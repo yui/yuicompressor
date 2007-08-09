@@ -1,0 +1,16 @@
+PRODUCT_NAME = yuicompressor
+VERSION      = 1.0
+LONG_DESC    = `cat README.yuicompressor`
+SHORT_DESC   = YUI Compressor
+PERM         = 0644
+OWNER        = root
+GROUP        = users
+CUSTODIAN    = jlecomte@yahoo-inc.com http://www.julienlecomte.net/
+
+PACKAGE_OS_SPECIFIC = no
+
+############################################################
+# Actions
+############################################################
+f 0755 - - bin/yuicompressor yuicompressor
+f 0644 - - bin/yuicompressor.jar yuicompressor.jar

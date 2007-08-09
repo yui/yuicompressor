@@ -1,0 +1,12 @@
+#!/bin/sh
+# yuicompressor file1.js file2.js ...
+
+if [ ! -n "$1" ]
+then
+	echo "Usage: yuicompressor [-h, --help] [--warn]"
+	echo "                     [--charset character-set]"
+	echo "                     [--nomunge] [-o outfile] infile"
+	exit
+fi
+
+java -jar yuicompressor.jar $*
