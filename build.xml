@@ -57,4 +57,11 @@
         </jar>
     </target>
 
+    <target name="build.package" depends="build.jar">
+        <mkdir dir="${build.dir}/yuicompressor"/>
+        <copy file="${build.dir}/${jar.name}" todir="${build.dir}/yuicompressor"/>
+        <copy file="${doc.dir}/README" todir="${build.dir}/yuicompressor"/>
+        <zip destfile="${build.dir}/${dist.name}" basedir="${build.dir}/yuicompressor"/>
+    </target>
+
 </project>
