@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<project name="YUI Compressor" default="build.jar" basedir=".">
+
+    <target name="clean" depends="-load.properties">
+        <delete dir="${build.dir}" quiet="true"/>
+    </target>
+
+    <target name="-load.properties">
+        <property file="ant.properties"/>
+    </target>
+
+    <target name="-init" depends="-load.properties">
+        <mkdir dir="${build.dir}"/>
+    </target>
+
+    <target name="build.classes" depends="-init">
+        <mkdir dir="${build.dir}/classes"/>
+        <javac srcdir="${src.dir}"
+               destdir="${build.dir}/classes"
+               includes="**/*.java"
+               deprecation="off"
+               debug="on"
+               source="1.4">
+            <classpath>
+                <pathelement location="${lib.dir}/jargs-1.0.jar"/>
+                <pathelement location="${lib.dir}/rhino-1.6R6.jar"/>
+            </classpath>
+        </javac>
+    </target>
+
+    <target name="build.jar" depends="build.classes">
+        <mkdir dir="${build.dir}/jar"/>
+        <mkdir dir="${build.dir}/jar/lib"/>
+        <mkdir dir="${build.dir}/jar/main"/>
+        <unjar src="${lib.dir}/one-jar-boot-0.95.jar" dest="${build.dir}/jar">
+            <patternset>
+                <include name="**/*.class"/>
+            </patternset>
+        </unjar>
+        <!--<delete dir="${build.dir}/jar/META-INF"/>-->
+        <copy todir="${build.dir}/jar/lib">
+            <fileset dir="${lib.dir}">
+                <include name="jargs-1.0.jar"/>
+                <include name="rhino-1.6R6.jar"/>
+            </fileset>
+        </copy>
+        <copy file="${lib.dir}/one-jar-license.txt" todir="${build.dir}/jar"/>
+        <jar destfile="${build.dir}/jar/main/main.jar" basedir="${build.dir}/classes">
+            <manifest>
+                <attribute name="Main-Class" value="YUICompressor"/>
+            </manifest>
+        </jar>
+        <jar destfile="${build.dir}/${jar.name}" basedir="${build.dir}/jar">
+            <manifest>
+                <attribute name="Main-Class" value="com.simontuffs.onejar.Boot"/>
+            </manifest>
+        </jar>
+    </target>
+
+</project>
