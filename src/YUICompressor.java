@@ -418,7 +418,11 @@ public class YUICompressor {
         CompilerEnvirons env = new CompilerEnvirons();
         ErrorReporter reporter = new JavaScriptErrorReporter(System.err, filename, true);
         Parser parser = new Parser(env, reporter);
-        parser.parse(in, filename, 1);
+        try {
+            parser.parse(in, filename, 1);
+        } catch (EvaluatorException e) {
+            System.exit(2);
+        }
         String encodedSource = parser.getEncodedSource();
         this.tokens = readTokens(encodedSource);
     }
