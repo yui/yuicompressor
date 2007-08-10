@@ -37,7 +37,6 @@
                 <include name="**/*.class"/>
             </patternset>
         </unjar>
-        <!--<delete dir="${build.dir}/jar/META-INF"/>-->
         <copy todir="${build.dir}/jar/lib">
             <fileset dir="${lib.dir}">
                 <include name="jargs-1.0.jar"/>
@@ -57,11 +56,21 @@
         </jar>
     </target>
 
-    <target name="build.package" depends="build.jar">
-        <mkdir dir="${build.dir}/yuicompressor"/>
-        <copy file="${build.dir}/${jar.name}" todir="${build.dir}/yuicompressor"/>
-        <copy file="${doc.dir}/README" todir="${build.dir}/yuicompressor"/>
-        <zip destfile="${build.dir}/${dist.name}" basedir="${build.dir}/yuicompressor"/>
+    <target name="build.dist.package" depends="build.jar">
+        <mkdir dir="${build.dir}/${dist.package.name}"/>
+        <mkdir dir="${build.dir}/${dist.package.name}/build"/>
+        <copy file="${build.dir}/${jar.name}" todir="${build.dir}/${dist.package.name}/build"/>
+        <copy todir="${build.dir}/${dist.package.name}">
+            <fileset dir=".">
+                <include name="doc/**/*"/>
+                <include name="lib/**/*"/>
+                <include name="src/**/*"/>
+                <exclude name="**/CVS"/>
+            </fileset>
+        </copy>
+        <zip destfile="${build.dir}/${dist.package.name}.zip"
+             basedir="${build.dir}"
+             includes="${dist.package.name}/**/*"/>
     </target>
 
 </project>
