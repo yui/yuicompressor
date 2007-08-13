@@ -9,4 +9,4 @@ then
 	exit
 fi
 
-java -jar yuicompressor.jar $*
+java -jar /home/y/bin/yuicompressor.jar $*
