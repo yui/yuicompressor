@@ -30,20 +30,10 @@
 
     <target name="build.jar" depends="build.classes">
         <mkdir dir="${build.dir}/jar"/>
-        <unjar src="${lib.dir}/jargs-1.0.jar" dest="${build.dir}/jar">
-            <patternset>
-                <include name="**/*.class"/>
-            </patternset>
-        </unjar>
-        <unjar src="${lib.dir}/rhino-1.6R6.jar" dest="${build.dir}/jar">
-            <patternset>
-                <include name="**/*.class"/>
-            </patternset>
-        </unjar>
+        <unjar src="${lib.dir}/jargs-1.0.jar" dest="${build.dir}/jar"/>
+        <unjar src="${lib.dir}/rhino-1.6R6.jar" dest="${build.dir}/jar"/>
         <copy todir="${build.dir}/jar">
-            <fileset dir="${build.dir}/classes">
-                <include name="**/*.class"/>
-            </fileset>
+            <fileset dir="${build.dir}/classes" includes="**/*.class"/>
         </copy>
         <jar destfile="${build.dir}/${jar.name}" basedir="${build.dir}/jar">
             <manifest>
