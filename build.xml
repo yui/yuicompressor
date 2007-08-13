@@ -30,28 +30,24 @@
 
     <target name="build.jar" depends="build.classes">
         <mkdir dir="${build.dir}/jar"/>
-        <mkdir dir="${build.dir}/jar/lib"/>
-        <mkdir dir="${build.dir}/jar/main"/>
-        <unjar src="${lib.dir}/one-jar-boot-0.95.jar" dest="${build.dir}/jar">
+        <unjar src="${lib.dir}/jargs-1.0.jar" dest="${build.dir}/jar">
             <patternset>
                 <include name="**/*.class"/>
             </patternset>
         </unjar>
-        <copy todir="${build.dir}/jar/lib">
-            <fileset dir="${lib.dir}">
-                <include name="jargs-1.0.jar"/>
-                <include name="rhino-1.6R6.jar"/>
+        <unjar src="${lib.dir}/rhino-1.6R6.jar" dest="${build.dir}/jar">
+            <patternset>
+                <include name="**/*.class"/>
+            </patternset>
+        </unjar>
+        <copy todir="${build.dir}/jar">
+            <fileset dir="${build.dir}/classes">
+                <include name="**/*.class"/>
             </fileset>
         </copy>
-        <copy file="${lib.dir}/one-jar-license.txt" todir="${build.dir}/jar"/>
-        <jar destfile="${build.dir}/jar/main/main.jar" basedir="${build.dir}/classes">
-            <manifest>
-                <attribute name="Main-Class" value="YUICompressor"/>
-            </manifest>
-        </jar>
         <jar destfile="${build.dir}/${jar.name}" basedir="${build.dir}/jar">
             <manifest>
-                <attribute name="Main-Class" value="com.simontuffs.onejar.Boot"/>
+                <attribute name="Main-Class" value="YUICompressor"/>
             </manifest>
         </jar>
     </target>
