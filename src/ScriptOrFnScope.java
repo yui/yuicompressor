@@ -78,7 +78,7 @@ class ScriptOrFnScope {
 
     void munge() {
 
-        if (!markedForMunging) {
+        if (!markedForMunging && parentScope != null) {
             return;
         }
 
