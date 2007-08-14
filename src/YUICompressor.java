@@ -467,6 +467,9 @@ public class YUICompressor {
      * Returns the highest function scope containing the specified scope.
      */
     private ScriptOrFnScope getHighestFnScope(ScriptOrFnScope scope) {
+        if (scope == globalScope) {
+            return scope;
+        }
         while (scope.getParentScope() != globalScope) {
             scope = scope.getParentScope();
         }
