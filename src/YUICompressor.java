@@ -542,7 +542,7 @@ public class YUICompressor {
         JavaScriptToken token;
         ScriptOrFnScope currentScope;
 
-        token = getToken(0);
+        token = getToken(-1);
         assert token.getType() == Token.CATCH;
         token = consumeToken();
         assert token.getType() == Token.LP;
