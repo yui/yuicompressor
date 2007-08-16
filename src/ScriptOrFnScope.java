@@ -48,8 +48,12 @@ class ScriptOrFnScope {
         return (Identifier) identifiers.get(symbol);
     }
 
-    void markForMunging(boolean value) {
-        markedForMunging = value;
+    void preventMunging() {
+        if (parentScope != null) {
+            // The symbols in the global scope don't get munged,
+            // but the sub-scopes it contains do get munged.
+            markedForMunging = false;
+        }
     }
 
     private ArrayList getUsedSymbols() {
@@ -78,7 +82,8 @@ class ScriptOrFnScope {
 
     void munge() {
 
-        if (!markedForMunging && parentScope != null) {
+        if (!markedForMunging) {
+            // Stop right here if this scope was flagged as unsafe for munging.
             return;
         }
 
