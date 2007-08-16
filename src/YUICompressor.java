@@ -81,6 +81,9 @@ public class YUICompressor {
         // That's up to ((26+26)*(1+(26+26+10)))*(1+(26+26+10))-8
         // (206,380 symbols per scope)
 
+        // The following list comes from org/mozilla/javascript/Decompiler.java...
+        literals.put(new Integer(Token.GET), "get ");
+        literals.put(new Integer(Token.SET), "set ");
         literals.put(new Integer(Token.TRUE), "true");
         literals.put(new Integer(Token.FALSE), "false");
         literals.put(new Integer(Token.NULL), "null");
@@ -149,6 +152,7 @@ public class YUICompressor {
         literals.put(new Integer(Token.URSH), ">>>");
         literals.put(new Integer(Token.TYPEOF), "typeof ");
         literals.put(new Integer(Token.VOID), "void ");
+        literals.put(new Integer(Token.CONST), "const ");
         literals.put(new Integer(Token.NOT), "!");
         literals.put(new Integer(Token.BITNOT), "~");
         literals.put(new Integer(Token.POS), "+");
@@ -464,16 +468,26 @@ public class YUICompressor {
     }
 
     /*
-     * Returns the highest function scope containing the specified scope.
+     * If either 'eval' or 'with' is used in a local scope, we must make
+     * sure that all containing local scopes don't get munged. Otherwise,
+     * the obfuscation would potentially introduce bugs.
      */
-    private ScriptOrFnScope getHighestFnScope(ScriptOrFnScope scope) {
+    private void protectScopeFromObfuscation(ScriptOrFnScope scope) {
+        assert scope != null;
+
         if (scope == globalScope) {
-            return scope;
+            // The global scope does not get obfuscated,
+            // so we don't need to worry about it...
+            return;
         }
+
+        // Find the highest local scope containing the specified scope.
         while (scope.getParentScope() != globalScope) {
             scope = scope.getParentScope();
         }
-        return scope;
+
+        assert scope.getParentScope() == globalScope;
+        scope.preventMunging();
     }
 
     private String getDebugString(int max) {
@@ -622,7 +636,7 @@ public class YUICompressor {
                     symbol = token.getValue();
                     if (symbol.equals("eval")) {
                         currentScope = getCurrentScope();
-                        getHighestFnScope(currentScope).markForMunging(false);
+                        protectScopeFromObfuscation(currentScope);
                         if (warn) {
                             System.out.println("\n[WARNING] Using 'eval' is not recommended.\n" + getDebugString(10));
                             if (munge) {
@@ -651,6 +665,7 @@ public class YUICompressor {
             switch (token.getType()) {
 
                 case Token.VAR:
+                case Token.CONST:
 
                     // The var keyword is followed by at least one symbol name.
                     // If several symbols follow, they are comma separated.
@@ -704,7 +719,7 @@ public class YUICompressor {
                     break;
 
                 case Token.WITH:
-                    getHighestFnScope(scope).markForMunging(false);
+                    protectScopeFromObfuscation(scope);
                     if (warn) {
                         System.out.println("\n[WARNING] Using 'with' is not recommended.\n" + getDebugString(10));
                         if (munge) {
@@ -725,7 +740,7 @@ public class YUICompressor {
                 case Token.NAME:
                     symbol = token.getValue();
                     if (symbol.equals("eval")) {
-                        getHighestFnScope(scope).markForMunging(false);
+                        protectScopeFromObfuscation(scope);
                         if (warn) {
                             System.out.println("\n[WARNING] Using 'eval' is not recommended.\n" + getDebugString(10));
                             if (munge) {
@@ -758,14 +773,9 @@ public class YUICompressor {
         // In the example above, there is a slim chance that localvar may be
         // munged to 'abc', conflicting with the undeclared global symbol
         // abc, creating a potential bug. The following code detects such
-        // global symbols. This must be done AFTER all the files have been
+        // global symbols. This must be done AFTER the entire file has been
         // parsed, and BEFORE munging the symbol tree. Note that declaring
         // extra symbols in the global scope won't hurt.
-        //
-        // Since we have to go through all the tokens, we could use the
-        // opportunity to count the number of times each identifier is used.
-        // The goal would be, in the future, to use the least number of
-        // characters to represent the most used identifiers.
 
         offset = 0;
         braceNesting = 0;
@@ -820,6 +830,7 @@ public class YUICompressor {
                     currentScope = (ScriptOrFnScope) indexedScopes.get(new Integer(offset));
                     enterScope(currentScope);
                     while (consumeToken().getType() != Token.RP) {
+                        // Don't do anything with the function arguments...
                     }
                     token = consumeToken();
                     assert token.getType() == Token.LC;
