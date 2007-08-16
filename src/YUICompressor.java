@@ -180,6 +180,7 @@ public class YUICompressor {
         CmdLineParser parser = new CmdLineParser();
         CmdLineParser.Option warnOpt = parser.addBooleanOption("warn");
         CmdLineParser.Option nomungeOpt = parser.addBooleanOption("nomunge");
+        CmdLineParser.Option linebreakOpt = parser.addBooleanOption("line-break");
         CmdLineParser.Option helpOpt = parser.addBooleanOption('h', "help");
         CmdLineParser.Option charsetOpt = parser.addStringOption("charset");
         CmdLineParser.Option outputOpt = parser.addStringOption('o', "output");
@@ -205,13 +206,14 @@ public class YUICompressor {
             System.exit(0);
         }
 
-        boolean warn = parser.getOptionValue(warnOpt) != null;
-        boolean munge = parser.getOptionValue(nomungeOpt) == null;
-        String charset = (String) parser.getOptionValue(charsetOpt);
         String output = (String) parser.getOptionValue(outputOpt);
+        String charset = (String) parser.getOptionValue(charsetOpt);
+        boolean munge = parser.getOptionValue(nomungeOpt) == null;
+        boolean warn = parser.getOptionValue(warnOpt) != null;
+        boolean linebreak = parser.getOptionValue(linebreakOpt) != null;
 
         try {
-            YUICompressor compressor = new YUICompressor(filename, munge, warn, charset, output);
+            YUICompressor compressor = new YUICompressor(filename, output, charset, munge, warn, linebreak);
             compressor.buildSymbolTree();
             compressor.mungeSymboltree();
             compressor.printSymbolTree();
@@ -223,9 +225,15 @@ public class YUICompressor {
     }
 
     private static void usage() {
-        System.out.println("Usage: java -jar yuicompressor.jar\n" +
-                "            [-h, --help] [--warn] [--nomunge]\n" +
-                "            [--charset character-set] [-o outfile] infile");
+        System.out.println(
+                "Usage: java -jar yuicompressor.jar [options] file\n"
+              + "Options\n"
+              + "  -h, --help             Displays this information\n"
+              + "  --line-break           Insert line breaks after semi colons\n"
+              + "  --nomunge              Minify only, do not obfuscate\n"
+              + "  --warn                 Displays possible errors in your code\n"
+              + "  --charset <charset>    Read the input file using the <charset>\n"
+              + "  -o <file>              Place the output into <file>");
     }
 
     private static ArrayList readTokens(String source) {
@@ -380,10 +388,11 @@ public class YUICompressor {
         return offset;
     }
 
+    private String output;
+    private String charset;
     private boolean munge;
     private boolean warn;
-    private String charset;
-    private String output;
+    private boolean linebreak;
 
     private int offset;
     private int braceNesting;
@@ -392,11 +401,13 @@ public class YUICompressor {
     private ScriptOrFnScope globalScope = new ScriptOrFnScope(-1, null);
     private Hashtable indexedScopes = new Hashtable();
 
-    YUICompressor(String filename, boolean munge, boolean warn,
-            String charset, String output) throws IOException {
+    YUICompressor(String filename, String output, String charset,
+            boolean munge, boolean warn, boolean linebreak)
+        throws IOException {
 
         this.munge = munge;
         this.warn = warn;
+        this.linebreak = linebreak;
 
         if (charset == null || !Charset.isSupported(charset)) {
             charset = System.getProperty("file.encoding");
@@ -954,6 +965,13 @@ public class YUICompressor {
                     assert braceNesting >= currentScope.getBraceNesting();
                     if (braceNesting == currentScope.getBraceNesting()) {
                         leaveCurrentScope();
+                    }
+                    break;
+
+                case Token.SEMI:
+                    result.append(";");
+                    if (linebreak) {
+                        result.append("\n");
                     }
                     break;
 
