@@ -8,3 +8,5 @@ YUI Compressor 1.1, 2007-08-xx
 - Removed the randomization of obfuscated symbols. When compressed code is checked
   in CVS, an unchanged file would end up being versioned every time it is built.
 - Added a web-based front-end to the YUI Compressor as part of the dist package.
+- Added a public entry point that makes the YUI Compressor easy to integrate with
+  an already existing Java application.
