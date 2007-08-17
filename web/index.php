@@ -25,7 +25,7 @@ if ( $jssrc ) {
     fwrite($fp, $jssrc);
     fclose($fp);
 
-    $cmd = "java -jar " . $dir . "yuicompressor-1.0.jar --charset UTF-8 -o " . $output . " " . $input . " 2>&1";
+    $cmd = "java -jar " . $dir . "yuicompressor-@VERSION.NUMBER@.jar --charset UTF-8 -o " . $output . " " . $input . " 2>&1";
     exec($cmd, $out, $err);
     unlink($input);
 
