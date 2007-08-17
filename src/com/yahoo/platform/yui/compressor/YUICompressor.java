@@ -565,9 +565,6 @@ public class YUICompressor {
                     token.getType() == Token.COMMA;
             if (token.getType() == Token.NAME && mode == BUILDING_SYMBOL_TREE) {
                 symbol = token.getValue();
-                if (fnScope.getIdentifier(symbol) != null && warn) {
-                    System.out.println("\n[WARNING] The function argument " + symbol + " has already been declared...\n" + getDebugString(10));
-                }
                 fnScope.declareIdentifier(symbol);
             }
         }
