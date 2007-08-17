@@ -37,7 +37,6 @@ public class YUICompressor {
             ones.add(Character.toString(c));
         for (char c = 'a'; c <= 'z'; c++)
             ones.add(Character.toString(c));
-        Collections.shuffle(ones);
 
         twos = new ArrayList();
         for (int i = 0; i < ones.size(); i++) {
@@ -57,7 +56,6 @@ public class YUICompressor {
         twos.remove("if");
         twos.remove("in");
         twos.removeAll(builtin);
-        Collections.shuffle(twos);
 
         threes = new ArrayList();
         for (int i = 0; i < twos.size(); i++) {
@@ -78,7 +76,6 @@ public class YUICompressor {
         threes.remove("use");
         threes.remove("var");
         threes.removeAll(builtin);
-        Collections.shuffle(threes);
 
         // That's up to ((26+26)*(1+(26+26+10)))*(1+(26+26+10))-8
         // (206,380 symbols per scope)
