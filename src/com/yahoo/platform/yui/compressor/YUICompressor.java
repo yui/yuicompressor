@@ -936,7 +936,7 @@ public class YUICompressor {
                             }
                             if (identifier.getRefcount() == 0 && warn) {
                                 System.out.println("\n[WARNING] The symbol " + symbol + " was declared but is apparently never used\n" + getDebugString(10));
-                                System.out.println("This code can probably be written in a more efficient way\n");
+                                System.out.println("This code can probably be written in a more efficient way.");
                             }
                         } else {
                             result.append(symbol);
@@ -965,7 +965,7 @@ public class YUICompressor {
                         }
                         if (identifier.getRefcount() == 0 && warn) {
                             System.out.println("\n[WARNING] The symbol " + symbol + " was declared but is apparently never used\n" + getDebugString(10));
-                            System.out.println("This code can probably be written in a more efficient way\n");
+                            System.out.println("This code can probably be written in a more efficient way.");
                         }
                         token = consumeToken();
                     }
