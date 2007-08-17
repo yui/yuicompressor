@@ -5,3 +5,5 @@ YUI Compressor 1.1, 2007-08-xx
 - Added --line-break option that adds a line feed character after each semi-colon character
 - Added support for missing JavaScript features (get, set, const)
 - Improved error message when file not found (don't display the whole stack trace)
+- Removed the randomization of obfuscated symbols. When compressed code is checked
+  in CVS, an unchanged file would end up being versioned every time it is built.
