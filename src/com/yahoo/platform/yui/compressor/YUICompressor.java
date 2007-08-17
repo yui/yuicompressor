@@ -226,13 +226,13 @@ public class YUICompressor {
     private static void usage() {
         System.out.println(
                 "Usage: java -jar yuicompressor.jar [options] file\n"
-              + "Options\n"
-              + "  -h, --help             Displays this information\n"
-              + "  --line-break           Insert line breaks after semi colons\n"
-              + "  --nomunge              Minify only, do not obfuscate\n"
-              + "  --warn                 Displays possible errors in your code\n"
-              + "  --charset <charset>    Read the input file using the <charset>\n"
-              + "  -o <file>              Place the output into <file>");
+                        + "Options\n"
+                        + "  -h, --help             Displays this information\n"
+                        + "  --line-break           Insert line breaks after semi colons\n"
+                        + "  --nomunge              Minify only, do not obfuscate\n"
+                        + "  --warn                 Displays possible errors in your code\n"
+                        + "  --charset <charset>    Read the input file using the <charset>\n"
+                        + "  -o <file>              Place the output into <file>");
     }
 
     private static ArrayList readTokens(String source) {
@@ -400,9 +400,13 @@ public class YUICompressor {
     private ScriptOrFnScope globalScope = new ScriptOrFnScope(-1, null);
     private Hashtable indexedScopes = new Hashtable();
 
+    private static final int BUILDING_SYMBOL_TREE = 1;
+    private static final int CHECKING_SYMBOL_TREE = 2;
+    private int mode;
+
     public YUICompressor(String filename, String output, String charset,
             boolean munge, boolean warn, boolean linebreak)
-        throws IOException {
+            throws IOException {
 
         this.munge = munge;
         this.warn = warn;
@@ -526,15 +530,6 @@ public class YUICompressor {
         return result.toString();
     }
 
-    private void buildSymbolTree() {
-        offset = 0;
-        braceNesting = 0;
-        scopes.clear();
-        indexedScopes.clear();
-        indexedScopes.put(new Integer(0), globalScope);
-        parseScope(globalScope);
-    }
-
     private void parseFunctionDeclaration() {
 
         String symbol;
@@ -545,25 +540,35 @@ public class YUICompressor {
 
         token = consumeToken();
         if (token.getType() == Token.NAME) {
-            // Get the name of the function and declare it in the current scope.
-            symbol = token.getValue();
-            if (currentScope.getIdentifier(symbol) != null && warn) {
-                System.out.println("\n[WARNING] The function " + symbol + " has already been declared in the same scope...\n" + getDebugString(10));
+            if (mode == BUILDING_SYMBOL_TREE) {
+                // Get the name of the function and declare it in the current scope.
+                symbol = token.getValue();
+                if (currentScope.getIdentifier(symbol) != null && warn) {
+                    System.out.println("\n[WARNING] The function " + symbol + " has already been declared in the same scope...\n" + getDebugString(10));
+                }
+                currentScope.declareIdentifier(symbol);
             }
-            currentScope.declareIdentifier(symbol);
             token = consumeToken();
         }
 
         assert token.getType() == Token.LP;
-        fnScope = new ScriptOrFnScope(braceNesting, currentScope);
-        indexedScopes.put(new Integer(offset), fnScope);
+        if (mode == BUILDING_SYMBOL_TREE) {
+            fnScope = new ScriptOrFnScope(braceNesting, currentScope);
+            indexedScopes.put(new Integer(offset), fnScope);
+        } else {
+            fnScope = (ScriptOrFnScope) indexedScopes.get(new Integer(offset));
+        }
 
         // Parse function arguments.
         while ((token = consumeToken()).getType() != Token.RP) {
             assert token.getType() == Token.NAME ||
                     token.getType() == Token.COMMA;
-            if (token.getType() == Token.NAME) {
-                fnScope.declareIdentifier(token.getValue());
+            if (token.getType() == Token.NAME && mode == BUILDING_SYMBOL_TREE) {
+                symbol = token.getValue();
+                if (fnScope.getIdentifier(symbol) != null && warn) {
+                    System.out.println("\n[WARNING] The function argument " + symbol + " has already been declared...\n" + getDebugString(10));
+                }
+                fnScope.declareIdentifier(symbol);
             }
         }
 
@@ -575,6 +580,7 @@ public class YUICompressor {
         String symbol;
         JavaScriptToken token;
         ScriptOrFnScope currentScope;
+        Identifier identifier;
 
         token = getToken(-1);
         assert token.getType() == Token.CATCH;
@@ -582,12 +588,20 @@ public class YUICompressor {
         assert token.getType() == Token.LP;
         token = consumeToken();
         assert token.getType() == Token.NAME;
-        // We must declare the exception identifier in the containing function
-        // scope to avoid errors related to the obfuscation process. No need to
-        // display a warning if the symbol was already declared here...
+
         symbol = token.getValue();
         currentScope = getCurrentScope();
-        currentScope.declareIdentifier(symbol);
+
+        if (mode == BUILDING_SYMBOL_TREE) {
+            // We must declare the exception identifier in the containing function
+            // scope to avoid errors related to the obfuscation process. No need to
+            // display a warning if the symbol was already declared here...
+            currentScope.declareIdentifier(symbol);
+        } else {
+            identifier = getIdentifier(symbol, currentScope);
+            identifier.incrementRefcount();
+        }
+
         token = consumeToken();
         assert token.getType() == Token.RP;
     }
@@ -601,6 +615,7 @@ public class YUICompressor {
         String symbol;
         JavaScriptToken token;
         ScriptOrFnScope currentScope;
+        Identifier identifier;
 
         int expressionBraceNesting = braceNesting;
         int bracketNesting = 0;
@@ -611,6 +626,7 @@ public class YUICompressor {
         while (offset < length) {
 
             token = consumeToken();
+            currentScope = getCurrentScope();
 
             switch (token.getType()) {
 
@@ -654,13 +670,42 @@ public class YUICompressor {
 
                 case Token.NAME:
                     symbol = token.getValue();
-                    if (symbol.equals("eval")) {
-                        currentScope = getCurrentScope();
-                        protectScopeFromObfuscation(currentScope);
-                        if (warn) {
-                            System.out.println("\n[WARNING] Using 'eval' is not recommended.\n" + getDebugString(10));
-                            if (munge) {
-                                System.out.println("Note: Using 'eval' reduces the level of compression.");
+
+                    if (mode == BUILDING_SYMBOL_TREE) {
+
+                        if (symbol.equals("eval")) {
+                            protectScopeFromObfuscation(currentScope);
+                            if (warn) {
+                                System.out.println("\n[WARNING] Using 'eval' is not recommended.\n" + getDebugString(10));
+                                if (munge) {
+                                    System.out.println("Note: Using 'eval' reduces the level of compression.");
+                                }
+                            }
+                        }
+
+                    } else if (mode == CHECKING_SYMBOL_TREE) {
+
+                        if ((offset < 2 || getToken(-2).getType() != Token.DOT) &&
+                                getToken(0).getType() != Token.OBJECTLIT) {
+
+                            identifier = getIdentifier(symbol, currentScope);
+
+                            if (identifier == null) {
+
+                                if (symbol.length() <= 3 && !builtin.contains(symbol)) {
+                                    // Here, we found an undeclared and un-namespaced symbol that is
+                                    // 3 characters or less in length. Declare it in the global scope.
+                                    // We don't need to declare longer symbols since they won't cause
+                                    // any conflict with other munged symbols.
+                                    globalScope.declareIdentifier(symbol);
+                                    if (warn) {
+                                        System.out.println("\n[WARNING] Found an undeclared symbol: " + symbol + "\n" + getDebugString(10));
+                                    }
+                                }
+
+                            } else {
+
+                                identifier.incrementRefcount();
                             }
                         }
                     }
@@ -673,6 +718,7 @@ public class YUICompressor {
 
         String symbol;
         JavaScriptToken token;
+        Identifier identifier;
 
         int length = tokens.size();
 
@@ -694,12 +740,13 @@ public class YUICompressor {
 
                         assert token.getType() == Token.NAME;
 
-                        symbol = token.getValue();
-
-                        if (scope.getIdentifier(symbol) == null) {
-                            scope.declareIdentifier(symbol);
-                        } else if (warn) {
-                            System.out.println("\n[WARNING] The variable " + symbol + " has already been declared in the same scope...\n" + getDebugString(10));
+                        if (mode == BUILDING_SYMBOL_TREE) {
+                            symbol = token.getValue();
+                            if (scope.getIdentifier(symbol) == null) {
+                                scope.declareIdentifier(symbol);
+                            } else if (warn) {
+                                System.out.println("\n[WARNING] The variable " + symbol + " has already been declared in the same scope...\n" + getDebugString(10));
+                            }
                         }
 
                         token = getToken(0);
@@ -739,16 +786,18 @@ public class YUICompressor {
                     break;
 
                 case Token.WITH:
-                    protectScopeFromObfuscation(scope);
-                    if (warn) {
-                        System.out.println("\n[WARNING] Using 'with' is not recommended.\n" + getDebugString(10));
-                        if (munge) {
-                            // Inside a 'with' block, it is impossible to figure out
-                            // statically whether a symbol is a local variable or an
-                            // object member. As a consequence, the only thing we can
-                            // do is turn the obfuscation off for the highest scope
-                            // containing the 'with' block.
-                            System.out.println("Note: Using 'with' reduces the level of compression.");
+                    if (mode == BUILDING_SYMBOL_TREE) {
+                        protectScopeFromObfuscation(scope);
+                        if (warn) {
+                            System.out.println("\n[WARNING] Using 'with' is not recommended.\n" + getDebugString(10));
+                            if (munge) {
+                                // Inside a 'with' block, it is impossible to figure out
+                                // statically whether a symbol is a local variable or an
+                                // object member. As a consequence, the only thing we can
+                                // do is turn the obfuscation off for the highest scope
+                                // containing the 'with' block.
+                                System.out.println("Note: Using 'with' reduces the level of compression.");
+                            }
                         }
                     }
                     break;
@@ -759,18 +808,58 @@ public class YUICompressor {
 
                 case Token.NAME:
                     symbol = token.getValue();
-                    if (symbol.equals("eval")) {
-                        protectScopeFromObfuscation(scope);
-                        if (warn) {
-                            System.out.println("\n[WARNING] Using 'eval' is not recommended.\n" + getDebugString(10));
-                            if (munge) {
-                                System.out.println("Note: Using 'eval' reduces the level of compression.");
+
+                    if (mode == BUILDING_SYMBOL_TREE) {
+
+                        if (symbol.equals("eval")) {
+                            protectScopeFromObfuscation(scope);
+                            if (warn) {
+                                System.out.println("\n[WARNING] Using 'eval' is not recommended.\n" + getDebugString(10));
+                                if (munge) {
+                                    System.out.println("Note: Using 'eval' reduces the level of compression.");
+                                }
+                            }
+                        }
+
+                    } else if (mode == CHECKING_SYMBOL_TREE) {
+
+                        if ((offset < 2 || getToken(-2).getType() != Token.DOT) &&
+                                getToken(0).getType() != Token.OBJECTLIT) {
+
+                            identifier = getIdentifier(symbol, scope);
+
+                            if (identifier == null) {
+
+                                if (symbol.length() <= 3 && !builtin.contains(symbol)) {
+                                    // Here, we found an undeclared and un-namespaced symbol that is
+                                    // 3 characters or less in length. Declare it in the global scope.
+                                    // We don't need to declare longer symbols since they won't cause
+                                    // any conflict with other munged symbols.
+                                    globalScope.declareIdentifier(symbol);
+                                    if (warn) {
+                                        System.out.println("\n[WARNING] Found an undeclared symbol: " + symbol + "\n" + getDebugString(10));
+                                    }
+                                }
+
+                            } else {
+
+                                identifier.incrementRefcount();
                             }
                         }
                     }
                     break;
             }
         }
+    }
+
+    private void buildSymbolTree() {
+        offset = 0;
+        braceNesting = 0;
+        scopes.clear();
+        indexedScopes.clear();
+        indexedScopes.put(new Integer(0), globalScope);
+        mode = BUILDING_SYMBOL_TREE;
+        parseScope(globalScope);
     }
 
     private void mungeSymboltree() {
@@ -796,81 +885,15 @@ public class YUICompressor {
         // global symbols. This must be done AFTER the entire file has been
         // parsed, and BEFORE munging the symbol tree. Note that declaring
         // extra symbols in the global scope won't hurt.
+        //
+        // Note: Since we go through all the tokens to do this, we also use
+        // the opportunity to count how many times each identifier is used.
 
         offset = 0;
         braceNesting = 0;
         scopes.clear();
-
-        String symbol;
-        JavaScriptToken token;
-        ScriptOrFnScope currentScope;
-        Identifier identifier;
-
-        int length = tokens.size();
-
-        enterScope(globalScope);
-
-        while (offset < length) {
-
-            token = consumeToken();
-            currentScope = getCurrentScope();
-
-            switch (token.getType()) {
-
-                case Token.NAME:
-                    symbol = token.getValue();
-
-                    if ((offset < 2 || getToken(-2).getType() != Token.DOT) &&
-                            getToken(0).getType() != Token.OBJECTLIT) {
-
-                        identifier = getIdentifier(symbol, currentScope);
-
-                        if (identifier == null) {
-
-                            if (symbol.length() <= 3 && !builtin.contains(symbol)) {
-                                // Here, we found an undeclared and un-namespaced symbol that is
-                                // 3 characters or less in length. Declare it in the global scope.
-                                // We don't need to declare longer symbols since they won't cause
-                                // any conflict with other munged symbols.
-                                globalScope.declareIdentifier(symbol);
-                                if (warn) {
-                                    System.out.println("\n[WARNING] Found an undeclared symbol: " + symbol + "\n" + getDebugString(10));
-                                }
-                            }
-                        }
-                    }
-                    break;
-
-                case Token.FUNCTION:
-                    token = consumeToken();
-                    if (token.getType() == Token.NAME) {
-                        token = consumeToken();
-                    }
-                    assert token.getType() == Token.LP;
-                    currentScope = (ScriptOrFnScope) indexedScopes.get(new Integer(offset));
-                    enterScope(currentScope);
-                    while (consumeToken().getType() != Token.RP) {
-                        // Don't do anything with the function arguments...
-                    }
-                    token = consumeToken();
-                    assert token.getType() == Token.LC;
-                    braceNesting++;
-                    break;
-
-                case Token.LC:
-                    braceNesting++;
-                    break;
-
-                case Token.RC:
-                    braceNesting--;
-                    assert braceNesting >= currentScope.getBraceNesting();
-                    if (braceNesting == currentScope.getBraceNesting()) {
-                        leaveCurrentScope();
-                    }
-                    break;
-            }
-        }
-
+        mode = CHECKING_SYMBOL_TREE;
+        parseScope(globalScope);
         globalScope.munge();
     }
 
@@ -908,8 +931,16 @@ public class YUICompressor {
                     } else {
 
                         identifier = getIdentifier(symbol, currentScope);
-                        if (identifier != null && identifier.getMungedValue() != null) {
-                            result.append(identifier.getMungedValue());
+                        if (identifier != null) {
+                            if (identifier.getMungedValue() != null) {
+                                result.append(identifier.getMungedValue());
+                            } else {
+                                result.append(symbol);
+                            }
+                            if (identifier.getRefcount() == 0 && warn) {
+                                System.out.println("\n[WARNING] The symbol " + symbol + " was declared but is apparently never used\n" + getDebugString(10));
+                                System.out.println("This code can probably be written in a more efficient way\n");
+                            }
                         } else {
                             result.append(symbol);
                         }
@@ -934,6 +965,10 @@ public class YUICompressor {
                             result.append(identifier.getMungedValue());
                         } else {
                             result.append(symbol);
+                        }
+                        if (identifier.getRefcount() == 0 && warn) {
+                            System.out.println("\n[WARNING] The symbol " + symbol + " was declared but is apparently never used\n" + getDebugString(10));
+                            System.out.println("This code can probably be written in a more efficient way\n");
                         }
                         token = consumeToken();
                     }
