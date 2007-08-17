@@ -15,6 +15,7 @@ import org.mozilla.javascript.Token;
  */
 class Identifier extends JavaScriptToken {
 
+    private int refcount = 0;
     private String mungedValue;
     private ScriptOrFnScope declaredScope;
 
@@ -33,5 +34,13 @@ class Identifier extends JavaScriptToken {
 
     String getMungedValue() {
         return mungedValue;
+    }
+
+    void incrementRefcount() {
+        refcount++;
+    }
+
+    int getRefcount() {
+        return refcount;
     }
 }
