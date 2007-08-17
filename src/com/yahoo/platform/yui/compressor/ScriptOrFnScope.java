@@ -6,6 +6,8 @@
  *     http://developer.yahoo.net/yui/license.txt
  */
 
+package com.yahoo.platform.yui.compressor;
+
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;

@@ -6,6 +6,8 @@
  *     http://developer.yahoo.net/yui/license.txt
  */
 
+package com.yahoo.platform.yui.compressor;
+
 import jargs.gnu.CmdLineParser;
 import org.mozilla.javascript.*;
 
@@ -218,9 +220,11 @@ public class YUICompressor {
             compressor.mungeSymboltree();
             compressor.printSymbolTree();
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            System.err.println("\nThe system cannot find the file specified: " + filename);
+            System.exit(1);
         } catch (IOException e) {
             e.printStackTrace();
+            System.exit(1);
         }
     }
 

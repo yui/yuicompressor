@@ -6,6 +6,8 @@
  *     http://developer.yahoo.net/yui/license.txt
  */
 
+package com.yahoo.platform.yui.compressor;
+
 public class JavaScriptToken {
 
     private int type;

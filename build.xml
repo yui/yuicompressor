@@ -37,7 +37,7 @@
         </copy>
         <jar destfile="${build.dir}/${jar.name}" basedir="${build.dir}/jar">
             <manifest>
-                <attribute name="Main-Class" value="YUICompressor"/>
+                <attribute name="Main-Class" value="com.yahoo.platform.yui.compressor.YUICompressor"/>
             </manifest>
         </jar>
     </target>

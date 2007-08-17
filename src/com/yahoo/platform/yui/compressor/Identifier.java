@@ -6,6 +6,8 @@
  *     http://developer.yahoo.net/yui/license.txt
  */
 
+package com.yahoo.platform.yui.compressor;
+
 import org.mozilla.javascript.Token;
 
 /**
