@@ -7,3 +7,4 @@ YUI Compressor 1.1, 2007-08-xx
 - Improved error message when file not found (don't display the whole stack trace)
 - Removed the randomization of obfuscated symbols. When compressed code is checked
   in CVS, an unchanged file would end up being versioned every time it is built.
+- Added a web-based front-end to the YUI Compressor as part of the dist package.
