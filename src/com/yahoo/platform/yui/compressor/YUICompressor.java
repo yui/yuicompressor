@@ -213,9 +213,7 @@ public class YUICompressor {
 
         try {
             YUICompressor compressor = new YUICompressor(filename, output, charset, munge, warn, linebreak);
-            compressor.buildSymbolTree();
-            compressor.mungeSymboltree();
-            compressor.printSymbolTree();
+            compressor.compress();
         } catch (FileNotFoundException e) {
             System.err.println("\nThe system cannot find the file specified: " + filename);
             System.exit(1);
@@ -402,7 +400,7 @@ public class YUICompressor {
     private ScriptOrFnScope globalScope = new ScriptOrFnScope(-1, null);
     private Hashtable indexedScopes = new Hashtable();
 
-    YUICompressor(String filename, String output, String charset,
+    public YUICompressor(String filename, String output, String charset,
             boolean munge, boolean warn, boolean linebreak)
         throws IOException {
 
@@ -441,6 +439,16 @@ public class YUICompressor {
         }
         String encodedSource = parser.getEncodedSource();
         this.tokens = readTokens(encodedSource);
+    }
+
+    /*
+     * A public entry point that makes the YUI Compressor easy
+     * to integrate with an already existing Java application.
+     */
+    public void compress() throws IOException {
+        buildSymbolTree();
+        mungeSymboltree();
+        printSymbolTree();
     }
 
     private ScriptOrFnScope getCurrentScope() {
