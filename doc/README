@@ -9,8 +9,9 @@ NAME
 SYNOPSIS
 
   java -jar yuicompressor.jar
-      [-h, --help] [--warn] [--nomunge]
-      [--charset character-set] [-o outfile] infile
+      [-h, --help] [--line-break] [--nomunge]
+      [--warn] [--charset character-set]
+      [-o outfile] infile
 
 DESCRIPTION
 
@@ -25,12 +26,16 @@ OPTIONS
   -h, --help
       Prints help on how to use the YUI Compressor
 
-  --warn
-      Prints additional warnings such as duplicate variable declarations,
-      missing variable declaration, unrecommended practices, etc.
+  --line-break
+      Adds a line feed character after each semi-colon character in the
+      output file (may help debugging with the MS Script debugger)
 
   --nomunge
       Minify only. Do not obfuscate local symbols.
+
+  --warn
+      Prints additional warnings such as duplicate variable declarations,
+      missing variable declaration, unrecommended practices, etc.
 
   --charset character-set
       If a supported character set is specified, the YUI Compressor will use it
