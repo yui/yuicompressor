@@ -934,7 +934,7 @@ public class YUICompressor {
                             } else {
                                 result.append(symbol);
                             }
-                            if (identifier.getRefcount() == 0 && warn) {
+                            if (currentScope != globalScope && identifier.getRefcount() == 0 && warn) {
                                 System.out.println("\n[WARNING] The symbol " + symbol + " was declared but is apparently never used\n" + getDebugString(10));
                                 System.out.println("This code can probably be written in a more efficient way.");
                             }
@@ -963,7 +963,7 @@ public class YUICompressor {
                         } else {
                             result.append(symbol);
                         }
-                        if (identifier.getRefcount() == 0 && warn) {
+                        if (currentScope != globalScope && identifier.getRefcount() == 0 && warn) {
                             System.out.println("\n[WARNING] The symbol " + symbol + " was declared but is apparently never used\n" + getDebugString(10));
                             System.out.println("This code can probably be written in a more efficient way.");
                         }
@@ -1010,7 +1010,9 @@ public class YUICompressor {
                     break;
 
                 case Token.SEMI:
-                    result.append(";");
+                    // No need to output a semi-colon if the next character is a right-curly...
+                    if (offset >= length || getToken(0).getType() != Token.RC)
+                        result.append(";");
                     if (linebreak) {
                         result.append("\n");
                     }
