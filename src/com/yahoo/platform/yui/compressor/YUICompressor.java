@@ -995,6 +995,33 @@ public class YUICompressor {
                     braceNesting++;
                     break;
 
+                case Token.RETURN:
+                    result.append("return");
+                    // No space needed after 'return' when followed
+                    // by '(', '[', '{', a string or a regexp.
+                    if (offset < length) {
+                        token = getToken(0);
+                        if (token.getType() != Token.LP &&
+                                token.getType() != Token.LB &&
+                                token.getType() != Token.LC &&
+                                token.getType() != Token.STRING &&
+                                token.getType() != Token.REGEXP) {
+                            result.append(" ");
+                        }
+                    }
+                    break;
+
+                case Token.CASE:
+                    result.append("case");
+                    // No space needed after 'case' when followed by a string.
+                    if (offset < length) {
+                        token = getToken(0);
+                        if (token.getType() != Token.STRING) {
+                            result.append(" ");
+                        }
+                    }
+                    break;
+
                 case Token.LC:
                     result.append("{");
                     braceNesting++;
