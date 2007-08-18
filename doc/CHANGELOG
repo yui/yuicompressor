@@ -17,3 +17,4 @@ YUI Compressor 1.1, 2007-08-20
   identifier seems to be unused (code cannot safely be removed automatically)
 + Remove ';' when followed by a '}'. This yields an additional ~1.5% savings
   on yahoo-dom-event.js compared to the JSMin version.
++ Output a white-space character after 'return' and 'case' only when necessary.
