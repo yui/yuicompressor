@@ -1011,7 +1011,7 @@ public class YUICompressor {
 
                 case Token.SEMI:
                     // No need to output a semi-colon if the next character is a right-curly...
-                    if (offset >= length || getToken(0).getType() != Token.RC)
+                    if (offset < length && getToken(0).getType() != Token.RC)
                         result.append(";");
                     if (linebreak) {
                         result.append("\n");
