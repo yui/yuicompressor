@@ -1,11 +1,15 @@
 #!/bin/sh
-# yuicompressor file1.js file2.js ...
 
 if [ ! -n "$1" ]
 then
-	echo "Usage: yuicompressor [-h, --help] [--warn]"
-	echo "                     [--charset character-set]"
-	echo "                     [--nomunge] [-o outfile] infile"
+    echo "Usage: yuicompressor [options] file"
+    echo "Options"
+    echo "  -h, --help             Displays this information"
+    echo "  --line-break           Insert line breaks after semi colons"
+    echo "  --nomunge              Minify only, do not obfuscate"
+    echo "  --warn                 Displays possible errors in your code"
+    echo "  --charset <charset>    Read the input file using the <charset>"
+    echo "  -o <file>              Place the output into <file>"
 	exit
 fi
 
