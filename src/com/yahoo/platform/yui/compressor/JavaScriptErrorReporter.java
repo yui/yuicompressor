@@ -17,11 +17,9 @@ class JavaScriptErrorReporter implements ErrorReporter {
 
     private boolean reportWarnings;
     private PrintStream err;
-    private String filename;
 
-    JavaScriptErrorReporter(PrintStream err, String filename, boolean reportWarnings) {
+    JavaScriptErrorReporter(PrintStream err, boolean reportWarnings) {
         this.err = err;
-        this.filename = filename;
         this.reportWarnings = reportWarnings;
     }
 
@@ -47,12 +45,12 @@ class JavaScriptErrorReporter implements ErrorReporter {
             int line, String lineSource, int lineOffset) {
         if (line < 0) {
             if (message.length() == 0) {
-                err.println("An unknown error occurred while checking " + this.filename);
+                err.println("An unknown error occurred...");
             } else {
-                err.println(this.filename + ':' + message);
+                err.println(message);
             }
         } else {
-            err.println(this.filename + ':' + line + ':' + lineOffset + ':' + message);
+            err.println(line + ':' + lineOffset + ':' + message);
         }
     }
 }

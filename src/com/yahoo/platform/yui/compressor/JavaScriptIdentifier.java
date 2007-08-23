@@ -11,15 +11,15 @@ package com.yahoo.platform.yui.compressor;
 import org.mozilla.javascript.Token;
 
 /**
- * Identifier represents a variable/function identifier.
+ * JavaScriptIdentifier represents a variable/function identifier.
  */
-class Identifier extends JavaScriptToken {
+class JavaScriptIdentifier extends JavaScriptToken {
 
     private int refcount = 0;
     private String mungedValue;
     private ScriptOrFnScope declaredScope;
 
-    Identifier(String value, ScriptOrFnScope declaredScope) {
+    JavaScriptIdentifier(String value, ScriptOrFnScope declaredScope) {
         super(Token.NAME, value);
         this.declaredScope = declaredScope;
     }

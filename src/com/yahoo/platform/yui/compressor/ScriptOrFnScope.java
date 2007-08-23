@@ -37,17 +37,17 @@ class ScriptOrFnScope {
         return parentScope;
     }
 
-    Identifier declareIdentifier(String symbol) {
-        Identifier identifier = (Identifier) identifiers.get(symbol);
-        if (identifier == null) {
-            identifier = new Identifier(symbol, this);
-            identifiers.put(symbol, identifier);
+    JavaScriptIdentifier declareIdentifier(String symbol) {
+        JavaScriptIdentifier javaScriptIdentifier = (JavaScriptIdentifier) identifiers.get(symbol);
+        if (javaScriptIdentifier == null) {
+            javaScriptIdentifier = new JavaScriptIdentifier(symbol, this);
+            identifiers.put(symbol, javaScriptIdentifier);
         }
-        return identifier;
+        return javaScriptIdentifier;
     }
 
-    Identifier getIdentifier(String symbol) {
-        return (Identifier) identifiers.get(symbol);
+    JavaScriptIdentifier getIdentifier(String symbol) {
+        return (JavaScriptIdentifier) identifiers.get(symbol);
     }
 
     void preventMunging() {
@@ -62,10 +62,10 @@ class ScriptOrFnScope {
         ArrayList result = new ArrayList();
         Enumeration elements = identifiers.elements();
         while (elements.hasMoreElements()) {
-            Identifier identifier = (Identifier) elements.nextElement();
-            String mungedValue = identifier.getMungedValue();
+            JavaScriptIdentifier javaScriptIdentifier = (JavaScriptIdentifier) elements.nextElement();
+            String mungedValue = javaScriptIdentifier.getMungedValue();
             if (mungedValue == null) {
-                mungedValue = identifier.getValue();
+                mungedValue = javaScriptIdentifier.getValue();
             }
             result.add(mungedValue);
         }
@@ -96,16 +96,16 @@ class ScriptOrFnScope {
 
             ArrayList freeSymbols = new ArrayList();
 
-            freeSymbols.addAll(YUICompressor.ones);
+            freeSymbols.addAll(JavaScriptCompressor.ones);
             freeSymbols.removeAll(getAllUsedSymbols());
             if (freeSymbols.size() == 0) {
                 pickFromSet = 2;
-                freeSymbols.addAll(YUICompressor.twos);
+                freeSymbols.addAll(JavaScriptCompressor.twos);
                 freeSymbols.removeAll(getAllUsedSymbols());
             }
             if (freeSymbols.size() == 0) {
                 pickFromSet = 3;
-                freeSymbols.addAll(YUICompressor.threes);
+                freeSymbols.addAll(JavaScriptCompressor.threes);
                 freeSymbols.removeAll(getAllUsedSymbols());
             }
             if (freeSymbols.size() == 0) {
@@ -118,9 +118,9 @@ class ScriptOrFnScope {
                 if (freeSymbols.size() == 0) {
                     pickFromSet++;
                     if (pickFromSet == 2) {
-                        freeSymbols.addAll(YUICompressor.twos);
+                        freeSymbols.addAll(JavaScriptCompressor.twos);
                     } else if (pickFromSet == 3) {
-                        freeSymbols.addAll(YUICompressor.threes);
+                        freeSymbols.addAll(JavaScriptCompressor.threes);
                     } else {
                         System.err.println("The YUI Compressor ran out of symbols. Aborting...");
                         System.exit(1);
@@ -131,9 +131,9 @@ class ScriptOrFnScope {
                     // lead to errors.
                     freeSymbols.removeAll(getAllUsedSymbols());
                 }
-                Identifier identifier = (Identifier) elements.nextElement();
+                JavaScriptIdentifier javaScriptIdentifier = (JavaScriptIdentifier) elements.nextElement();
                 String mungedValue = (String) freeSymbols.remove(0);
-                identifier.setMungedValue(mungedValue);
+                javaScriptIdentifier.setMungedValue(mungedValue);
             }
         }
 
