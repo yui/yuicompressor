@@ -23,7 +23,7 @@
                source="1.4">
             <classpath>
                 <pathelement location="${lib.dir}/jargs-1.0.jar"/>
-                <pathelement location="${lib.dir}/rhino-1.6R6.jar"/>
+                <pathelement location="${lib.dir}/rhino-1.6R7.jar"/>
             </classpath>
         </javac>
     </target>
@@ -31,7 +31,7 @@
     <target name="build.jar" depends="build.classes">
         <mkdir dir="${build.dir}/jar"/>
         <unjar src="${lib.dir}/jargs-1.0.jar" dest="${build.dir}/jar"/>
-        <unjar src="${lib.dir}/rhino-1.6R6.jar" dest="${build.dir}/jar"/>
+        <unjar src="${lib.dir}/rhino-1.6R7.jar" dest="${build.dir}/jar"/>
         <copy todir="${build.dir}/jar">
             <fileset dir="${build.dir}/classes" includes="**/*.class"/>
         </copy>
