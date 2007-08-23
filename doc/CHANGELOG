@@ -1,3 +1,11 @@
+YUI Compressor 1.2, 2007-xx-xx
+------------------------------
+
++ Switched from Rhino 1.6R6 to Rhino 1.6R7
++ Refactored code to make it easier to use the compressor from a servlet
+  environment or another Java app (no need to pass in file names anymore)
++ Integrated Isaac Schlueter's CSS compressor.
+
 YUI Compressor 1.1, 2007-08-20
 ------------------------------
 
