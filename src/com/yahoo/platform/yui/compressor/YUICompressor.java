@@ -24,6 +24,7 @@ public class YUICompressor {
         }
 
         CmdLineParser parser = new CmdLineParser();
+        CmdLineParser.Option typeOpt = parser.addStringOption("type");
         CmdLineParser.Option warnOpt = parser.addBooleanOption("warn");
         CmdLineParser.Option nomungeOpt = parser.addBooleanOption("nomunge");
         CmdLineParser.Option linebreakOpt = parser.addBooleanOption("line-break");
@@ -59,14 +60,32 @@ public class YUICompressor {
             extension = inputFilename.substring(idx + 1);
         }
 
-        if (extension == null || !extension.equalsIgnoreCase("js") && !extension.equalsIgnoreCase("css")) {
-            System.err.println("Unknown file extension. Aborting...");
+        String type = (String) parser.getOptionValue(typeOpt);
+        if (type != null && !type.equalsIgnoreCase("js") && !type.equalsIgnoreCase("css")) {
+            usage();
             System.exit(1);
+        }
+
+        if (extension == null && type == null) {
+            System.err.println("Unknown file type. Aborting...");
+            System.exit(1);
+        }
+
+        if (type != null) {
+            if (type.equalsIgnoreCase("js")) {
+                extension = "js";
+            } else if (type.equalsIgnoreCase("css")) {
+                extension = "css";
+            }
         }
 
         String outputFilename = (String) parser.getOptionValue(outputFilenameOpt);
         if (outputFilename == null) {
-            outputFilename = inputFilename.substring(0, idx) + "-min." + extension;
+            if (idx >= 0 && idx < inputFilename.length() - 1) {
+                outputFilename = inputFilename.substring(0, idx) + "-min." + extension;
+            } else {
+                outputFilename = inputFilename + "-min." + extension;
+            }
         }
 
         String charset = (String) parser.getOptionValue(charsetOpt);
@@ -133,6 +152,7 @@ public class YUICompressor {
                 "Usage: java -jar yuicompressor.jar [options] file\n"
                         + "Options\n"
                         + "  -h, --help             Displays this information\n"
+                        + "  --type <js|css>        Specifies the type of the input file\n"
                         + "  --charset <charset>    Read the input file using <charset>\n"
                         + "  -o <file>              Place the output into <file>\n"
                         + "  --line-break           [js only] Insert line breaks in output for readability\n"
