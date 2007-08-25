@@ -1,10 +1,10 @@
-YUI Compressor 1.2, 2007-xx-xx
+YUI Compressor 1.2, 2007-08-27
 ------------------------------
 
 + Switched from Rhino 1.6R6 to Rhino 1.6R7
++ Integrated Isaac Schlueter's CSS compressor.
 + Refactored code to make it easier to use the compressor from a servlet
   environment or another Java app (no need to pass in file names anymore)
-+ Integrated Isaac Schlueter's CSS compressor.
 + Output a white-space character after 'throw' only when necessary.
 + Output a white-space character after 'break' and 'continue' when followed
   by a label.
