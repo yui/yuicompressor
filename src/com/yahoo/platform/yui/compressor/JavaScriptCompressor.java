@@ -111,8 +111,8 @@ public class JavaScriptCompressor {
         literals.put(new Integer(Token.FINALLY), "finally");
         literals.put(new Integer(Token.THROW), "throw ");
         literals.put(new Integer(Token.SWITCH), "switch");
-        literals.put(new Integer(Token.BREAK), "break");
-        literals.put(new Integer(Token.CONTINUE), "continue");
+        literals.put(new Integer(Token.BREAK), "break ");
+        literals.put(new Integer(Token.CONTINUE), "continue ");
         literals.put(new Integer(Token.CASE), "case ");
         literals.put(new Integer(Token.DEFAULT), "default");
         literals.put(new Integer(Token.RETURN), "return ");
@@ -921,12 +921,35 @@ public class JavaScriptCompressor {
 
                 case Token.CASE:
                     result.append("case");
-                    // No space needed after 'case' when followed by a string.
-                    if (offset < length) {
-                        token = getToken(0);
-                        if (token.getType() != Token.STRING) {
-                            result.append(" ");
-                        }
+                    // White-space needed after 'case' when not followed by a string.
+                    if (offset < length && getToken(0).getType() != Token.STRING) {
+                        result.append(" ");
+                    }
+                    break;
+
+                case Token.THROW:
+                    // White-space needed after 'throw' when not followed by a string.
+                    result.append("throw");
+                    if (offset < length && getToken(0).getType() != Token.STRING) {
+                        result.append(" ");
+                    }
+                    break;
+
+                case Token.BREAK:
+                    result.append("break");
+                    if (offset < length && getToken(0).getType() != Token.SEMI) {
+                        // If 'break' is not followed by a semi-colon, it must be
+                        // followed by a label, hence the need for a white space.
+                        result.append(" ");
+                    }
+                    break;
+
+                case Token.CONTINUE:
+                    result.append("continue");
+                    if (offset < length && getToken(0).getType() != Token.SEMI) {
+                        // If 'continue' is not followed by a semi-colon, it must be
+                        // followed by a label, hence the need for a white space.
+                        result.append(" ");
                     }
                     break;
 
