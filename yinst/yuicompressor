@@ -1,16 +1,3 @@
 #!/bin/sh
 
-if [ ! -n "$1" ]
-then
-    echo "Usage: yuicompressor [options] file"
-    echo "Options"
-    echo "  -h, --help             Displays this information"
-    echo "  --line-break           Insert line breaks after semi colons"
-    echo "  --nomunge              Minify only, do not obfuscate"
-    echo "  --warn                 Displays possible errors in your code"
-    echo "  --charset <charset>    Read the input file using the <charset>"
-    echo "  -o <file>              Place the output into <file>"
-	exit
-fi
-
 java -jar /home/y/bin/yuicompressor.jar $*
