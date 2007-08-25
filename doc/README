@@ -29,6 +29,12 @@ GLOBAL OPTIONS
   -h, --help
       Prints help on how to use the YUI Compressor
 
+  --type js|css
+      The type of compressor (JavaScript or CSS) is chosen based on the
+      extension of the input file name (.js or .css) If the input file name
+      does not have an extension, or that extension is neither .js nor .css,
+      the type option MUST be specified.
+
   --charset character-set
       If a supported character set is specified, the YUI Compressor will use it
       to read the input file. Otherwise, it will assume that the platform's
