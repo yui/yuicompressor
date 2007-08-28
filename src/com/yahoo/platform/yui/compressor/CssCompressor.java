@@ -63,11 +63,11 @@ public class CssCompressor {
         }
         m.appendTail(sb);
         css = sb.toString();
-        css = css.replaceAll("\\s+([!{};:>+\\],])", "$1");
+        css = css.replaceAll("\\s+([!{};:>+\\(\\)\\],])", "$1");
         css = css.replaceAll("___PSEUDOCLASSCOLON___", ":");
 
         // Remove the spaces after the things that should not have spaces after them.
-        css = css.replaceAll("([!{}:;>+\\[,])\\s+", "$1");
+        css = css.replaceAll("([!{}:;>+\\(\\)\\[,])\\s+", "$1");
 
         // Add the semicolon where it's missing.
         css = css.replaceAll("([^;\\}])}", "$1;}");
