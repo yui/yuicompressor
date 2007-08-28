@@ -5,6 +5,9 @@ YUI Compressor 2.1, 2007-0x-xx
 + Allow the output file to overwrite the input file (with version 2.0,
   in this case, the output file was always empty)
 + Remove spaces before and after '(' and ')' as in background:url('xxx');
++ Merge (if possible) string literals that are appended in JavaScript files.
+  This not only makes the code smaller, it makes the code faster, but allows
+  you to maintain some readability in your source code.
 
 YUI Compressor 2.0, 2007-08-27
 ------------------------------
