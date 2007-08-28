@@ -4,6 +4,7 @@ YUI Compressor 2.1, 2007-0x-xx
 + Pass the --line-break option to the CSS compressor.
 + Allow the output file to overwrite the input file (with version 2.0,
   in this case, the output file was always empty)
++ Remove spaces before and after '(' and ')' as in background:url('xxx');
 
 YUI Compressor 2.0, 2007-08-27
 ------------------------------
