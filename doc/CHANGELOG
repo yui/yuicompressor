@@ -6,8 +6,10 @@ YUI Compressor 2.1, 2007-0x-xx
   in this case, the output file was always empty)
 + Remove spaces before and after '(' and ')' as in background:url('xxx');
 + Merge (if possible) string literals that are appended in JavaScript files.
-  This not only makes the code smaller, it makes the code faster, but allows
-  you to maintain some readability in your source code.
+  This not only makes the code smaller, it makes the code faster,
+  but allows you to maintain some readability in your source code.
++ Handle constructs such as a + ++ b or a + + "1" (in which case the
+  space between the operators must be kept!) and other similar cases...
 
 YUI Compressor 2.0, 2007-08-27
 ------------------------------
