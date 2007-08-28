@@ -105,12 +105,20 @@ public class YUICompressor {
         try {
 
             in = new InputStreamReader(new FileInputStream(inputFilename), charset);
-            out = new OutputStreamWriter(new FileOutputStream(outputFilename), charset);
+
             if (extension.equalsIgnoreCase("js")) {
                 try {
                     JavaScriptCompressor compressor = new JavaScriptCompressor(in, System.out, System.err);
+
+                    // Close the input stream in case the output file should overwrite it...
+                    in.close(); in = null;
+
                     boolean munge = parser.getOptionValue(nomungeOpt) == null;
                     boolean warn = parser.getOptionValue(warnOpt) != null;
+
+                    // Open the output stream now in case it should overwrite the input...
+                    out = new OutputStreamWriter(new FileOutputStream(outputFilename), charset);
+
                     compressor.compress(out, linebreak, munge, warn);
                 } catch (EvaluatorException e) {
                     e.printStackTrace();
@@ -119,6 +127,13 @@ public class YUICompressor {
                 }
             } else if (extension.equalsIgnoreCase("css")) {
                 CssCompressor compressor = new CssCompressor(in);
+
+                // Close the input stream in case the output file should overwrite it...
+                in.close(); in = null;
+
+                // Open the output stream now in case it should overwrite the input...
+                out = new OutputStreamWriter(new FileOutputStream(outputFilename), charset);
+
                 compressor.compress(out, linebreak);
             }
 
