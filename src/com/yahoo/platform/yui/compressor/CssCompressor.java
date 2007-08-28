@@ -18,11 +18,6 @@ import java.util.regex.Matcher;
 
 public class CssCompressor {
 
-    class CssRule {
-        String selector;
-        String text;
-    }
-
     private StringBuffer srcsb = new StringBuffer();
 
     public CssCompressor(Reader in) throws IOException {
@@ -33,7 +28,7 @@ public class CssCompressor {
         }
     }
 
-    public void compress(Writer out)
+    public void compress(Writer out, boolean linebreak)
             throws IOException {
 
         Pattern p;
@@ -107,8 +102,10 @@ public class CssCompressor {
         // Remove empty rules.
         css = css.replaceAll("[^\\}]+\\{;\\}", "");
 
-        // Put a line break after each rule. This helps ie6 in some strange cases.
-        css = css.replaceAll("}", "}\n");
+        if (linebreak) {
+            // Put a line break after each rule.
+            css = css.replaceAll("}", "}\n");
+        }
 
         // Write the output...
         out.write(css);

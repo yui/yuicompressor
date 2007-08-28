@@ -111,7 +111,7 @@ public class YUICompressor {
                     JavaScriptCompressor compressor = new JavaScriptCompressor(in, System.out, System.err);
                     boolean munge = parser.getOptionValue(nomungeOpt) == null;
                     boolean warn = parser.getOptionValue(warnOpt) != null;
-                    compressor.compress(out, munge, warn, linebreak);
+                    compressor.compress(out, linebreak, munge, warn);
                 } catch (EvaluatorException e) {
                     e.printStackTrace();
                     // Return a special error code used specifically by the web front-end.
@@ -119,7 +119,7 @@ public class YUICompressor {
                 }
             } else if (extension.equalsIgnoreCase("css")) {
                 CssCompressor compressor = new CssCompressor(in);
-                compressor.compress(out);
+                compressor.compress(out, linebreak);
             }
 
         } catch (IOException e) {

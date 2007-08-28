@@ -324,9 +324,9 @@ public class JavaScriptCompressor {
 
     private PrintStream stdout;
 
+    private boolean linebreak;
     private boolean munge;
     private boolean warn;
-    private boolean linebreak;
 
     private static final int BUILDING_SYMBOL_TREE = 1;
     private static final int CHECKING_SYMBOL_TREE = 2;
@@ -350,12 +350,12 @@ public class JavaScriptCompressor {
         this.tokens = readTokens(encodedSource);
     }
 
-    public void compress(Writer out, boolean munge, boolean warn, boolean linebreak)
+    public void compress(Writer out, boolean linebreak, boolean munge, boolean warn)
             throws IOException {
 
+        this.linebreak = linebreak;
         this.munge = munge;
         this.warn = warn;
-        this.linebreak = linebreak;
 
         buildSymbolTree();
         mungeSymboltree();
