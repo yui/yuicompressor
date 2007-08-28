@@ -821,12 +821,12 @@ public class JavaScriptCompressor {
         while (offset < length) {
 
             token = consumeToken();
+            symbol = token.getValue();
             currentScope = getCurrentScope();
 
             switch (token.getType()) {
 
                 case Token.NAME:
-                    symbol = token.getValue();
 
                     if (offset >= 2 && getToken(-2).getType() == Token.DOT ||
                             getToken(0).getType() == Token.OBJECTLIT) {
@@ -855,7 +855,29 @@ public class JavaScriptCompressor {
                 case Token.REGEXP:
                 case Token.NUMBER:
                 case Token.STRING:
-                    result.append(token.getValue());
+                    result.append(symbol);
+                    break;
+
+                case Token.ADD:
+                    if (offset >= 2 && offset < length &&
+                            getToken(-2).getType() == Token.STRING &&
+                            getToken(0).getType() == Token.STRING &&
+                            (offset == length - 1 || getToken(1).getType() != Token.DOT)) {
+                        // Here, we have two string literal that are being appended.
+                        // Note that we take care of the case "a" + "b".toUpperCase()
+                        // Also note that the different quoting styles are normalized
+                        // in printSourceString, and the strings are already escaped...
+
+                        // Remove the first string's terminating quote...
+                        result.deleteCharAt(result.length() - 1);
+
+                        // Append the second string without its starting quote...
+                        result.append(getToken(0).getValue().substring(1));
+
+                        consumeToken(); // skip the second string...
+                    } else {
+                        result.append("+");
+                    }
                     break;
 
                 case Token.FUNCTION:
@@ -981,7 +1003,7 @@ public class JavaScriptCompressor {
                     if (literal != null) {
                         result.append(literal);
                     } else if (warn) {
-                        stdout.println("\n[WARNING] This symbol cannot be printed: " + token.getValue());
+                        stdout.println("\n[WARNING] This symbol cannot be printed: " + symbol);
                     }
                     break;
             }
