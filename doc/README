@@ -29,6 +29,10 @@ GLOBAL OPTIONS
   -h, --help
       Prints help on how to use the YUI Compressor
 
+  --line-break
+      Adds a line feed character for readability after each semi-colon
+      character in JavaScript mode, or after each rule in CSS mode.
+
   --type js|css
       The type of compressor (JavaScript or CSS) is chosen based on the
       extension of the input file name (.js or .css) If the input file name
@@ -47,10 +51,6 @@ GLOBAL OPTIONS
       the "-min" suffix and the "js" extension.
 
 JAVASCRIPT ONLY OPTIONS
-
-  --line-break
-      Adds a line feed character after each semi-colon character in the
-      output file (may help debugging with the MS Script debugger)
 
   --nomunge
       Minify only. Do not obfuscate local symbols.
