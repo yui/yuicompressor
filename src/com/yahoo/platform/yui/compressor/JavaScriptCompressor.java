@@ -875,8 +875,29 @@ public class JavaScriptCompressor {
                         result.append(getToken(0).getValue().substring(1));
 
                         consumeToken(); // skip the second string...
-                    } else {
-                        result.append("+");
+                        break;
+                    }
+
+                    /* FALLSTHROUGH */
+
+                case Token.SUB:
+                    result.append((String) literals.get(new Integer(token.getType())));
+                    if (offset < length) {
+                        token = getToken(0);
+                        if (token.getType() == Token.INC ||
+                                token.getType() == Token.DEC ||
+                                token.getType() == Token.ADD ||
+                                token.getType() == Token.DEC) {
+                            // Handle the case x +/- ++/-- y
+                            // We must keep a white space here. Otherwise, x +++ y would be
+                            // interpreted as x ++ + y by the compiler, which is a bug (due
+                            // to the implicit assignment being done on the wrong variable)
+                            result.append(" ");
+                        } else if (token.getType() == Token.POS && getToken(-1).getType() == Token.ADD ||
+                                token.getType() == Token.NEG && getToken(-1).getType() == Token.SUB) {
+                            // Handle the case x + + y and x - - y
+                            result.append(" ");
+                        }
                     }
                     break;
 
