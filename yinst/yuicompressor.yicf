@@ -1,5 +1,5 @@
 PRODUCT_NAME = yuicompressor
-VERSION      = 2.0
+VERSION      = 2.1
 LONG_DESC    = `cat ../doc/README`
 SHORT_DESC   = YUI Compressor
 PERM         = 0644
