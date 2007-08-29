@@ -1,4 +1,4 @@
-YUI Compressor 2.1, 2007-0x-xx
+YUI Compressor 2.1, 2007-08-29
 ------------------------------
 
 + Pass the --line-break option to the CSS compressor.
@@ -10,6 +10,9 @@ YUI Compressor 2.1, 2007-0x-xx
   but allows you to maintain some readability in your source code.
 + Handle constructs such as a + ++ b or a + + "1" (in which case the
   space between the operators must be kept!) and other similar cases...
++ Pass ErrorReporter instance to the constructor of class JavaScriptCompressor
+  (as suggested by David Bernard for his integration  of the YUI Compressor
+  as a maven plugin)
 
 YUI Compressor 2.0, 2007-08-27
 ------------------------------
