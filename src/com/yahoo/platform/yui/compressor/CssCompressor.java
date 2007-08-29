@@ -107,6 +107,9 @@ public class CssCompressor {
             css = css.replaceAll("}", "}\n");
         }
 
+        // Trim the final string (for any leading white space)
+        css = css.trim();
+
         // Write the output...
         out.write(css);
     }
