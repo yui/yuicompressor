@@ -9,6 +9,7 @@
 package com.yahoo.platform.yui.compressor;
 
 import jargs.gnu.CmdLineParser;
+import org.mozilla.javascript.ErrorReporter;
 import org.mozilla.javascript.EvaluatorException;
 
 import java.io.*;
@@ -108,10 +109,36 @@ public class YUICompressor {
 
             if (extension.equalsIgnoreCase("js")) {
                 try {
-                    JavaScriptCompressor compressor = new JavaScriptCompressor(in, System.out, System.err);
+                    JavaScriptCompressor compressor = new JavaScriptCompressor(in, new ErrorReporter() {
+
+                        public void warning(String message, String sourceName,
+                                int line, String lineSource, int lineOffset) {
+                            if (line < 0) {
+                                System.out.println("\n" + message);
+                            } else {
+                                System.out.println("\n" + line + ':' + lineOffset + ':' + message);
+                            }
+                        }
+
+                        public void error(String message, String sourceName,
+                                int line, String lineSource, int lineOffset) {
+                            if (line < 0) {
+                                System.err.println("\n" + message);
+                            } else {
+                                System.err.println("\n" + line + ':' + lineOffset + ':' + message);
+                            }
+                        }
+
+                        public EvaluatorException runtimeError(String message, String sourceName,
+                                int line, String lineSource, int lineOffset) {
+                            error(message, sourceName, line, lineSource, lineOffset);
+                            return new EvaluatorException(message);
+                        }
+                    });
 
                     // Close the input stream in case the output file should overwrite it...
-                    in.close(); in = null;
+                    in.close();
+                    in = null;
 
                     boolean munge = parser.getOptionValue(nomungeOpt) == null;
                     boolean warn = parser.getOptionValue(warnOpt) != null;
@@ -129,7 +156,8 @@ public class YUICompressor {
                 CssCompressor compressor = new CssCompressor(in);
 
                 // Close the input stream in case the output file should overwrite it...
-                in.close(); in = null;
+                in.close();
+                in = null;
 
                 // Open the output stream now in case it should overwrite the input...
                 out = new OutputStreamWriter(new FileOutputStream(outputFilename), charset);

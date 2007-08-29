@@ -11,7 +11,6 @@ package com.yahoo.platform.yui.compressor;
 import org.mozilla.javascript.*;
 
 import java.io.IOException;
-import java.io.PrintStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.*;
@@ -322,7 +321,7 @@ public class JavaScriptCompressor {
         return offset;
     }
 
-    private PrintStream stdout;
+    private ErrorReporter logger;
 
     private boolean linebreak;
     private boolean munge;
@@ -339,11 +338,10 @@ public class JavaScriptCompressor {
     private ScriptOrFnScope globalScope = new ScriptOrFnScope(-1, null);
     private Hashtable indexedScopes = new Hashtable();
 
-    public JavaScriptCompressor(Reader in, PrintStream stdout, PrintStream stderr)
+    public JavaScriptCompressor(Reader in, ErrorReporter reporter)
             throws IOException, EvaluatorException {
-        this.stdout = stdout;
+        this.logger = reporter;
         CompilerEnvirons env = new CompilerEnvirons();
-        ErrorReporter reporter = new JavaScriptErrorReporter(stderr, true);
         Parser parser = new Parser(env, reporter);
         parser.parse(in, null, 1);
         String encodedSource = parser.getEncodedSource();
@@ -438,6 +436,15 @@ public class JavaScriptCompressor {
         return result.toString();
     }
 
+    private void warn(String message, boolean showDebugString) {
+        if (warn) {
+            if (showDebugString) {
+                message = message + "\n" + getDebugString(10);
+            }
+            logger.warning(message, null, -1, null, -1);
+        }
+    }
+
     private void parseFunctionDeclaration() {
 
         String symbol;
@@ -451,8 +458,8 @@ public class JavaScriptCompressor {
             if (mode == BUILDING_SYMBOL_TREE) {
                 // Get the name of the function and declare it in the current scope.
                 symbol = token.getValue();
-                if (currentScope.getIdentifier(symbol) != null && warn) {
-                    stdout.println("\n[WARNING] The function " + symbol + " has already been declared in the same scope...\n" + getDebugString(10));
+                if (currentScope.getIdentifier(symbol) != null) {
+                    warn("[WARNING] The function " + symbol + " has already been declared in the same scope...", true);
                 }
                 currentScope.declareIdentifier(symbol);
             }
@@ -580,12 +587,7 @@ public class JavaScriptCompressor {
 
                         if (symbol.equals("eval")) {
                             protectScopeFromObfuscation(currentScope);
-                            if (warn) {
-                                stdout.println("\n[WARNING] Using 'eval' is not recommended.\n" + getDebugString(10));
-                                if (munge) {
-                                    stdout.println("Note: Using 'eval' reduces the level of compression.");
-                                }
-                            }
+                            warn("[WARNING] Using 'eval' is not recommended..." + (munge ? "\nNote: Using 'eval' reduces the level of compression!" : ""), true);
                         }
 
                     } else if (mode == CHECKING_SYMBOL_TREE) {
@@ -603,9 +605,7 @@ public class JavaScriptCompressor {
                                     // We don't need to declare longer symbols since they won't cause
                                     // any conflict with other munged symbols.
                                     globalScope.declareIdentifier(symbol);
-                                    if (warn) {
-                                        stdout.println("\n[WARNING] Found an undeclared symbol: " + symbol + "\n" + getDebugString(10));
-                                    }
+                                    warn("[WARNING] Found an undeclared symbol: " + symbol, true);
                                 }
 
                             } else {
@@ -649,8 +649,8 @@ public class JavaScriptCompressor {
                             symbol = token.getValue();
                             if (scope.getIdentifier(symbol) == null) {
                                 scope.declareIdentifier(symbol);
-                            } else if (warn) {
-                                stdout.println("\n[WARNING] The variable " + symbol + " has already been declared in the same scope...\n" + getDebugString(10));
+                            } else {
+                                warn("[WARNING] The variable " + symbol + " has already been declared in the same scope...", true);
                             }
                         }
 
@@ -692,18 +692,13 @@ public class JavaScriptCompressor {
 
                 case Token.WITH:
                     if (mode == BUILDING_SYMBOL_TREE) {
+                        // Inside a 'with' block, it is impossible to figure out
+                        // statically whether a symbol is a local variable or an
+                        // object member. As a consequence, the only thing we can
+                        // do is turn the obfuscation off for the highest scope
+                        // containing the 'with' block.
                         protectScopeFromObfuscation(scope);
-                        if (warn) {
-                            stdout.println("\n[WARNING] Using 'with' is not recommended.\n" + getDebugString(10));
-                            if (munge) {
-                                // Inside a 'with' block, it is impossible to figure out
-                                // statically whether a symbol is a local variable or an
-                                // object member. As a consequence, the only thing we can
-                                // do is turn the obfuscation off for the highest scope
-                                // containing the 'with' block.
-                                stdout.println("Note: Using 'with' reduces the level of compression.");
-                            }
-                        }
+                        warn("[WARNING] Using 'with' is not recommended" + (munge ? "(and it reduces the level of compression)" : ""), true);
                     }
                     break;
 
@@ -718,12 +713,7 @@ public class JavaScriptCompressor {
 
                         if (symbol.equals("eval")) {
                             protectScopeFromObfuscation(scope);
-                            if (warn) {
-                                stdout.println("\n[WARNING] Using 'eval' is not recommended.\n" + getDebugString(10));
-                                if (munge) {
-                                    stdout.println("Note: Using 'eval' reduces the level of compression.");
-                                }
-                            }
+                            warn("[WARNING] Using 'eval' is not recommended..." + (munge ? "\nNote: Using 'eval' reduces the level of compression!" : ""), true);
                         }
 
                     } else if (mode == CHECKING_SYMBOL_TREE) {
@@ -741,9 +731,7 @@ public class JavaScriptCompressor {
                                     // We don't need to declare longer symbols since they won't cause
                                     // any conflict with other munged symbols.
                                     globalScope.declareIdentifier(symbol);
-                                    if (warn) {
-                                        stdout.println("\n[WARNING] Found an undeclared symbol: " + symbol + "\n" + getDebugString(10));
-                                    }
+                                    warn("[WARNING] Found an undeclared symbol: " + symbol, true);
                                 }
 
                             } else {
@@ -842,9 +830,8 @@ public class JavaScriptCompressor {
                             } else {
                                 result.append(symbol);
                             }
-                            if (currentScope != globalScope && javaScriptIdentifier.getRefcount() == 0 && warn) {
-                                stdout.println("\n[WARNING] The symbol " + symbol + " was declared but is apparently never used\n" + getDebugString(10));
-                                stdout.println("This code can probably be written in a more efficient way.");
+                            if (currentScope != globalScope && javaScriptIdentifier.getRefcount() == 0) {
+                                warn("[WARNING] The symbol " + symbol + " is declared but is apparently never used.\nThis code can probably be written in a more efficient way.", true);
                             }
                         } else {
                             result.append(symbol);
@@ -914,9 +901,8 @@ public class JavaScriptCompressor {
                         } else {
                             result.append(symbol);
                         }
-                        if (currentScope != globalScope && javaScriptIdentifier.getRefcount() == 0 && warn) {
-                            stdout.println("\n[WARNING] The symbol " + symbol + " was declared but is apparently never used\n" + getDebugString(10));
-                            stdout.println("This code can probably be written in a more efficient way.");
+                        if (currentScope != globalScope && javaScriptIdentifier.getRefcount() == 0) {
+                            warn("[WARNING] The symbol " + symbol + " is declared but is apparently never used.\nThis code can probably be written in a more efficient way.", true);
                         }
                         token = consumeToken();
                     }
@@ -1023,8 +1009,8 @@ public class JavaScriptCompressor {
                     String literal = (String) literals.get(new Integer(token.getType()));
                     if (literal != null) {
                         result.append(literal);
-                    } else if (warn) {
-                        stdout.println("\n[WARNING] This symbol cannot be printed: " + symbol);
+                    } else {
+                        warn("[WARNING] This symbol cannot be printed: " + symbol, true);
                     }
                     break;
             }
