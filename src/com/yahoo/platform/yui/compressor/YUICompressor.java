@@ -195,7 +195,7 @@ public class YUICompressor {
                 "Usage: java -jar yuicompressor.jar [options] file\n"
                         + "Options\n"
                         + "  -h, --help             Displays this information\n"
-                        + "  --line-break           [js only] Insert line breaks in output for readability\n"
+                        + "  --line-break           Insert line breaks in output for readability\n"
                         + "  --type <js|css>        Specifies the type of the input file\n"
                         + "  --charset <charset>    Read the input file using <charset>\n"
                         + "  -o <file>              Place the output into <file>\n"
