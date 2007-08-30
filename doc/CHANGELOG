@@ -1,3 +1,9 @@
+YUI Compressor 2.1.1, 2007-08-30
+--------------------------------
+
++ Fixed missing space in CSS background:url('foo.png')no-repeat
+  causing a background not to appear on Internet Explorer.
+
 YUI Compressor 2.1, 2007-08-29
 ------------------------------
 
