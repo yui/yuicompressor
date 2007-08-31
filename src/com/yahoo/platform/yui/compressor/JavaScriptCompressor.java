@@ -323,7 +323,6 @@ public class JavaScriptCompressor {
 
     private ErrorReporter logger;
 
-    private boolean linebreak;
     private boolean munge;
     private boolean warn;
 
@@ -348,16 +347,16 @@ public class JavaScriptCompressor {
         this.tokens = readTokens(encodedSource);
     }
 
-    public void compress(Writer out, boolean linebreak, boolean munge, boolean warn)
+    public void compress(Writer out, int linebreak, boolean munge,
+            boolean warn, boolean preserveAllSemiColons)
             throws IOException {
 
-        this.linebreak = linebreak;
         this.munge = munge;
         this.warn = warn;
 
         buildSymbolTree();
         mungeSymboltree();
-        StringBuffer sb = printSymbolTree();
+        StringBuffer sb = printSymbolTree(linebreak, preserveAllSemiColons);
         out.write(sb.toString());
     }
 
@@ -790,7 +789,8 @@ public class JavaScriptCompressor {
         globalScope.munge();
     }
 
-    private StringBuffer printSymbolTree() throws IOException {
+    private StringBuffer printSymbolTree(int linebreakpos, boolean preserveAllSemiColons)
+            throws IOException {
 
         offset = 0;
         braceNesting = 0;
@@ -803,6 +803,8 @@ public class JavaScriptCompressor {
 
         int length = tokens.size();
         StringBuffer result = new StringBuffer();
+
+        int linestartpos = 0;
 
         enterScope(globalScope);
 
@@ -998,10 +1000,14 @@ public class JavaScriptCompressor {
 
                 case Token.SEMI:
                     // No need to output a semi-colon if the next character is a right-curly...
-                    if (offset < length && getToken(0).getType() != Token.RC)
+                    if (preserveAllSemiColons || offset < length && getToken(0).getType() != Token.RC)
                         result.append(";");
-                    if (linebreak) {
+                    if (linebreakpos >= 0 && result.length() - linestartpos > linebreakpos) {
+                        // Some source control tools don't like it when files containing lines longer
+                        // than, say 8000 characters, are checked in. The linebreak option is used in
+                        // that case to split long lines after a specific column.
                         result.append("\n");
+                        linestartpos = result.length();
                     }
                     break;
 

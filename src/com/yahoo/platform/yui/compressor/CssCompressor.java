@@ -28,7 +28,7 @@ public class CssCompressor {
         }
     }
 
-    public void compress(Writer out, boolean linebreak)
+    public void compress(Writer out, int linebreakpos)
             throws IOException {
 
         Pattern p;
@@ -102,12 +102,25 @@ public class CssCompressor {
         // Remove empty rules.
         css = css.replaceAll("[^\\}]+\\{;\\}", "");
 
-        if (linebreak) {
-            // Put a line break after each rule.
-            css = css.replaceAll("}", "}\n");
+        if (linebreakpos >= 0) {
+            // Some source control tools don't like it when files containing lines longer
+            // than, say 8000 characters, are checked in. The linebreak option is used in
+            // that case to split long lines after a specific column.
+            int i = 0;
+            int linestartpos = 0;
+            sb = new StringBuffer(css);
+            while (i < sb.length()) {
+                char c = sb.charAt(i++);
+                if (c == '}' && i - linestartpos > linebreakpos) {
+                    sb.insert(i, '\n');
+                    linestartpos = i;
+                }
+            }
+
+            css = sb.toString();
         }
 
-        // Trim the final string (for any leading white space)
+        // Trim the final string (for any leading or trailing white spaces)
         css = css.trim();
 
         // Write the output...

@@ -28,7 +28,8 @@ public class YUICompressor {
         CmdLineParser.Option typeOpt = parser.addStringOption("type");
         CmdLineParser.Option warnOpt = parser.addBooleanOption("warn");
         CmdLineParser.Option nomungeOpt = parser.addBooleanOption("nomunge");
-        CmdLineParser.Option linebreakOpt = parser.addBooleanOption("line-break");
+        CmdLineParser.Option linebreakOpt = parser.addStringOption("line-break");
+        CmdLineParser.Option preserveSemiOpt = parser.addBooleanOption("preserve-semi");
         CmdLineParser.Option helpOpt = parser.addBooleanOption('h', "help");
         CmdLineParser.Option charsetOpt = parser.addStringOption("charset");
         CmdLineParser.Option outputFilenameOpt = parser.addStringOption('o', "output");
@@ -98,7 +99,17 @@ public class YUICompressor {
             System.out.println("\n[INFO] Using charset " + charset);
         }
 
-        boolean linebreak = parser.getOptionValue(linebreakOpt) != null;
+        int linebreakpos = -1;
+
+        String linebreakstr = (String) parser.getOptionValue(linebreakOpt);
+        if (linebreakstr != null) {
+            try {
+                linebreakpos = Integer.parseInt(linebreakstr, 10);
+            } catch (NumberFormatException e) {
+                usage();
+                System.exit(1);
+            }
+        }
 
         Reader in = null;
         Writer out = null;
@@ -142,11 +153,12 @@ public class YUICompressor {
 
                     boolean munge = parser.getOptionValue(nomungeOpt) == null;
                     boolean warn = parser.getOptionValue(warnOpt) != null;
+                    boolean preserveAllSemiColons = parser.getOptionValue(preserveSemiOpt) != null;
 
                     // Open the output stream now in case it should overwrite the input...
                     out = new OutputStreamWriter(new FileOutputStream(outputFilename), charset);
 
-                    compressor.compress(out, linebreak, munge, warn);
+                    compressor.compress(out, linebreakpos, munge, warn, preserveAllSemiColons);
                 } catch (EvaluatorException e) {
                     e.printStackTrace();
                     // Return a special error code used specifically by the web front-end.
@@ -162,7 +174,7 @@ public class YUICompressor {
                 // Open the output stream now in case it should overwrite the input...
                 out = new OutputStreamWriter(new FileOutputStream(outputFilename), charset);
 
-                compressor.compress(out, linebreak);
+                compressor.compress(out, linebreakpos);
             }
 
         } catch (IOException e) {
@@ -195,11 +207,12 @@ public class YUICompressor {
                 "Usage: java -jar yuicompressor.jar [options] file\n"
                         + "Options\n"
                         + "  -h, --help             Displays this information\n"
-                        + "  --line-break           Insert line breaks in output for readability\n"
                         + "  --type <js|css>        Specifies the type of the input file\n"
                         + "  --charset <charset>    Read the input file using <charset>\n"
+                        + "  --line-break <column>  Insert a line break after the specified column number\n"
                         + "  -o <file>              Place the output into <file>\n"
+                        + "  --warn                 [js only] Display possible errors in the code\n"
                         + "  --nomunge              [js only] Minify only, do not obfuscate\n"
-                        + "  --warn                 [js only] Display possible errors in the code");
+                        + "  --preserve-semi        [js only] Preserve unnecessary semicolons");
     }
 }

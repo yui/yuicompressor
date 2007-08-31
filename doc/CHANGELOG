@@ -1,3 +1,9 @@
+YUI Compressor 2.1.2, 2007-08-31
+--------------------------------
+
++ Added --preserve-semi option
++ Modified --line-break option
+
 YUI Compressor 2.1.1, 2007-08-30
 --------------------------------
 

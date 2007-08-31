@@ -8,10 +8,16 @@ NAME
 
 SYNOPSIS
 
-  java -jar yuicompressor.jar
-      [-h, --help] [--line-break] [--nomunge]
-      [--warn] [--charset character-set]
-      [-o outfile] infile
+  Usage: java -jar yuicompressor.jar [options] file
+  Options
+    -h, --help             Displays this information
+    --type <js|css>        Specifies the type of the input file
+    --charset <charset>    Read the input file using <charset>
+    --line-break <column>  Insert a line break after the specified column number
+    -o <file>              Place the output into <file>
+    --warn                 [js only] Display possible errors in the code
+    --nomunge              [js only] Minify only, do not obfuscate
+    --preserve-semi        [js only] Preserve unnecessary semicolons
 
 DESCRIPTION
 
@@ -30,8 +36,10 @@ GLOBAL OPTIONS
       Prints help on how to use the YUI Compressor
 
   --line-break
-      Adds a line feed character for readability after each semi-colon
-      character in JavaScript mode, or after each rule in CSS mode.
+      Some source control tools don't like files containing lines longer than,
+      say 8000 characters. The linebreak option is used in that case to split
+      long lines after a specific column. It can also be used to make the code
+      more readable, easier to debug (especially with the MS Script Debugger)
 
   --type js|css
       The type of compressor (JavaScript or CSS) is chosen based on the
@@ -58,6 +66,11 @@ JAVASCRIPT ONLY OPTIONS
   --warn
       Prints additional warnings such as duplicate variable declarations,
       missing variable declaration, unrecommended practices, etc.
+
+  --preserve-semi
+      Preserve unnecessary semicolons (such as right before a '}') This option
+      is useful when compressed code has to be run through JSLint (which is the
+      case of YUI for example)
 
 NOTES
 
