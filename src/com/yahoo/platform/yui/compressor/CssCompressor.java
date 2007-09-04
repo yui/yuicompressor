@@ -73,7 +73,7 @@ public class CssCompressor {
         css = css.replaceAll("([^;\\}])}", "$1;}");
 
         // Replace 0(px,em,%) with 0.
-        css = css.replaceAll("([\\s:])(0)(px|em|%|pt|ex)", "$1$2");
+        css = css.replaceAll("([\\s:])(0)(px|em|%|in|cm|mm|pc|pt|ex)", "$1$2");
 
         // Replace 0 0 0 0; with 0.
         css = css.replaceAll(":0 0 0 0;", ":0;");
