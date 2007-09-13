@@ -18,6 +18,7 @@ class ScriptOrFnScope {
     private ScriptOrFnScope parentScope;
     private ArrayList subScopes;
     private Hashtable identifiers = new Hashtable();
+    private Hashtable hints = new Hashtable();
     private boolean markedForMunging = true;
 
     ScriptOrFnScope(int braceNesting, ScriptOrFnScope parentScope) {
@@ -38,16 +39,20 @@ class ScriptOrFnScope {
     }
 
     JavaScriptIdentifier declareIdentifier(String symbol) {
-        JavaScriptIdentifier javaScriptIdentifier = (JavaScriptIdentifier) identifiers.get(symbol);
-        if (javaScriptIdentifier == null) {
-            javaScriptIdentifier = new JavaScriptIdentifier(symbol, this);
-            identifiers.put(symbol, javaScriptIdentifier);
+        JavaScriptIdentifier identifier = (JavaScriptIdentifier) identifiers.get(symbol);
+        if (identifier == null) {
+            identifier = new JavaScriptIdentifier(symbol, this);
+            identifiers.put(symbol, identifier);
         }
-        return javaScriptIdentifier;
+        return identifier;
     }
 
     JavaScriptIdentifier getIdentifier(String symbol) {
         return (JavaScriptIdentifier) identifiers.get(symbol);
+    }
+
+    void addHint(String variableName, String variableType) {
+        hints.put(variableName, variableType);
     }
 
     void preventMunging() {
@@ -62,10 +67,10 @@ class ScriptOrFnScope {
         ArrayList result = new ArrayList();
         Enumeration elements = identifiers.elements();
         while (elements.hasMoreElements()) {
-            JavaScriptIdentifier javaScriptIdentifier = (JavaScriptIdentifier) elements.nextElement();
-            String mungedValue = javaScriptIdentifier.getMungedValue();
+            JavaScriptIdentifier identifier = (JavaScriptIdentifier) elements.nextElement();
+            String mungedValue = identifier.getMungedValue();
             if (mungedValue == null) {
-                mungedValue = javaScriptIdentifier.getValue();
+                mungedValue = identifier.getValue();
             }
             result.add(mungedValue);
         }
@@ -131,9 +136,15 @@ class ScriptOrFnScope {
                     // lead to errors.
                     freeSymbols.removeAll(getAllUsedSymbols());
                 }
-                JavaScriptIdentifier javaScriptIdentifier = (JavaScriptIdentifier) elements.nextElement();
-                String mungedValue = (String) freeSymbols.remove(0);
-                javaScriptIdentifier.setMungedValue(mungedValue);
+
+                String mungedValue;
+                JavaScriptIdentifier identifier = (JavaScriptIdentifier) elements.nextElement();
+                if (identifier.isMarkedForMunging()) {
+                    mungedValue = (String) freeSymbols.remove(0);
+                } else {
+                    mungedValue = identifier.getValue();
+                }
+                identifier.setMungedValue(mungedValue);
             }
         }
 

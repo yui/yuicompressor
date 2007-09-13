@@ -386,11 +386,12 @@ public class JavaScriptCompressor {
      * if this symbol does not have a corresponding identifier.
      */
     private JavaScriptIdentifier getIdentifier(String symbol, ScriptOrFnScope scope) {
-        JavaScriptIdentifier javaScriptIdentifier;
+        JavaScriptIdentifier identifier;
         while (scope != null) {
-            javaScriptIdentifier = scope.getIdentifier(symbol);
-            if (javaScriptIdentifier != null)
-                return javaScriptIdentifier;
+            identifier = scope.getIdentifier(symbol);
+            if (identifier != null) {
+                return identifier;
+            }
             scope = scope.getParentScope();
         }
         return null;
@@ -449,6 +450,7 @@ public class JavaScriptCompressor {
         String symbol;
         JavaScriptToken token;
         ScriptOrFnScope currentScope, fnScope;
+        JavaScriptIdentifier identifier;
 
         currentScope = getCurrentScope();
 
@@ -483,6 +485,54 @@ public class JavaScriptCompressor {
             }
         }
 
+        token = consumeToken();
+        assert token.getType() == Token.LC;
+        braceNesting++;
+
+        token = getToken(0);
+        if (token.getType() == Token.STRING) {
+            // This is a hint. Hints are empty statements that look like
+            // "localvar1:nomunge, localvar2:nomunge"; They allow developers
+            // to prevent specific symbols from getting obfuscated (some heretic
+            // implementations, such as Prototype 1.6, require specific variable
+            // names, such as $super for example, in order to work appropriately.
+            // Note: right now, only "nomunge" is supported in the right hand side
+            // of a hint. However, in the future, the right hand side may contain
+            // different values.
+            consumeToken();
+            String hints = token.getValue();
+            // Remove the leading and trailing quotes...
+            hints = hints.substring(1, hints.length() - 1).trim();
+            StringTokenizer st1 = new StringTokenizer(hints, ",");
+            while (st1.hasMoreTokens()) {
+                String hint = st1.nextToken();
+                int idx = hint.indexOf(':');
+                if (idx <= 0 || idx >= hint.length() - 1) {
+                    if (mode == BUILDING_SYMBOL_TREE) {
+                        // No need to report the error twice, hence the test...
+                        warn("[WARNING] Invalid hint syntax: " + hint, true);
+                    }
+                    break;
+                }
+                String variableName = hint.substring(0, idx).trim();
+                String variableType = hint.substring(idx + 1).trim();
+                if (mode == BUILDING_SYMBOL_TREE) {
+                    fnScope.addHint(variableName, variableType);
+                } else if (mode == CHECKING_SYMBOL_TREE) {
+                    identifier = fnScope.getIdentifier(variableName);
+                    if (identifier != null) {
+                        if (variableType.equals("nomunge")) {
+                            identifier.preventMunging();
+                        } else {
+                            warn("[WARNING] Unsupported hint value: " + hint, true);
+                        }
+                    } else {
+                        warn("[WARNING] Hint refers to an unknown identifier: " + hint, true);
+                    }
+                }
+            }
+        }
+
         parseScope(fnScope);
     }
 
@@ -491,7 +541,7 @@ public class JavaScriptCompressor {
         String symbol;
         JavaScriptToken token;
         ScriptOrFnScope currentScope;
-        JavaScriptIdentifier javaScriptIdentifier;
+        JavaScriptIdentifier identifier;
 
         token = getToken(-1);
         assert token.getType() == Token.CATCH;
@@ -504,13 +554,13 @@ public class JavaScriptCompressor {
         currentScope = getCurrentScope();
 
         if (mode == BUILDING_SYMBOL_TREE) {
-            // We must declare the exception javaScriptIdentifier in the containing function
+            // We must declare the exception identifier in the containing function
             // scope to avoid errors related to the obfuscation process. No need to
             // display a warning if the symbol was already declared here...
             currentScope.declareIdentifier(symbol);
         } else {
-            javaScriptIdentifier = getIdentifier(symbol, currentScope);
-            javaScriptIdentifier.incrementRefcount();
+            identifier = getIdentifier(symbol, currentScope);
+            identifier.incrementRefcount();
         }
 
         token = consumeToken();
@@ -526,7 +576,7 @@ public class JavaScriptCompressor {
         String symbol;
         JavaScriptToken token;
         ScriptOrFnScope currentScope;
-        JavaScriptIdentifier javaScriptIdentifier;
+        JavaScriptIdentifier identifier;
 
         int expressionBraceNesting = braceNesting;
         int bracketNesting = 0;
@@ -594,9 +644,9 @@ public class JavaScriptCompressor {
                         if ((offset < 2 || getToken(-2).getType() != Token.DOT) &&
                                 getToken(0).getType() != Token.OBJECTLIT) {
 
-                            javaScriptIdentifier = getIdentifier(symbol, currentScope);
+                            identifier = getIdentifier(symbol, currentScope);
 
-                            if (javaScriptIdentifier == null) {
+                            if (identifier == null) {
 
                                 if (symbol.length() <= 3 && !builtin.contains(symbol)) {
                                     // Here, we found an undeclared and un-namespaced symbol that is
@@ -609,7 +659,7 @@ public class JavaScriptCompressor {
 
                             } else {
 
-                                javaScriptIdentifier.incrementRefcount();
+                                identifier.incrementRefcount();
                             }
                         }
                     }
@@ -622,7 +672,7 @@ public class JavaScriptCompressor {
 
         String symbol;
         JavaScriptToken token;
-        JavaScriptIdentifier javaScriptIdentifier;
+        JavaScriptIdentifier identifier;
 
         int length = tokens.size();
 
@@ -720,9 +770,9 @@ public class JavaScriptCompressor {
                         if ((offset < 2 || getToken(-2).getType() != Token.DOT) &&
                                 getToken(0).getType() != Token.OBJECTLIT) {
 
-                            javaScriptIdentifier = getIdentifier(symbol, scope);
+                            identifier = getIdentifier(symbol, scope);
 
-                            if (javaScriptIdentifier == null) {
+                            if (identifier == null) {
 
                                 if (symbol.length() <= 3 && !builtin.contains(symbol)) {
                                     // Here, we found an undeclared and un-namespaced symbol that is
@@ -735,7 +785,7 @@ public class JavaScriptCompressor {
 
                             } else {
 
-                                javaScriptIdentifier.incrementRefcount();
+                                identifier.incrementRefcount();
                             }
                         }
                     }
@@ -799,7 +849,7 @@ public class JavaScriptCompressor {
         String symbol;
         JavaScriptToken token;
         ScriptOrFnScope currentScope;
-        JavaScriptIdentifier javaScriptIdentifier;
+        JavaScriptIdentifier identifier;
 
         int length = tokens.size();
         StringBuffer result = new StringBuffer();
@@ -825,14 +875,14 @@ public class JavaScriptCompressor {
 
                     } else {
 
-                        javaScriptIdentifier = getIdentifier(symbol, currentScope);
-                        if (javaScriptIdentifier != null) {
-                            if (javaScriptIdentifier.getMungedValue() != null) {
-                                result.append(javaScriptIdentifier.getMungedValue());
+                        identifier = getIdentifier(symbol, currentScope);
+                        if (identifier != null) {
+                            if (identifier.getMungedValue() != null) {
+                                result.append(identifier.getMungedValue());
                             } else {
                                 result.append(symbol);
                             }
-                            if (currentScope != globalScope && javaScriptIdentifier.getRefcount() == 0) {
+                            if (currentScope != globalScope && identifier.getRefcount() == 0) {
                                 warn("[WARNING] The symbol " + symbol + " is declared but is apparently never used.\nThis code can probably be written in a more efficient way.", true);
                             }
                         } else {
@@ -896,14 +946,14 @@ public class JavaScriptCompressor {
                     if (token.getType() == Token.NAME) {
                         result.append(" ");
                         symbol = token.getValue();
-                        javaScriptIdentifier = getIdentifier(symbol, currentScope);
-                        assert javaScriptIdentifier != null;
-                        if (javaScriptIdentifier.getMungedValue() != null) {
-                            result.append(javaScriptIdentifier.getMungedValue());
+                        identifier = getIdentifier(symbol, currentScope);
+                        assert identifier != null;
+                        if (identifier.getMungedValue() != null) {
+                            result.append(identifier.getMungedValue());
                         } else {
                             result.append(symbol);
                         }
-                        if (currentScope != globalScope && javaScriptIdentifier.getRefcount() == 0) {
+                        if (currentScope != globalScope && identifier.getRefcount() == 0) {
                             warn("[WARNING] The symbol " + symbol + " is declared but is apparently never used.\nThis code can probably be written in a more efficient way.", true);
                         }
                         token = consumeToken();
@@ -916,10 +966,10 @@ public class JavaScriptCompressor {
                         assert token.getType() == Token.NAME || token.getType() == Token.COMMA;
                         if (token.getType() == Token.NAME) {
                             symbol = token.getValue();
-                            javaScriptIdentifier = getIdentifier(symbol, currentScope);
-                            assert javaScriptIdentifier != null;
-                            if (javaScriptIdentifier.getMungedValue() != null) {
-                                result.append(javaScriptIdentifier.getMungedValue());
+                            identifier = getIdentifier(symbol, currentScope);
+                            assert identifier != null;
+                            if (identifier.getMungedValue() != null) {
+                                result.append(identifier.getMungedValue());
                             } else {
                                 result.append(symbol);
                             }
@@ -932,6 +982,14 @@ public class JavaScriptCompressor {
                     assert token.getType() == Token.LC;
                     result.append("{");
                     braceNesting++;
+                    token = getToken(0);
+                    if (token.getType() == Token.STRING) {
+                        // This is a hint. Skip it!
+                        consumeToken();
+                        token = getToken(0);
+                        assert token.getType() == Token.SEMI;
+                        consumeToken();
+                    }
                     break;
 
                 case Token.RETURN:

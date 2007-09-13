@@ -18,6 +18,7 @@ class JavaScriptIdentifier extends JavaScriptToken {
     private int refcount = 0;
     private String mungedValue;
     private ScriptOrFnScope declaredScope;
+    private boolean markedForMunging = true;
 
     JavaScriptIdentifier(String value, ScriptOrFnScope declaredScope) {
         super(Token.NAME, value);
@@ -34,6 +35,14 @@ class JavaScriptIdentifier extends JavaScriptToken {
 
     String getMungedValue() {
         return mungedValue;
+    }
+
+    void preventMunging() {
+        markedForMunging = false;
+    }
+
+    boolean isMarkedForMunging() {
+        return markedForMunging;
     }
 
     void incrementRefcount() {
