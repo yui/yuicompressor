@@ -40,6 +40,8 @@ GLOBAL OPTIONS
       say 8000 characters. The linebreak option is used in that case to split
       long lines after a specific column. It can also be used to make the code
       more readable, easier to debug (especially with the MS Script Debugger)
+      Specify 0 to get a line break after each semi-colon in JavaScript, and
+      after each rule in CSS.
 
   --type js|css
       The type of compressor (JavaScript or CSS) is chosen based on the
