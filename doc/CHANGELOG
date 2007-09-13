@@ -1,3 +1,22 @@
+YUI Compressor 2.2, 2007-xx-xx
+------------------------------
+
++ It is now possible to prevent specific symbols from being obfuscated (this is
+  useful with Prototype 1.6, which requires some arguments to be named $super,
+  yet another heresy I had to deal with) To do so, the compressor now supports
+  "hints". A hint is a string literal immediately following the opening curly
+  of a function declaration:
+
+      function (argvar) {
+          "argvar:nomunge, localvar:nomunge";
+          ...
+          var localvar;
+          ...
+      }
+
+  This does not create any syntax error (so uncompressed code may be run and
+  tested) and hints disappear during compression.
+
 YUI Compressor 2.1.2, 2007-08-31
 --------------------------------
 
