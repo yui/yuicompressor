@@ -476,12 +476,18 @@ public class JavaScriptCompressor {
         }
 
         // Parse function arguments.
+        int argpos = 0;
         while ((token = consumeToken()).getType() != Token.RP) {
             assert token.getType() == Token.NAME ||
                     token.getType() == Token.COMMA;
             if (token.getType() == Token.NAME && mode == BUILDING_SYMBOL_TREE) {
                 symbol = token.getValue();
-                fnScope.declareIdentifier(symbol);
+                identifier = fnScope.declareIdentifier(symbol);
+                if (symbol.equals("$super") && argpos == 0) {
+                    // Exception for Prototype 1.6...
+                    identifier.preventMunging();
+                }
+                argpos++;
             }
         }
 
@@ -489,8 +495,8 @@ public class JavaScriptCompressor {
         assert token.getType() == Token.LC;
         braceNesting++;
 
-        token = getToken(0);
-        if (token.getType() == Token.STRING) {
+        if (getToken(0).getType() == Token.STRING &&
+                getToken(1).getType() == Token.SEMI) {
             // This is a hint. Hints are empty statements that look like
             // "localvar1:nomunge, localvar2:nomunge"; They allow developers
             // to prevent specific symbols from getting obfuscated (some heretic
@@ -498,7 +504,7 @@ public class JavaScriptCompressor {
             // names, such as $super for example, in order to work appropriately.
             // Note: right now, only "nomunge" is supported in the right hand side
             // of a hint. However, in the future, the right hand side may contain
-            // different values.
+            // other values.
             consumeToken();
             String hints = token.getValue();
             // Remove the leading and trailing quotes...
