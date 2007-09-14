@@ -495,7 +495,8 @@ public class JavaScriptCompressor {
         assert token.getType() == Token.LC;
         braceNesting++;
 
-        if (getToken(0).getType() == Token.STRING &&
+        token = getToken(0);
+        if (token.getType() == Token.STRING &&
                 getToken(1).getType() == Token.SEMI) {
             // This is a hint. Hints are empty statements that look like
             // "localvar1:nomunge, localvar2:nomunge"; They allow developers
