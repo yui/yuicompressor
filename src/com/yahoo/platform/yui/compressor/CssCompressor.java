@@ -82,36 +82,25 @@ public class CssCompressor {
         // Replace background-position:0; with background-position:0 0;
         css = css.replaceAll("background-position:0;", "background-position:0 0;");
 
-        /**
-         * TODO: Convert this PHP into Java.
-         *
+        // Replace 0.6 to .6
+        css = css.replaceAll("[^\\d]0\\.(\\d+)", ".$1");
 
-        // shorten colors from rgb ( 51, 102, 153 ) to #336699
-        // this makes it more likely that it'll get further compressed in the next step.
-        preg_match_all('~rgb\s*\(\s*([0-9,\s]+)\s*\)~',$css,$matches);
-        foreach ( $matches[0] as $key => $rgbcolor ) {
-            $colors = explode(',',$matches[1][$key]);
-            $hex = array();
-            foreach ( $colors as $color ) {
-                $h = dechex($color);
-                $l = strlen($h);
-                if ( $l > 2 ) {
-                    // maxed out
-                    $h = 'ff';
-                } elseif ( $l < 2 ) {
-                    // too small
-                    for ( $l = 2 - $l; $l > 0; $l -- ) {
-                        $h = '0' . $h;
-                    }
-                }
-                $hex[] = $h;
+        // Shorten colors from rgb(51,102,153) to #336699
+        // This makes it more likely that it'll get further compressed in the next step.
+        p = Pattern.compile("rgb\\s*\\(\\s*([0-9,\\s]+)\\s*\\)");
+        m = p.matcher(css);
+        sb = new StringBuffer();
+        while (m.find()) {
+            String[] rgbcolors = m.group(1).split(",");
+            StringBuffer hexcolor = new StringBuffer("#");
+            for (int i = 0; i < rgbcolors.length; i++) {
+                int val = Integer.parseInt(rgbcolors[i]);
+                hexcolor.append(Integer.toHexString(val));
             }
-            $hex = '#' . implode('',$hex);
-            $css = str_replace($rgbcolor,$hex,$css);
+            m.appendReplacement(sb, hexcolor.toString());
         }
-
-        *
-        **/
+        m.appendTail(sb);
+        css = sb.toString();
 
         // Shorten colors from #AABBCC to #ABC
         p = Pattern.compile("#([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])");
