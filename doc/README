@@ -8,13 +8,13 @@ NAME
 
 SYNOPSIS
 
-  Usage: java -jar yuicompressor.jar [options] file
+  Usage: java -jar yuicompressor.jar [options] [input file]
   Options
     -h, --help             Displays this information
     --type <js|css>        Specifies the type of the input file
     --charset <charset>    Read the input file using <charset>
     --line-break <column>  Insert a line break after the specified column number
-    -o <file>              Place the output into <file>
+    -o <file>              Place the output into <file> - defaults to stdout
     --warn                 [js only] Display possible errors in the code
     --nomunge              [js only] Minify only, do not obfuscate
     --preserve-semi        [js only] Preserve unnecessary semicolons
