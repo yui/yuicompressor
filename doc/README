@@ -45,9 +45,9 @@ GLOBAL OPTIONS
 
   --type js|css
       The type of compressor (JavaScript or CSS) is chosen based on the
-      extension of the input file name (.js or .css) If the input file name
-      does not have an extension, or that extension is neither .js nor .css,
-      the type option MUST be specified.
+      extension of the input file name (.js or .css) This option is required
+      if no input file has been specified. Otherwise, this option is only
+      required if the input file extension is neither 'js' nor 'css'.
 
   --charset character-set
       If a supported character set is specified, the YUI Compressor will use it
@@ -57,8 +57,7 @@ GLOBAL OPTIONS
 
   -o outfile
       Place output in file outfile. If not specified, the YUI Compressor will
-      place the output in a file which name is made of the input file name,
-      the "-min" suffix and the "js" extension.
+      default to the standard output, which you can redirect to a file.
 
 JAVASCRIPT ONLY OPTIONS
 
@@ -76,7 +75,9 @@ JAVASCRIPT ONLY OPTIONS
 
 NOTES
 
-  The YUI Compressor requires Java version >= 1.4.
+  + If no input file is specified, it defaults to stdin.
+
+  + The YUI Compressor requires Java version >= 1.4.
 
 AUTHOR
 

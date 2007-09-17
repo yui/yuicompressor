@@ -3,6 +3,7 @@ YUI Compressor 2.2, 2007-xx-xx
 
 + Don't obfuscate function argument named $super if it is the first function
   argument listed. This is to support Prototype 1.6's heretic implementation.
++ Added support for stdin/stdout.
 
 YUI Compressor 2.1.2, 2007-08-31
 --------------------------------
