@@ -409,7 +409,7 @@ public class JavaScriptCompressor {
         String script = sb.toString();
 
         // Restore IE's conditional comments if any...
-        Pattern p = Pattern.compile("window\\." + IE_CC_MARKER + "(\\d)+;");
+        Pattern p = Pattern.compile("window\\." + IE_CC_MARKER + "(\\d)+;?");
         Matcher m = p.matcher(script);
         sb = new StringBuffer();
         while (m.find()) {
