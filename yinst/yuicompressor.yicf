@@ -1,11 +1,11 @@
 PRODUCT_NAME = yuicompressor
-VERSION      = 2.1.2
+VERSION      = 2.2
 LONG_DESC    = `cat ../doc/README`
 SHORT_DESC   = YUI Compressor
 PERM         = 0644
 OWNER        = root
 GROUP        = users
-CUSTODIAN    = jlecomte@yahoo-inc.com http://www.julienlecomte.net/
+CUSTODIAN    = jlecomte@yahoo-inc.com http://www.julienlecomte.net/yuicompressor/
 
 PACKAGE_OS_SPECIFIC = no
 

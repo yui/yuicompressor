@@ -1,4 +1,4 @@
-YUI Compressor 2.2, 2007-xx-xx
+YUI Compressor 2.2, 2007-09-18
 ------------------------------
 
 + Don't obfuscate function argument named $super if it is the first function
