@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.*;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 public class JavaScriptCompressor {
 
@@ -337,13 +339,59 @@ public class JavaScriptCompressor {
     private ScriptOrFnScope globalScope = new ScriptOrFnScope(-1, null);
     private Hashtable indexedScopes = new Hashtable();
 
+    // Use something that people are not likely to use. Note: This should not
+    // contain any character with a special meaning in regular expressions...
+    private String IE_CC_MARKER = "__yui__compressor__ie__cc__";
+    private Hashtable iecc = new Hashtable();
+
     public JavaScriptCompressor(Reader in, ErrorReporter reporter)
             throws IOException, EvaluatorException {
+
         this.logger = reporter;
+
+        // In order to handle IE's conditional comments, we read the specified
+        // reader to a string, replace IE's conditional comments by valid
+        // JavaScript statements, go through the minification process, and
+        // finally replace the JavaScript statements by the original
+        // conditional comments. This is not a very beautiful approach.
+        // A better approach would have been to extract and modify Rhino's
+        // tokenizer. However, this is the most pragmatic solution as it does
+        // not introduce any new bugs, and allows me to use an unmodified
+        // version of Rhino, which has a lot of benefits.
+
+        int n;
+        StringBuffer sb = new StringBuffer();
+        while ((n = in.read()) != -1) {
+            sb.append((char) n);
+        }
+
+        String script = sb.toString();
+
+        // First of all, make sure that the marker we are going to use to
+        // replace conditional comments is not used anywhere in the script.
+        while (script.indexOf(IE_CC_MARKER) != -1) {
+            IE_CC_MARKER += "_";
+        }
+
+        n = 0;
+        Pattern p = Pattern.compile("/\\*@(cc_on|if|elif|else|end)([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/");
+        Matcher m = p.matcher(script);
+        sb = new StringBuffer();
+        while (m.find()) {
+            String comment = m.group(0);
+            iecc.put(new Integer(n), comment);
+            m.appendReplacement(sb, "window." + IE_CC_MARKER + n + ";");
+            n++;
+        }
+        m.appendTail(sb);
+
+        script = sb.toString();
+
         CompilerEnvirons env = new CompilerEnvirons();
         Parser parser = new Parser(env, reporter);
-        parser.parse(in, null, 1);
+        parser.parse(script, null, 1);
         String encodedSource = parser.getEncodedSource();
+
         this.tokens = readTokens(encodedSource);
     }
 
@@ -357,7 +405,23 @@ public class JavaScriptCompressor {
         buildSymbolTree();
         mungeSymboltree();
         StringBuffer sb = printSymbolTree(linebreak, preserveAllSemiColons);
-        out.write(sb.toString());
+
+        String script = sb.toString();
+
+        // Restore IE's conditional comments if any...
+        Pattern p = Pattern.compile("window\\." + IE_CC_MARKER + "(\\d)+;");
+        Matcher m = p.matcher(script);
+        sb = new StringBuffer();
+        while (m.find()) {
+            Integer number = new Integer(m.group(1));
+            String comment = (String) iecc.get(number);
+            m.appendReplacement(sb, comment);
+        }
+        m.appendTail(sb);
+
+        script = sb.toString();
+
+        out.write(script);
     }
 
     private ScriptOrFnScope getCurrentScope() {
@@ -642,8 +706,15 @@ public class JavaScriptCompressor {
                     if (mode == BUILDING_SYMBOL_TREE) {
 
                         if (symbol.equals("eval")) {
+
                             protectScopeFromObfuscation(currentScope);
-                            warn("[WARNING] Using 'eval' is not recommended..." + (munge ? "\nNote: Using 'eval' reduces the level of compression!" : ""), true);
+                            warn("[WARNING] Using 'eval' is not recommended..." + (munge ? "\n[INFO] Using 'eval' reduces the level of compression!" : ""), true);
+
+                        } else if (symbol.startsWith(IE_CC_MARKER)) {
+
+                            protectScopeFromObfuscation(currentScope);
+                            warn("[INFO] Using Internet Explorer's conditional comments reduces the level of compression!", true);
+
                         }
 
                     } else if (mode == CHECKING_SYMBOL_TREE) {
@@ -768,8 +839,15 @@ public class JavaScriptCompressor {
                     if (mode == BUILDING_SYMBOL_TREE) {
 
                         if (symbol.equals("eval")) {
+
                             protectScopeFromObfuscation(scope);
-                            warn("[WARNING] Using 'eval' is not recommended..." + (munge ? "\nNote: Using 'eval' reduces the level of compression!" : ""), true);
+                            warn("[WARNING] Using 'eval' is not recommended..." + (munge ? "\n[INFO] Using 'eval' reduces the level of compression!" : ""), true);
+
+                        } else if (symbol.startsWith(IE_CC_MARKER)) {
+
+                            protectScopeFromObfuscation(scope);
+                            warn("[INFO] Using Internet Explorer's conditional comments reduces the level of compression!", true);
+
                         }
 
                     } else if (mode == CHECKING_SYMBOL_TREE) {
