@@ -3,9 +3,16 @@ YUI Compressor 2.2, 2007-xx-xx
 
 + Don't obfuscate function argument named $super if it is the first function
   argument listed. This is to support Prototype 1.6's heretic implementation.
-+ Added support for stdin/stdout.
++ Added support for stdin/stdout (see README for more info)
 + Shorten colors from rgb(51,102,153) to #336699 in CSS files.
 + Shorten values from 0.8em to .8em in CSS files.
++ Added support for Internet Explorer's conditional comments in JavaScript
+  files. Note that the presence of a conditional comment inside a function
+  (i.e. not in the global scope) will reduce the level of compression for the
+  same reason  the use of 'eval' or 'with' reduces the level of compression
+  (conditional comments, which do not get parsed, may refer to local variables,
+  which get obfuscated) In any case, the use of Internet Explorer's conditional
+  comment is to be avoided.
 
 YUI Compressor 2.1.2, 2007-08-31
 --------------------------------
