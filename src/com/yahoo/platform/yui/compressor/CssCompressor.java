@@ -83,7 +83,7 @@ public class CssCompressor {
         css = css.replaceAll("background-position:0;", "background-position:0 0;");
 
         // Replace 0.6 to .6
-        css = css.replaceAll("[^\\d]0+\\.(\\d+)", ".$1");
+        css = css.replaceAll("([^\\d])0+\\.(\\d+)", "$1.$2");
 
         // Shorten colors from rgb(51,102,153) to #336699
         // This makes it more likely that it'll get further compressed in the next step.
