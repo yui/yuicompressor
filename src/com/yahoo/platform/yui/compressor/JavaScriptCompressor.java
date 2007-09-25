@@ -223,17 +223,25 @@ public class JavaScriptCompressor {
             if (!asQuotedString) {
                 sb.append(str);
             } else {
-                sb.append('"');
-                sb.append(escapeString(str, '"'));
-                sb.append('"');
+                // Small optimization: Choose the best quote char for
+                // this string to save a few additional bytes...
+                char quotechar;
+                if (str.indexOf('"') >= 0) {
+                    quotechar = '\'';
+                } else {
+                    quotechar = '"';
+                }
+                sb.append(quotechar);
+                sb.append(escapeString(str, quotechar));
+                sb.append(quotechar);
             }
         }
         return offset + length;
     }
 
-    private static String escapeString(String s, char escapeQuote) {
+    private static String escapeString(String s, char quotechar) {
 
-        assert escapeQuote == '"' || escapeQuote == '\'';
+        assert quotechar == '"' || quotechar == '\'';
 
         if (s == null) {
             return null;
@@ -243,29 +251,33 @@ public class JavaScriptCompressor {
         for (int i = 0, L = s.length(); i < L; i++) {
             int c = s.charAt(i);
             switch (c) {
-                case'\b':
+                case '\b':
                     sb.append("\\b");
                     break;
-                case'\f':
+                case '\f':
                     sb.append("\\f");
                     break;
-                case'\n':
+                case '\n':
                     sb.append("\\n");
                     break;
-                case'\r':
+                case '\r':
                     sb.append("\\r");
                     break;
-                case'\t':
+                case '\t':
                     sb.append("\\t");
                     break;
                 case 0xb:
                     sb.append("\\v");
                     break;
-                case'\\':
+                case '\\':
                     sb.append("\\\\");
                     break;
-                case'"':
-                    sb.append("\\\"");
+                case '"':
+                case '\'':
+                    if (c == quotechar) {
+                        sb.append("\\");
+                    }
+                    sb.append((char) c);
                     break;
                 default:
                     if (c < ' ') {
