@@ -1,3 +1,14 @@
+YUI Compressor 2.2.1, 2007-09-25
+--------------------------------
+
++ Optimize quote escaping in JavaScript string literals by using the best quote
+  character (' or " depending on the occurrence of this character in the string)
++ Fixed minor bug in the CSS compressor. Colors should not be shortened in
+      filter: chroma(color="#FFFFFF");
+  Otherwise, it makes the filter break in Internet Explorer.
++ In CSS files, change color names into their corresponding color codes
+  (and vice-versa) if that change yields any savings.
+
 YUI Compressor 2.2, 2007-09-18
 ------------------------------
 
