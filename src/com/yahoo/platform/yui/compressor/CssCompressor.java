@@ -102,8 +102,13 @@ public class CssCompressor {
         m.appendTail(sb);
         css = sb.toString();
 
-        // Shorten colors from #AABBCC to #ABC
-        p = Pattern.compile("#([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])");
+        // Shorten colors from #AABBCC to #ABC. Note that we want to make sure
+        // the color is not preceded by either ", " or =. Indeed, the property
+        //     filter: chroma(color="#FFFFFF");
+        // would become
+        //     filter: chroma(color="#FFF");
+        // which makes the filter break in IE.
+        p = Pattern.compile("[^\"'=]#([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])");
         m = p.matcher(css);
         sb = new StringBuffer();
         while (m.find()) {
