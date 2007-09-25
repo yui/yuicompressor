@@ -108,15 +108,15 @@ public class CssCompressor {
         // would become
         //     filter: chroma(color="#FFF");
         // which makes the filter break in IE.
-        p = Pattern.compile("[^\"'=]#([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])");
+        p = Pattern.compile("([^\"'=\\s])\\s*#([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])");
         m = p.matcher(css);
         sb = new StringBuffer();
         while (m.find()) {
             // Test for AABBCC pattern
-            if (m.group(1).equalsIgnoreCase(m.group(2)) &&
-                    m.group(3).equalsIgnoreCase(m.group(4)) &&
-                    m.group(5).equalsIgnoreCase(m.group(6))) {
-                m.appendReplacement(sb, "#" + m.group(1) + m.group(3) + m.group(5));
+            if (m.group(2).equalsIgnoreCase(m.group(3)) &&
+                    m.group(4).equalsIgnoreCase(m.group(5)) &&
+                    m.group(6).equalsIgnoreCase(m.group(7))) {
+                m.appendReplacement(sb, m.group(1) + "#" + m.group(2) + m.group(4) + m.group(6));
             } else {
                 m.appendReplacement(sb, m.group());
             }
