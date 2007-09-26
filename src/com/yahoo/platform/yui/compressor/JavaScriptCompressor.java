@@ -14,8 +14,8 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.*;
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class JavaScriptCompressor {
 
@@ -223,17 +223,9 @@ public class JavaScriptCompressor {
             if (!asQuotedString) {
                 sb.append(str);
             } else {
-                // Small optimization: Choose the best quote char for
-                // this string to save a few additional bytes...
-                char quotechar;
-                if (str.indexOf('"') >= 0) {
-                    quotechar = '\'';
-                } else {
-                    quotechar = '"';
-                }
-                sb.append(quotechar);
-                sb.append(escapeString(str, quotechar));
-                sb.append(quotechar);
+                sb.append('"');
+                sb.append(escapeString(str, '"'));
+                sb.append('"');
             }
         }
         return offset + length;
@@ -251,29 +243,29 @@ public class JavaScriptCompressor {
         for (int i = 0, L = s.length(); i < L; i++) {
             int c = s.charAt(i);
             switch (c) {
-                case '\b':
+                case'\b':
                     sb.append("\\b");
                     break;
-                case '\f':
+                case'\f':
                     sb.append("\\f");
                     break;
-                case '\n':
+                case'\n':
                     sb.append("\\n");
                     break;
-                case '\r':
+                case'\r':
                     sb.append("\\r");
                     break;
-                case '\t':
+                case'\t':
                     sb.append("\\t");
                     break;
                 case 0xb:
                     sb.append("\\v");
                     break;
-                case '\\':
+                case'\\':
                     sb.append("\\\\");
                     break;
-                case '"':
-                case '\'':
+                case'"':
+                case'\'':
                     if (c == quotechar) {
                         sb.append("\\");
                     }
@@ -407,8 +399,11 @@ public class JavaScriptCompressor {
         this.tokens = readTokens(encodedSource);
     }
 
-    public void compress(Writer out, int linebreak, boolean munge,
-            boolean warn, boolean preserveAllSemiColons)
+    public void compress(
+            Writer out, int linebreak,
+            boolean munge, boolean warn,
+            boolean preserveAllSemiColons,
+            boolean mergeStringLiterals)
             throws IOException {
 
         this.munge = munge;
@@ -416,7 +411,7 @@ public class JavaScriptCompressor {
 
         buildSymbolTree();
         mungeSymboltree();
-        StringBuffer sb = printSymbolTree(linebreak, preserveAllSemiColons);
+        StringBuffer sb = printSymbolTree(linebreak, preserveAllSemiColons, mergeStringLiterals);
 
         String script = sb.toString();
 
@@ -936,7 +931,10 @@ public class JavaScriptCompressor {
         globalScope.munge();
     }
 
-    private StringBuffer printSymbolTree(int linebreakpos, boolean preserveAllSemiColons)
+    private StringBuffer printSymbolTree(
+            int linebreakpos,
+            boolean preserveAllSemiColons,
+            boolean mergeStringLiterals)
             throws IOException {
 
         offset = 0;
@@ -995,7 +993,8 @@ public class JavaScriptCompressor {
                     break;
 
                 case Token.ADD:
-                    if (offset >= 2 && offset < length &&
+                    if (mergeStringLiterals &&
+                            offset >= 2 && offset < length &&
                             getToken(-2).getType() == Token.STRING &&
                             getToken(0).getType() == Token.STRING &&
                             (offset == length - 1 || getToken(1).getType() != Token.DOT)) {
