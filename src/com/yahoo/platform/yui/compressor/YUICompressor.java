@@ -25,6 +25,7 @@ public class YUICompressor {
         CmdLineParser.Option nomungeOpt = parser.addBooleanOption("nomunge");
         CmdLineParser.Option linebreakOpt = parser.addStringOption("line-break");
         CmdLineParser.Option preserveSemiOpt = parser.addBooleanOption("preserve-semi");
+        CmdLineParser.Option preserveStringsOpt = parser.addBooleanOption("preserve-strings");
         CmdLineParser.Option helpOpt = parser.addBooleanOption('h', "help");
         CmdLineParser.Option charsetOpt = parser.addStringOption("charset");
         CmdLineParser.Option outputFilenameOpt = parser.addStringOption('o', "output");
@@ -144,8 +145,10 @@ public class YUICompressor {
                     boolean munge = parser.getOptionValue(nomungeOpt) == null;
                     boolean warn = parser.getOptionValue(warnOpt) != null;
                     boolean preserveAllSemiColons = parser.getOptionValue(preserveSemiOpt) != null;
+                    boolean mergeStringLiterals = parser.getOptionValue(preserveStringsOpt) == null;
 
-                    compressor.compress(out, linebreakpos, munge, warn, preserveAllSemiColons);
+                    compressor.compress(out, linebreakpos, munge, warn,
+                            preserveAllSemiColons, mergeStringLiterals);
 
                 } catch (EvaluatorException e) {
 
@@ -204,16 +207,20 @@ public class YUICompressor {
 
     private static void usage() {
         System.out.println(
-                "\nUsage: java -jar yuicompressor-x.y.z.jar [options] [input file]\n"
-                        + "Options\n"
-                        + "  -h, --help             Displays this information\n"
-                        + "  --type <js|css>        Specifies the type of the input file\n"
-                        + "  --charset <charset>    Read the input file using <charset>\n"
-                        + "  --line-break <column>  Insert a line break after the specified column number\n"
-                        + "  -o <file>              Place the output into <file>. Defaults to stdout.\n"
-                        + "  --warn                 [js only] Display possible errors in the code\n"
-                        + "  --nomunge              [js only] Minify only, do not obfuscate\n"
-                        + "  --preserve-semi        [js only] Preserve unnecessary semicolons\n\n"
+                "\nUsage: java -jar yuicompressor-x.y.z.jar [options] [input file]\n\n"
+
+                        + "Global Options\n"
+                        + "  -h, --help                   Displays this information\n"
+                        + "  --type <js|css>              Specifies the type of the input file\n"
+                        + "  --charset <charset>          Read the input file using <charset>\n"
+                        + "  --line-break <column>        Insert a line break after the specified column number\n"
+                        + "  -o <file>                    Place the output into <file>. Defaults to stdout.\n\n"
+
+                        + "JavaScript Options\n"
+                        + "  --warn                       Display possible errors in the code\n"
+                        + "  --nomunge                    Minify only, do not obfuscate\n"
+                        + "  --preserve-semi              Preserve all semicolons\n"
+                        + "  --preserve-strings           Do not merge string literals\n\n"
 
                         + "If no input file is specified, it defaults to stdin. In this case, the 'type'\n"
                         + "option is required. Otherwise, the 'type' option is required only if the input\n"
