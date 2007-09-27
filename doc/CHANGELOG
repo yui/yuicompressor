@@ -1,3 +1,15 @@
+YUI Compressor 2.2.2, 2007-xx-xx
+--------------------------------
+
++ Fixed regression related to the optimization of the amount of escaping
+  in string literals and the concatenation of string literals.
++ Modified the Rhino tokenizer to handle JScript conditional comments
+  natively (instead of hacking around the fact that Rhino is not keeping
+  track of comments)
++ Transform </ into <\/ in string literals. This is especially useful if the
+  code is written to a script block in an HTML document. This renders the old
+  hack '<scr'+'ipt ...><'+'/script>' completely useless.
+
 YUI Compressor 2.2.1, 2007-09-25
 --------------------------------
 
