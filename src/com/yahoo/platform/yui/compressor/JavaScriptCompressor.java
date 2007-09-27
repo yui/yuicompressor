@@ -14,8 +14,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class JavaScriptCompressor {
 
@@ -171,64 +169,130 @@ public class JavaScriptCompressor {
         literals.put(new Integer(Token.XMLATTR), "@");
     }
 
-    private static ArrayList readTokens(String source) {
-        int offset = 0;
+    private static ArrayList readTokens(Reader in, ErrorReporter reporter)
+            throws IOException, EvaluatorException {
+
+        String tv;
+        int i, tt, length;
+        JavaScriptToken token, prevToken, nextToken;
+        CompilerEnvirons env = new CompilerEnvirons();
+        Parser parser = new Parser(env, reporter);
+        TokenStream ts = new TokenStream(parser, in, null, 1);
+
         ArrayList tokens = new ArrayList();
-        int length = source.length();
-        StringBuffer sb = new StringBuffer();
-        while (offset < length) {
-            int token = source.charAt(offset++);
-            switch (token) {
+
+        while ((tt = ts.getToken()) != Token.EOF) {
+
+            switch (tt) {
 
                 case Token.NAME:
+                case Token.IECC:
                 case Token.REGEXP:
-                    sb.setLength(0);
-                    offset = printSourceString(source, offset, false, sb);
-                    tokens.add(new JavaScriptToken(token, sb.toString()));
-                    break;
-
                 case Token.STRING:
-                    sb.setLength(0);
-                    offset = printSourceString(source, offset, true, sb);
-                    tokens.add(new JavaScriptToken(token, sb.toString()));
+                    tokens.add(new JavaScriptToken(tt, ts.getString()));
                     break;
 
                 case Token.NUMBER:
-                    sb.setLength(0);
-                    offset = printSourceNumber(source, offset, sb);
-                    tokens.add(new JavaScriptToken(token, sb.toString()));
+                    tokens.add(new JavaScriptToken(tt, ScriptRuntime.numberToString(ts.getNumber(), 10)));
                     break;
 
                 default:
-                    String literal = (String) literals.get(new Integer(token));
+                    String literal = (String) literals.get(new Integer(tt));
                     if (literal != null) {
-                        tokens.add(new JavaScriptToken(token, literal));
+                        tokens.add(new JavaScriptToken(tt, literal));
                     }
                     break;
             }
         }
-        return tokens;
-    }
 
-    private static int printSourceString(String source, int offset,
-            boolean asQuotedString, StringBuffer sb) {
-        int length = source.charAt(offset);
-        ++offset;
-        if ((0x8000 & length) != 0) {
-            length = ((0x7FFF & length) << 16) | source.charAt(offset);
-            ++offset;
-        }
-        if (sb != null) {
-            String str = source.substring(offset, offset + length);
-            if (!asQuotedString) {
-                sb.append(str);
-            } else {
-                sb.append('"');
-                sb.append(escapeString(str, '"'));
-                sb.append('"');
+        // Go through the tokens again to handle "get" and "set".
+        // For some reason, these are not handled by the tokenizer
+        // (see Parser.java)
+
+        for (i = 0, length = tokens.size(); i < length; i++) {
+            token = (JavaScriptToken) tokens.get(i);
+            tt = token.getType();
+            tv = token.getValue();
+            if (tt == Token.NAME && (tv.equals("get") || tv.equals("set")) && i < length - 1) {
+                nextToken = (JavaScriptToken) tokens.get(i + 1);
+                if (nextToken.getType() == Token.NAME) {
+                    if (tv.equals("get")) {
+                        tt = Token.GET;
+                    } else if (tv.equals("set")) {
+                        tt = Token.SET;
+                    }
+                    tokens.set(i, new JavaScriptToken(tt, (String) literals.get(new Integer(tt))));
+                }
             }
         }
-        return offset + length;
+
+        ArrayList result = new ArrayList();
+
+        // Concatenate string literals that are being appended wherever
+        // it is safe to do so. Note that we take care of the case:
+        //     "a" + "b".toUpperCase()
+
+        for (i = 0, length = tokens.size(); i < length; i++) {
+            token = (JavaScriptToken) tokens.get(i);
+            switch (token.getType()) {
+
+                case Token.ADD:
+                    if (i > 0 && i < length) {
+                        prevToken = (JavaScriptToken) result.get(result.size() - 1);
+                        nextToken = (JavaScriptToken) tokens.get(i + 1);
+                        if (prevToken.getType() == Token.STRING && nextToken.getType() == Token.STRING &&
+                                (i == length - 1 || ((JavaScriptToken) tokens.get(i + 2)).getType() != Token.DOT)) {
+                            result.set(result.size() - 1, new JavaScriptToken(Token.STRING,
+                                    prevToken.getValue() + nextToken.getValue()));
+                            i++; // not a good practice, but oh well...
+                            break;
+                        }
+                    }
+
+                    /* FALLSTHROUGH */
+
+                default:
+                    result.add(token);
+                    break;
+            }
+        }
+
+        for (i = 0, length = result.size(); i < length; i++) {
+            token = (JavaScriptToken) result.get(i);
+            if (token.getType() == Token.STRING) {
+                tv = token.getValue();
+
+                // String concatenation transforms the old script scheme:
+                //     '<scr'+'ipt ...><'+'/script>'
+                // into the following:
+                //     '<script ...></script>'
+                // which breaks if this code is embedded inside an HTML document.
+                // Since this is not the right way to do this, let's fix the code by
+                // transforming all "</" into "<\/" (suggested by Douglas Crockford)
+
+                if (tv.indexOf("</") >= 0) {
+                    tv = token.getValue().replaceAll("<\\/", "<\\\\/");
+                }
+
+                // Finally, add the quoting characters and escape the string. We use
+                // the quoting character that minimizes the amount of escaping to save
+                // a few additional bytes.
+
+                char quotechar;
+                int singleQuoteCount = tv.split("'").length - 1;
+                int doubleQuoteCount = tv.split("\"").length - 1;
+                if (doubleQuoteCount <= singleQuoteCount) {
+                    quotechar = '"';
+                } else {
+                    quotechar = '\'';
+                }
+
+                tv = quotechar + escapeString(tv, quotechar) + quotechar;
+                result.set(i, new JavaScriptToken(Token.STRING, tv));
+            }
+        }
+
+        return result;
     }
 
     private static String escapeString(String s, char quotechar) {
@@ -293,40 +357,6 @@ public class JavaScriptCompressor {
         return sb.toString();
     }
 
-    private static int printSourceNumber(String source,
-            int offset, StringBuffer sb) {
-        double number = 0.0;
-        char type = source.charAt(offset);
-        ++offset;
-        if (type == 'S') {
-            if (sb != null) {
-                number = source.charAt(offset);
-            }
-            ++offset;
-        } else if (type == 'J' || type == 'D') {
-            if (sb != null) {
-                long lbits;
-                lbits = (long) source.charAt(offset) << 48;
-                lbits |= (long) source.charAt(offset + 1) << 32;
-                lbits |= (long) source.charAt(offset + 2) << 16;
-                lbits |= (long) source.charAt(offset + 3);
-                if (type == 'J') {
-                    number = lbits;
-                } else {
-                    number = Double.longBitsToDouble(lbits);
-                }
-            }
-            offset += 4;
-        } else {
-            // Bad source
-            throw new RuntimeException();
-        }
-        if (sb != null) {
-            sb.append(ScriptRuntime.numberToString(number, 10));
-        }
-        return offset;
-    }
-
     private ErrorReporter logger;
 
     private boolean munge;
@@ -338,72 +368,19 @@ public class JavaScriptCompressor {
     private int mode;
     private int offset;
     private int braceNesting;
-    private ArrayList tokens;
+    private ArrayList tokens = new ArrayList();
     private Stack scopes = new Stack();
     private ScriptOrFnScope globalScope = new ScriptOrFnScope(-1, null);
     private Hashtable indexedScopes = new Hashtable();
 
-    // Use something that people are not likely to use. Note: This should not
-    // contain any character with a special meaning in regular expressions...
-    private String IE_CC_MARKER = "__yui__compressor__ie__cc__";
-    private Hashtable iecc = new Hashtable();
-
     public JavaScriptCompressor(Reader in, ErrorReporter reporter)
             throws IOException, EvaluatorException {
 
+        this.tokens = readTokens(in, reporter);
         this.logger = reporter;
-
-        // In order to handle IE's conditional comments, we read the specified
-        // reader to a string, replace IE's conditional comments by valid
-        // JavaScript statements, go through the minification process, and
-        // finally replace the JavaScript statements by the original
-        // conditional comments. This is not a very beautiful approach.
-        // A better approach would have been to extract and modify Rhino's
-        // tokenizer. However, this is the most pragmatic solution as it does
-        // not introduce any new bugs, and allows me to use an unmodified
-        // version of Rhino, which has a lot of benefits.
-
-        int n;
-        StringBuffer sb = new StringBuffer();
-        while ((n = in.read()) != -1) {
-            sb.append((char) n);
-        }
-
-        String script = sb.toString();
-
-        // First of all, make sure that the marker we are going to use to
-        // replace conditional comments is not used anywhere in the script.
-        while (script.indexOf(IE_CC_MARKER) != -1) {
-            IE_CC_MARKER += "_";
-        }
-
-        n = 0;
-        Pattern p = Pattern.compile("/\\*@(cc_on|if|elif|else|end)([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/");
-        Matcher m = p.matcher(script);
-        sb = new StringBuffer();
-        while (m.find()) {
-            String comment = m.group(0);
-            iecc.put(new Integer(n), comment);
-            m.appendReplacement(sb, "window." + IE_CC_MARKER + n + ";");
-            n++;
-        }
-        m.appendTail(sb);
-
-        script = sb.toString();
-
-        CompilerEnvirons env = new CompilerEnvirons();
-        Parser parser = new Parser(env, reporter);
-        parser.parse(script, null, 1);
-        String encodedSource = parser.getEncodedSource();
-
-        this.tokens = readTokens(encodedSource);
     }
 
-    public void compress(
-            Writer out, int linebreak,
-            boolean munge, boolean warn,
-            boolean preserveAllSemiColons,
-            boolean mergeStringLiterals)
+    public void compress(Writer out, int linebreak, boolean munge, boolean warn, boolean preserveAllSemiColons)
             throws IOException {
 
         this.munge = munge;
@@ -411,24 +388,9 @@ public class JavaScriptCompressor {
 
         buildSymbolTree();
         mungeSymboltree();
-        StringBuffer sb = printSymbolTree(linebreak, preserveAllSemiColons, mergeStringLiterals);
+        StringBuffer sb = printSymbolTree(linebreak, preserveAllSemiColons);
 
-        String script = sb.toString();
-
-        // Restore IE's conditional comments if any...
-        Pattern p = Pattern.compile("window\\." + IE_CC_MARKER + "(\\d)+;?");
-        Matcher m = p.matcher(script);
-        sb = new StringBuffer();
-        while (m.find()) {
-            Integer number = new Integer(m.group(1));
-            String comment = (String) iecc.get(number);
-            m.appendReplacement(sb, comment);
-        }
-        m.appendTail(sb);
-
-        script = sb.toString();
-
-        out.write(script);
+        out.write(sb.toString());
     }
 
     private ScriptOrFnScope getCurrentScope() {
@@ -707,6 +669,11 @@ public class JavaScriptCompressor {
                     parensNesting--;
                     break;
 
+                case Token.IECC:
+                    protectScopeFromObfuscation(currentScope);
+                    warn("[WARNING] Using JScript conditional comments is not recommended..." + (munge ? "\n[INFO] Using JSCript conditional comments reduces the level of compression!" : ""), true);
+                    break;
+
                 case Token.NAME:
                     symbol = token.getValue();
 
@@ -716,11 +683,6 @@ public class JavaScriptCompressor {
 
                             protectScopeFromObfuscation(currentScope);
                             warn("[WARNING] Using 'eval' is not recommended..." + (munge ? "\n[INFO] Using 'eval' reduces the level of compression!" : ""), true);
-
-                        } else if (symbol.startsWith(IE_CC_MARKER)) {
-
-                            protectScopeFromObfuscation(currentScope);
-                            warn("[INFO] Using Internet Explorer's conditional comments reduces the level of compression!", true);
 
                         }
 
@@ -840,6 +802,11 @@ public class JavaScriptCompressor {
                     parseCatch();
                     break;
 
+                case Token.IECC:
+                    protectScopeFromObfuscation(scope);
+                    warn("[WARNING] Using JScript conditional comments is not recommended..." + (munge ? "\n[INFO] Using JSCript conditional comments reduces the level of compression!" : ""), true);
+                    break;
+
                 case Token.NAME:
                     symbol = token.getValue();
 
@@ -849,11 +816,6 @@ public class JavaScriptCompressor {
 
                             protectScopeFromObfuscation(scope);
                             warn("[WARNING] Using 'eval' is not recommended..." + (munge ? "\n[INFO] Using 'eval' reduces the level of compression!" : ""), true);
-
-                        } else if (symbol.startsWith(IE_CC_MARKER)) {
-
-                            protectScopeFromObfuscation(scope);
-                            warn("[INFO] Using Internet Explorer's conditional comments reduces the level of compression!", true);
 
                         }
 
@@ -931,10 +893,7 @@ public class JavaScriptCompressor {
         globalScope.munge();
     }
 
-    private StringBuffer printSymbolTree(
-            int linebreakpos,
-            boolean preserveAllSemiColons,
-            boolean mergeStringLiterals)
+    private StringBuffer printSymbolTree(int linebreakpos, boolean preserveAllSemiColons)
             throws IOException {
 
         offset = 0;
@@ -993,28 +952,6 @@ public class JavaScriptCompressor {
                     break;
 
                 case Token.ADD:
-                    if (mergeStringLiterals &&
-                            offset >= 2 && offset < length &&
-                            getToken(-2).getType() == Token.STRING &&
-                            getToken(0).getType() == Token.STRING &&
-                            (offset == length - 1 || getToken(1).getType() != Token.DOT)) {
-                        // Here, we have two string literal that are being appended.
-                        // Note that we take care of the case "a" + "b".toUpperCase()
-                        // Also note that the different quoting styles are normalized
-                        // in printSourceString, and the strings are already escaped...
-
-                        // Remove the first string's terminating quote...
-                        result.deleteCharAt(result.length() - 1);
-
-                        // Append the second string without its starting quote...
-                        result.append(getToken(0).getValue().substring(1));
-
-                        consumeToken(); // skip the second string...
-                        break;
-                    }
-
-                    /* FALLSTHROUGH */
-
                 case Token.SUB:
                     result.append((String) literals.get(new Integer(token.getType())));
                     if (offset < length) {
@@ -1163,6 +1100,12 @@ public class JavaScriptCompressor {
                         result.append("\n");
                         linestartpos = result.length();
                     }
+                    break;
+
+                case Token.IECC:
+                    result.append("/*");
+                    result.append(symbol);
+                    result.append("*/");
                     break;
 
                 default:
