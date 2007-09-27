@@ -12,6 +12,9 @@ YUI Compressor 2.2.2, 2007-09-27
 + When converting decimal rgb color values to hexadecimal color values,
   prepend a '0' if the value is less than 16. Otherwise, rgb(0,124,114)
   for instance becomes #07c72, which is incorrect.
++ In CSS files, do not change color names into their corresponding color
+  codes (and vice-versa) due to the high potential of introducing bugs
+  (rolled back from 2.2.1)
 
 YUI Compressor 2.2.1, 2007-09-25
 --------------------------------
