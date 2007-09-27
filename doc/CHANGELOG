@@ -1,4 +1,4 @@
-YUI Compressor 2.2.2, 2007-xx-xx
+YUI Compressor 2.2.2, 2007-09-27
 --------------------------------
 
 + Fixed regression related to the optimization of the amount of escaping
@@ -9,6 +9,9 @@ YUI Compressor 2.2.2, 2007-xx-xx
 + Transform </ into <\/ in string literals. This is especially useful if the
   code is written to a script block in an HTML document. This renders the old
   hack '<scr'+'ipt ...><'+'/script>' completely useless.
++ When converting decimal rgb color values to hexadecimal color values,
+  prepend a '0' if the value is less than 16. Otherwise, rgb(0,124,114)
+  for instance becomes #07c72, which is incorrect.
 
 YUI Compressor 2.2.1, 2007-09-25
 --------------------------------
