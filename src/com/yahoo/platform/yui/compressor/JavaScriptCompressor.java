@@ -262,18 +262,6 @@ public class JavaScriptCompressor {
             if (token.getType() == Token.STRING) {
                 tv = token.getValue();
 
-                // String concatenation transforms the old script scheme:
-                //     '<scr'+'ipt ...><'+'/script>'
-                // into the following:
-                //     '<script ...></script>'
-                // which breaks if this code is embedded inside an HTML document.
-                // Since this is not the right way to do this, let's fix the code by
-                // transforming all "</" into "<\/" (suggested by Douglas Crockford)
-
-                if (tv.indexOf("</") >= 0) {
-                    tv = token.getValue().replaceAll("<\\/", "<\\\\/");
-                }
-
                 // Finally, add the quoting characters and escape the string. We use
                 // the quoting character that minimizes the amount of escaping to save
                 // a few additional bytes.
@@ -288,6 +276,19 @@ public class JavaScriptCompressor {
                 }
 
                 tv = quotechar + escapeString(tv, quotechar) + quotechar;
+
+                // String concatenation transforms the old script scheme:
+                //     '<scr'+'ipt ...><'+'/script>'
+                // into the following:
+                //     '<script ...></script>'
+                // which breaks if this code is embedded inside an HTML document.
+                // Since this is not the right way to do this, let's fix the code by
+                // transforming all "</" into "<\/" (suggested by Douglas Crockford)
+
+                if (tv.indexOf("</") >= 0) {
+                    tv = tv.replaceAll("<\\/", "<\\\\/");
+                }
+
                 result.set(i, new JavaScriptToken(Token.STRING, tv));
             }
         }
