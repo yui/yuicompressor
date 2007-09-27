@@ -169,31 +169,28 @@ public class JavaScriptCompressor {
         literals.put(new Integer(Token.XMLATTR), "@");
     }
 
-    private static ArrayList readTokens(Reader in, ErrorReporter reporter)
-            throws IOException, EvaluatorException {
-
-        String tv;
-        int i, tt, length;
-        JavaScriptToken token, prevToken, nextToken;
-        CompilerEnvirons env = new CompilerEnvirons();
-        Parser parser = new Parser(env, reporter);
-        TokenStream ts = new TokenStream(parser, in, null, 1);
-
+    private static ArrayList readTokens(String source) {
+        int offset = 0;
         ArrayList tokens = new ArrayList();
-
-        while ((tt = ts.getToken()) != Token.EOF) {
-
+        int length = source.length();
+        StringBuffer sb = new StringBuffer();
+        while (offset < length) {
+            int tt = source.charAt(offset++);
             switch (tt) {
 
-                case Token.NAME:
                 case Token.IECC:
+                case Token.NAME:
                 case Token.REGEXP:
                 case Token.STRING:
-                    tokens.add(new JavaScriptToken(tt, ts.getString()));
+                    sb.setLength(0);
+                    offset = printSourceString(source, offset, sb);
+                    tokens.add(new JavaScriptToken(tt, sb.toString()));
                     break;
 
                 case Token.NUMBER:
-                    tokens.add(new JavaScriptToken(tt, ScriptRuntime.numberToString(ts.getNumber(), 10)));
+                    sb.setLength(0);
+                    offset = printSourceNumber(source, offset, sb);
+                    tokens.add(new JavaScriptToken(tt, sb.toString()));
                     break;
 
                 default:
@@ -204,6 +201,69 @@ public class JavaScriptCompressor {
                     break;
             }
         }
+        return tokens;
+    }
+
+    private static int printSourceString(String source, int offset, StringBuffer sb) {
+        int length = source.charAt(offset);
+        ++offset;
+        if ((0x8000 & length) != 0) {
+            length = ((0x7FFF & length) << 16) | source.charAt(offset);
+            ++offset;
+        }
+        if (sb != null) {
+            String str = source.substring(offset, offset + length);
+            sb.append(str);
+        }
+        return offset + length;
+    }
+
+    private static int printSourceNumber(String source,
+            int offset, StringBuffer sb) {
+        double number = 0.0;
+        char type = source.charAt(offset);
+        ++offset;
+        if (type == 'S') {
+            if (sb != null) {
+                number = source.charAt(offset);
+            }
+            ++offset;
+        } else if (type == 'J' || type == 'D') {
+            if (sb != null) {
+                long lbits;
+                lbits = (long) source.charAt(offset) << 48;
+                lbits |= (long) source.charAt(offset + 1) << 32;
+                lbits |= (long) source.charAt(offset + 2) << 16;
+                lbits |= (long) source.charAt(offset + 3);
+                if (type == 'J') {
+                    number = lbits;
+                } else {
+                    number = Double.longBitsToDouble(lbits);
+                }
+            }
+            offset += 4;
+        } else {
+            // Bad source
+            throw new RuntimeException();
+        }
+        if (sb != null) {
+            sb.append(ScriptRuntime.numberToString(number, 10));
+        }
+        return offset;
+    }
+
+    private static ArrayList parse(Reader in, ErrorReporter reporter)
+            throws IOException, EvaluatorException {
+
+        String tv;
+        int i, tt, length;
+        JavaScriptToken token, prevToken, nextToken;
+
+        CompilerEnvirons env = new CompilerEnvirons();
+        Parser parser = new Parser(env, reporter);
+        parser.parse(in, null, 1);
+        String encodedSource = parser.getEncodedSource();
+        ArrayList tokens = readTokens(encodedSource);
 
         // Go through the tokens again to handle "get" and "set".
         // For some reason, these are not handled by the tokenizer
@@ -377,7 +437,7 @@ public class JavaScriptCompressor {
     public JavaScriptCompressor(Reader in, ErrorReporter reporter)
             throws IOException, EvaluatorException {
 
-        this.tokens = readTokens(in, reporter);
+        this.tokens = parse(in, reporter);
         this.logger = reporter;
     }
 
