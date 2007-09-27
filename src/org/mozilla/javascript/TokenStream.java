@@ -58,7 +58,7 @@ import java.io.*;
  * @author Brendan Eich
  */
 
-public class TokenStream
+class TokenStream
 {
     /*
      * For chars - because we need something out-of-range
@@ -68,7 +68,7 @@ public class TokenStream
     private final static int
         EOF_CHAR = -1;
 
-    public TokenStream(Parser parser, Reader sourceReader, String sourceString,
+    TokenStream(Parser parser, Reader sourceReader, String sourceString,
                 int lineno)
     {
         this.parser = parser;
@@ -287,13 +287,13 @@ public class TokenStream
 
     final int getLineno() { return lineno; }
 
-    public final String getString() { return string; }
+    final String getString() { return string; }
 
-    public final double getNumber() { return number; }
+    final double getNumber() { return number; }
 
     final boolean eof() { return hitEOF; }
 
-    public final int getToken() throws IOException
+    final int getToken() throws IOException
     {
         int c;
 

@@ -250,9 +250,10 @@ public class Token
         CONST          = 149,
         SETCONST       = 150,
         SETCONSTVAR    = 151,
-        LAST_TOKEN     = 152,
 
-        IECC           = 999; // Internet Explorer conditional comment
+        IECC           = 152, // Internet Explorer conditional comment
+
+        LAST_TOKEN     = 153;
 
     public static String name(int token)
     {
