@@ -123,6 +123,9 @@ public class CssCompressor {
             StringBuffer hexcolor = new StringBuffer("#");
             for (int i = 0; i < rgbcolors.length; i++) {
                 int val = Integer.parseInt(rgbcolors[i]);
+                if (val < 16) {
+                    hexcolor.append("0");
+                }
                 hexcolor.append(Integer.toHexString(val));
             }
             m.appendReplacement(sb, hexcolor.toString());
