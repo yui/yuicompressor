@@ -15,34 +15,8 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-import java.util.Map;
-import java.util.Hashtable;
-import java.util.Set;
-import java.util.Iterator;
 
 public class CssCompressor {
-
-    private static final Map name2hexcolor = new Hashtable();
-    private static final Map hexcolor2name = new Hashtable();
-
-    static {
-
-        // Here, we only list colors that can be shortened
-        name2hexcolor.put("black", "#000");
-        name2hexcolor.put("fuchsia", "#F0F");
-        name2hexcolor.put("white", "#fff");
-
-        hexcolor2name.put("#F00",    "red");
-        hexcolor2name.put("#808080", "gray");
-        hexcolor2name.put("#008000", "green");
-        hexcolor2name.put("#800000", "maroon");
-        hexcolor2name.put("#000080", "navy");
-        hexcolor2name.put("#808000", "olive");
-        hexcolor2name.put("#800080", "purple");
-        hexcolor2name.put("#C0C0C0", "silver");
-        hexcolor2name.put("#008080", "teal");
-        hexcolor2name.put("#FFFF00", "yellow");
-    }
 
     private StringBuffer srcsb = new StringBuffer();
 
@@ -57,12 +31,10 @@ public class CssCompressor {
     public void compress(Writer out, int linebreakpos)
             throws IOException {
 
-        Set keys;
         Pattern p;
         Matcher m;
         String css;
-        Iterator it;
-        StringBuffer sb, regexp;
+        StringBuffer sb;
         int startIndex, endIndex;
 
         // Remove all comment blocks...
@@ -151,47 +123,6 @@ public class CssCompressor {
             } else {
                 m.appendReplacement(sb, m.group());
             }
-        }
-        m.appendTail(sb);
-        css = sb.toString();
-
-        // Use name2hexcolor to shorten color names...
-
-        regexp = new StringBuffer("([^.#\\s])\\s*(");
-        keys = name2hexcolor.keySet();
-        it = keys.iterator();
-        while (it.hasNext()) {
-            regexp.append(it.next());
-            regexp.append('|');
-        }
-        regexp.deleteCharAt(regexp.length()-1);
-        regexp.append(')');
-
-        p = Pattern.compile(regexp.toString());
-        m = p.matcher(css);
-        sb = new StringBuffer();
-        while (m.find()) {
-            m.appendReplacement(sb, m.group(1) + name2hexcolor.get(m.group(2)));
-        }
-        m.appendTail(sb);
-        css = sb.toString();
-
-        // Use hexcolor2name to shorten color codes...
-
-        regexp = new StringBuffer();
-        keys = hexcolor2name.keySet();
-        it = keys.iterator();
-        while (it.hasNext()) {
-            regexp.append(it.next());
-            regexp.append('|');
-        }
-        regexp.deleteCharAt(regexp.length()-1);
-
-        p = Pattern.compile(regexp.toString());
-        m = p.matcher(css);
-        sb = new StringBuffer();
-        while (m.find()) {
-            m.appendReplacement(sb, (String) hexcolor2name.get(m.group()));
         }
         m.appendTail(sb);
         css = sb.toString();
