@@ -279,8 +279,8 @@ public class JavaScriptCompressor {
                 // a few additional bytes.
 
                 char quotechar;
-                int singleQuoteCount = tv.split("'").length - 1;
-                int doubleQuoteCount = tv.split("\"").length - 1;
+                int singleQuoteCount = tv.split("'").length;
+                int doubleQuoteCount = tv.split("\"").length;
                 if (doubleQuoteCount <= singleQuoteCount) {
                     quotechar = '"';
                 } else {
@@ -670,8 +670,10 @@ public class JavaScriptCompressor {
                     break;
 
                 case Token.IECC:
-                    protectScopeFromObfuscation(currentScope);
-                    warn("[WARNING] Using JScript conditional comments is not recommended..." + (munge ? "\n[INFO] Using JSCript conditional comments reduces the level of compression!" : ""), true);
+                    if (mode == BUILDING_SYMBOL_TREE) {
+                        protectScopeFromObfuscation(currentScope);
+                        warn("[WARNING] Using JScript conditional comments is not recommended..." + (munge ? "\n[INFO] Using JSCript conditional comments reduces the level of compression!" : ""), true);
+                    }
                     break;
 
                 case Token.NAME:
@@ -688,7 +690,10 @@ public class JavaScriptCompressor {
 
                     } else if (mode == CHECKING_SYMBOL_TREE) {
 
-                        if ((offset < 2 || getToken(-2).getType() != Token.DOT) &&
+                        if ((offset < 2 ||
+                                (getToken(-2).getType() != Token.DOT &&
+                                        getToken(-2).getType() != Token.GET &&
+                                        getToken(-2).getType() != Token.SET)) &&
                                 getToken(0).getType() != Token.OBJECTLIT) {
 
                             identifier = getIdentifier(symbol, currentScope);
@@ -803,8 +808,10 @@ public class JavaScriptCompressor {
                     break;
 
                 case Token.IECC:
-                    protectScopeFromObfuscation(scope);
-                    warn("[WARNING] Using JScript conditional comments is not recommended..." + (munge ? "\n[INFO] Using JSCript conditional comments reduces the level of compression!" : ""), true);
+                    if (mode == BUILDING_SYMBOL_TREE) {
+                        protectScopeFromObfuscation(scope);
+                        warn("[WARNING] Using JScript conditional comments is not recommended..." + (munge ? "\n[INFO] Using JSCript conditional comments reduces the level of compression!" : ""), true);
+                    }
                     break;
 
                 case Token.NAME:
