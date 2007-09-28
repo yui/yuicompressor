@@ -169,41 +169,6 @@ public class JavaScriptCompressor {
         literals.put(new Integer(Token.XMLATTR), "@");
     }
 
-    private static ArrayList readTokens(String source) {
-        int offset = 0;
-        ArrayList tokens = new ArrayList();
-        int length = source.length();
-        StringBuffer sb = new StringBuffer();
-        while (offset < length) {
-            int tt = source.charAt(offset++);
-            switch (tt) {
-
-                case Token.IECC:
-                case Token.NAME:
-                case Token.REGEXP:
-                case Token.STRING:
-                    sb.setLength(0);
-                    offset = printSourceString(source, offset, sb);
-                    tokens.add(new JavaScriptToken(tt, sb.toString()));
-                    break;
-
-                case Token.NUMBER:
-                    sb.setLength(0);
-                    offset = printSourceNumber(source, offset, sb);
-                    tokens.add(new JavaScriptToken(tt, sb.toString()));
-                    break;
-
-                default:
-                    String literal = (String) literals.get(new Integer(tt));
-                    if (literal != null) {
-                        tokens.add(new JavaScriptToken(tt, literal));
-                    }
-                    break;
-            }
-        }
-        return tokens;
-    }
-
     private static int printSourceString(String source, int offset, StringBuffer sb) {
         int length = source.charAt(offset);
         ++offset;
@@ -255,38 +220,53 @@ public class JavaScriptCompressor {
     private static ArrayList parse(Reader in, ErrorReporter reporter)
             throws IOException, EvaluatorException {
 
-        String tv;
-        int i, tt, length;
-        JavaScriptToken token, prevToken, nextToken;
-
         CompilerEnvirons env = new CompilerEnvirons();
         Parser parser = new Parser(env, reporter);
         parser.parse(in, null, 1);
-        String encodedSource = parser.getEncodedSource();
-        ArrayList tokens = readTokens(encodedSource);
+        String source = parser.getEncodedSource();
 
-        // Go through the tokens again to handle "get" and "set".
-        // For some reason, these are not handled by the tokenizer
-        // (see Parser.java)
+        int offset = 0;
+        int length = source.length();
+        ArrayList tokens = new ArrayList();
+        StringBuffer sb = new StringBuffer();
 
-        for (i = 0, length = tokens.size(); i < length; i++) {
-            token = (JavaScriptToken) tokens.get(i);
-            tt = token.getType();
-            tv = token.getValue();
-            if (tt == Token.NAME && (tv.equals("get") || tv.equals("set")) && i < length - 1) {
-                nextToken = (JavaScriptToken) tokens.get(i + 1);
-                if (nextToken.getType() == Token.NAME) {
-                    if (tv.equals("get")) {
-                        tt = Token.GET;
-                    } else if (tv.equals("set")) {
-                        tt = Token.SET;
+        while (offset < length) {
+            int tt = source.charAt(offset++);
+            switch (tt) {
+
+                case Token.IECC:
+                case Token.NAME:
+                case Token.REGEXP:
+                case Token.STRING:
+                    sb.setLength(0);
+                    offset = printSourceString(source, offset, sb);
+                    tokens.add(new JavaScriptToken(tt, sb.toString()));
+                    break;
+
+                case Token.NUMBER:
+                    sb.setLength(0);
+                    offset = printSourceNumber(source, offset, sb);
+                    tokens.add(new JavaScriptToken(tt, sb.toString()));
+                    break;
+
+                default:
+                    String literal = (String) literals.get(new Integer(tt));
+                    if (literal != null) {
+                        tokens.add(new JavaScriptToken(tt, literal));
                     }
-                    tokens.set(i, new JavaScriptToken(tt, (String) literals.get(new Integer(tt))));
-                }
+                    break;
             }
         }
 
+        return tokens;
+    }
+
+    private static ArrayList processStringLiterals(ArrayList tokens, boolean merge) {
+
+        String tv;
+        int i, length;
         ArrayList result = new ArrayList();
+        JavaScriptToken token, prevToken, nextToken;
 
         // Concatenate string literals that are being appended wherever
         // it is safe to do so. Note that we take care of the case:
@@ -297,15 +277,17 @@ public class JavaScriptCompressor {
             switch (token.getType()) {
 
                 case Token.ADD:
-                    if (i > 0 && i < length) {
-                        prevToken = (JavaScriptToken) result.get(result.size() - 1);
-                        nextToken = (JavaScriptToken) tokens.get(i + 1);
-                        if (prevToken.getType() == Token.STRING && nextToken.getType() == Token.STRING &&
-                                (i == length - 1 || ((JavaScriptToken) tokens.get(i + 2)).getType() != Token.DOT)) {
-                            result.set(result.size() - 1, new JavaScriptToken(Token.STRING,
-                                    prevToken.getValue() + nextToken.getValue()));
-                            i++; // not a good practice, but oh well...
-                            break;
+                    if (merge) {
+                        if (i > 0 && i < length) {
+                            prevToken = (JavaScriptToken) result.get(result.size() - 1);
+                            nextToken = (JavaScriptToken) tokens.get(i + 1);
+                            if (prevToken.getType() == Token.STRING && nextToken.getType() == Token.STRING &&
+                                    (i == length - 1 || ((JavaScriptToken) tokens.get(i + 2)).getType() != Token.DOT)) {
+                                result.set(result.size() - 1, new JavaScriptToken(Token.STRING,
+                                        prevToken.getValue() + nextToken.getValue()));
+                                i++; // not a good practice, but oh well...
+                                break;
+                            }
                         }
                     }
 
@@ -316,6 +298,8 @@ public class JavaScriptCompressor {
                     break;
             }
         }
+
+        // Second pass...
 
         for (i = 0, length = result.size(); i < length; i++) {
             token = (JavaScriptToken) result.get(i);
@@ -429,7 +413,7 @@ public class JavaScriptCompressor {
     private int mode;
     private int offset;
     private int braceNesting;
-    private ArrayList tokens = new ArrayList();
+    private ArrayList srctokens, tokens;
     private Stack scopes = new Stack();
     private ScriptOrFnScope globalScope = new ScriptOrFnScope(-1, null);
     private Hashtable indexedScopes = new Hashtable();
@@ -437,15 +421,18 @@ public class JavaScriptCompressor {
     public JavaScriptCompressor(Reader in, ErrorReporter reporter)
             throws IOException, EvaluatorException {
 
-        this.tokens = parse(in, reporter);
         this.logger = reporter;
+        this.srctokens = parse(in, reporter);
     }
 
-    public void compress(Writer out, int linebreak, boolean munge, boolean warn, boolean preserveAllSemiColons)
+    public void compress(Writer out, int linebreak, boolean munge, boolean warn,
+            boolean preserveAllSemiColons, boolean preserveStringLiterals)
             throws IOException {
 
         this.munge = munge;
         this.warn = warn;
+
+        this.tokens = processStringLiterals(this.srctokens, !preserveStringLiterals);
 
         buildSymbolTree();
         mungeSymboltree();
