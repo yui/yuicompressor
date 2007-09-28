@@ -1,4 +1,4 @@
-YUI Compressor 2.2.3, 2007-xx-xx
+YUI Compressor 2.2.3, 2007-09-28
 --------------------------------
 
 + Transform </script into <\/script instead of replacing all </ into <\/.
@@ -6,6 +6,7 @@ YUI Compressor 2.2.3, 2007-xx-xx
   "1px solid #aabbcc" became "1px solid#abc", missing a required white space)
 + Added --preserve-strings option to specify that concatenated string literals
   should never be merged.
++ Do not convert \uXXXX and \xXX escape sequences to their unicode equivalent.
 
 YUI Compressor 2.2.2, 2007-09-27
 --------------------------------
