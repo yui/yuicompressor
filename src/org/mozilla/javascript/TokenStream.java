@@ -512,7 +512,7 @@ class TokenStream
                 stringBufferTop = 0;
 
                 c = getChar();
-            strLoop: while (c != quoteChar) {
+                while (c != quoteChar) {
                     if (c == '\n' || c == EOF_CHAR) {
                         ungetChar(c);
                         parser.addError("msg.unterminated.string.lit");
@@ -520,89 +520,12 @@ class TokenStream
                     }
 
                     if (c == '\\') {
-                        // We've hit an escaped character
-                        int escapeVal;
-
                         c = getChar();
-                        switch (c) {
-                        case 'b': c = '\b'; break;
-                        case 'f': c = '\f'; break;
-                        case 'n': c = '\n'; break;
-                        case 'r': c = '\r'; break;
-                        case 't': c = '\t'; break;
-
-                        // \v a late addition to the ECMA spec,
-                        // it is not in Java, so use 0xb
-                        case 'v': c = 0xb; break;
-
-                        case 'u':
-                            // Get 4 hex digits; if the u escape is not
-                            // followed by 4 hex digits, use 'u' + the
-                            // literal character sequence that follows.
-                            int escapeStart = stringBufferTop;
-                            addToString('u');
-                            escapeVal = 0;
-                            for (int i = 0; i != 4; ++i) {
-                                c = getChar();
-                                escapeVal = Kit.xDigitToInt(c, escapeVal);
-                                if (escapeVal < 0) {
-                                    continue strLoop;
-                                }
-                                addToString(c);
-                            }
-                            // prepare for replace of stored 'u' sequence
-                            // by escape value
-                            stringBufferTop = escapeStart;
-                            c = escapeVal;
-                            break;
-                        case 'x':
-                            // Get 2 hex digits, defaulting to 'x'+literal
-                            // sequence, as above.
-                            c = getChar();
-                            escapeVal = Kit.xDigitToInt(c, 0);
-                            if (escapeVal < 0) {
-                                addToString('x');
-                                continue strLoop;
-                            } else {
-                                int c1 = c;
-                                c = getChar();
-                                escapeVal = Kit.xDigitToInt(c, escapeVal);
-                                if (escapeVal < 0) {
-                                    addToString('x');
-                                    addToString(c1);
-                                    continue strLoop;
-                                } else {
-                                    // got 2 hex digits
-                                    c = escapeVal;
-                                }
-                            }
-                            break;
-
-                        case '\n':
-                            // Remove line terminator after escape to follow
-                            // SpiderMonkey and C/C++
-                            c = getChar();
-                            continue strLoop;
-
-                        default:
-                            if ('0' <= c && c < '8') {
-                                int val = c - '0';
-                                c = getChar();
-                                if ('0' <= c && c < '8') {
-                                    val = 8 * val + c - '0';
-                                    c = getChar();
-                                    if ('0' <= c && c < '8' && val <= 037) {
-                                        // c is 3rd char of octal sequence only
-                                        // if the resulting val <= 0377
-                                        val = 8 * val + c - '0';
-                                        c = getChar();
-                                    }
-                                }
-                                ungetChar(c);
-                                c = val;
-                            }
+                        if (c != quoteChar) {
+                            addToString('\\');
                         }
                     }
+
                     addToString(c);
                     c = getChar();
                 }

@@ -340,6 +340,7 @@ public class JavaScriptCompressor {
         return result;
     }
 
+    // Add necessary escaping that was removed in Rhino's tokenizer.
     private static String escapeString(String s, char quotechar) {
 
         assert quotechar == '"' || quotechar == '\'';
@@ -351,52 +352,10 @@ public class JavaScriptCompressor {
         StringBuffer sb = new StringBuffer();
         for (int i = 0, L = s.length(); i < L; i++) {
             int c = s.charAt(i);
-            switch (c) {
-                case'\b':
-                    sb.append("\\b");
-                    break;
-                case'\f':
-                    sb.append("\\f");
-                    break;
-                case'\n':
-                    sb.append("\\n");
-                    break;
-                case'\r':
-                    sb.append("\\r");
-                    break;
-                case'\t':
-                    sb.append("\\t");
-                    break;
-                case 0xb:
-                    sb.append("\\v");
-                    break;
-                case'\\':
-                    sb.append("\\\\");
-                    break;
-                case'"':
-                case'\'':
-                    if (c == quotechar) {
-                        sb.append("\\");
-                    }
-                    sb.append((char) c);
-                    break;
-                default:
-                    if (c < ' ') {
-                        // Control character: 2-digit hex. Note: Can I ever get
-                        // in this situation? Shouldn't rhino report an error?
-                        sb.append("\\x");
-                        // Append hexadecimal form of c left-padded with 0.
-                        int hexSize = 2;
-                        for (int shift = (hexSize - 1) * 4; shift >= 0; shift -= 4) {
-                            int digit = 0xf & (c >> shift);
-                            int hc = (digit < 10) ? '0' + digit : 'a' - 10 + digit;
-                            sb.append((char) hc);
-                        }
-                    } else {
-                        sb.append((char) c);
-                    }
-                    break;
+            if (c == quotechar) {
+                sb.append("\\");
             }
+            sb.append((char) c);
         }
 
         return sb.toString();
