@@ -18,14 +18,16 @@ import java.util.regex.Matcher;
 
 public class CssCompressor {
 
-    private StringBuffer srcsb = new StringBuffer();
+    private String origcss;
 
     public CssCompressor(Reader in) throws IOException {
         // Read the stream...
         int c;
+        StringBuffer sb = new StringBuffer();
         while ((c = in.read()) != -1) {
-            srcsb.append((char) c);
+            sb.append((char) c);
         }
+        origcss = sb.toString();
     }
 
     public void compress(Writer out, int linebreakpos)
@@ -33,19 +35,11 @@ public class CssCompressor {
 
         Pattern p;
         Matcher m;
-        String css;
         StringBuffer sb;
-        int startIndex, endIndex;
+        String css = origcss;
 
         // Remove all comment blocks...
-        sb = new StringBuffer(srcsb.toString());
-        while ((startIndex = sb.indexOf("/*")) >= 0) {
-            endIndex = sb.indexOf("*/", startIndex + 2);
-            if (endIndex >= startIndex + 2)
-                sb.delete(startIndex, endIndex + 2);
-        }
-
-        css = sb.toString();
+        css = css.replaceAll("/\\*(.|[\\r\\n])*?\\*/", "");
 
         // Normalize all whitespace strings to single spaces. Easier to work with that way.
         css = css.replaceAll("\\s+", " ");
@@ -111,15 +105,15 @@ public class CssCompressor {
         // would become
         //     filter: chroma(color="#FFF");
         // which makes the filter break in IE.
-        p = Pattern.compile("([^\"'=\\s])\\s*#([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])");
+        p = Pattern.compile("([^\"'=\\s])(\\s*)#([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])");
         m = p.matcher(css);
         sb = new StringBuffer();
         while (m.find()) {
             // Test for AABBCC pattern
-            if (m.group(2).equalsIgnoreCase(m.group(3)) &&
-                    m.group(4).equalsIgnoreCase(m.group(5)) &&
-                    m.group(6).equalsIgnoreCase(m.group(7))) {
-                m.appendReplacement(sb, m.group(1) + "#" + m.group(2) + m.group(4) + m.group(6));
+            if (m.group(3).equalsIgnoreCase(m.group(4)) &&
+                    m.group(5).equalsIgnoreCase(m.group(6)) &&
+                    m.group(7).equalsIgnoreCase(m.group(8))) {
+                m.appendReplacement(sb, m.group(1) + m.group(2) + "#" + m.group(3) + m.group(5) + m.group(7));
             } else {
                 m.appendReplacement(sb, m.group());
             }
