@@ -73,6 +73,10 @@ JAVASCRIPT ONLY OPTIONS
       is useful when compressed code has to be run through JSLint (which is the
       case of YUI for example)
 
+  --preserve-strings
+      Use this option to specify that concatenated string literals should
+      never be merged.
+
 NOTES
 
   + If no input file is specified, it defaults to stdin.
