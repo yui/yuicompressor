@@ -1,3 +1,12 @@
+YUI Compressor 2.2.3, 2007-xx-xx
+--------------------------------
+
++ Transform </script into <\/script instead of replacing all </ into <\/.
++ Fixed bug related to the shortening of hexadecimal color codes (the string
+  "1px solid #aabbcc" became "1px solid#abc", missing a required white space)
++ Added --preserve-strings option to specify that concatenated string literals
+  should never be merged.
+
 YUI Compressor 2.2.2, 2007-09-27
 --------------------------------
 
