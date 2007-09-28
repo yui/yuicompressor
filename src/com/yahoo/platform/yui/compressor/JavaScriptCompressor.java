@@ -343,10 +343,10 @@ public class JavaScriptCompressor {
                 //     '<script ...></script>'
                 // which breaks if this code is embedded inside an HTML document.
                 // Since this is not the right way to do this, let's fix the code by
-                // transforming all "</" into "<\/" (suggested by Douglas Crockford)
+                // transforming all "</script" into "<\/script"
 
-                if (tv.indexOf("</") >= 0) {
-                    tv = tv.replaceAll("<\\/", "<\\\\/");
+                if (tv.indexOf("</script") >= 0) {
+                    tv = tv.replaceAll("<\\/script", "<\\\\/script");
                 }
 
                 result.set(i, new JavaScriptToken(Token.STRING, tv));
