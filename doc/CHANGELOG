@@ -3,9 +3,9 @@ YUI Compressor 2.2.4, 2007-10-01
 
 + Fixed the way quote characters are counted in string literals
   [SourceForge bug #1804576]
-+ Do not use a regular expression using non-greedy matching to remove comments
-  (if the comment is more than 800 characters long or so, a stack overflow
-  exception gets thrown) Instead, use good old parsing...
++ Do not use a regular expression using non-greedy matching to remove CSS
+  comments (if the comment is more than 800 characters long or so, a stack
+  overflow exception gets thrown) Instead, use good old parsing...
 + Fix unnecessary quote escaping in string literals.
 
 YUI Compressor 2.2.3, 2007-09-28
