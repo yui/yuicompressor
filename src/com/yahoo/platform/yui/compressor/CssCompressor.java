@@ -18,16 +18,14 @@ import java.util.regex.Matcher;
 
 public class CssCompressor {
 
-    private String origcss;
+    private StringBuffer srcsb = new StringBuffer();
 
     public CssCompressor(Reader in) throws IOException {
         // Read the stream...
         int c;
-        StringBuffer sb = new StringBuffer();
         while ((c = in.read()) != -1) {
-            sb.append((char) c);
+            srcsb.append((char) c);
         }
-        origcss = sb.toString();
     }
 
     public void compress(Writer out, int linebreakpos)
@@ -35,11 +33,19 @@ public class CssCompressor {
 
         Pattern p;
         Matcher m;
+        String css;
         StringBuffer sb;
-        String css = origcss;
+        int startIndex, endIndex;
 
         // Remove all comment blocks...
-        css = css.replaceAll("/\\*(.|[\\r\\n])*?\\*/", "");
+        sb = new StringBuffer(srcsb.toString());
+        while ((startIndex = sb.indexOf("/*")) >= 0) {
+            endIndex = sb.indexOf("*/", startIndex + 2);
+            if (endIndex >= startIndex + 2)
+                sb.delete(startIndex, endIndex + 2);
+        }
+
+        css = sb.toString();
 
         // Normalize all whitespace strings to single spaces. Easier to work with that way.
         css = css.replaceAll("\\s+", " ");
