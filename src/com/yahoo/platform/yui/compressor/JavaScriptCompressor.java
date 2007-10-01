@@ -169,6 +169,19 @@ public class JavaScriptCompressor {
         literals.put(new Integer(Token.XMLATTR), "@");
     }
 
+    private static int countChar(String haystack, char needle) {
+        int idx = 0;
+        int count = 0;
+        int length = haystack.length();
+        while (idx < length) {
+            char c = haystack.charAt(idx++);
+            if (c == needle) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     private static int printSourceString(String source, int offset, StringBuffer sb) {
         int length = source.charAt(offset);
         ++offset;
@@ -311,8 +324,8 @@ public class JavaScriptCompressor {
                 // a few additional bytes.
 
                 char quotechar;
-                int singleQuoteCount = tv.split("'").length;
-                int doubleQuoteCount = tv.split("\"").length;
+                int singleQuoteCount = countChar(tv, '\'');
+                int doubleQuoteCount = countChar(tv, '"');
                 if (doubleQuoteCount <= singleQuoteCount) {
                     quotechar = '"';
                 } else {
