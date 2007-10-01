@@ -521,7 +521,7 @@ class TokenStream
 
                     if (c == '\\') {
                         c = getChar();
-                        if (c != quoteChar) {
+                        if (c != '"' && c != '\'') {
                             addToString('\\');
                         }
                     }
