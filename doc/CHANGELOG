@@ -1,3 +1,10 @@
+YUI Compressor 2.2.5, 2007-xx-xx
+--------------------------------
+
++ In string literals, only escape the characters that actually need to be
+  escaped according to the latest JavaScript specs: \\, \b, \f, \n, \r, \t,
+  \v, \d, \u and \x.
+
 YUI Compressor 2.2.4, 2007-10-01
 --------------------------------
 
