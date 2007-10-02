@@ -520,9 +520,28 @@ class TokenStream
                     }
 
                     if (c == '\\') {
+                        // We've hit an escaped character
+
                         c = getChar();
-                        if (c != '"' && c != '\'') {
-                            addToString('\\');
+
+                        switch (c) {
+
+                            case '\\': // backslash
+                            case 'b':  // backspace
+                            case 'f':  // form feed
+                            case 'n':  // line feed
+                            case 'r':  // carriage return
+                            case 't':  // horizontal tab
+                            case 'v':  // vertical tab
+                            case 'd':  // octal sequence
+                            case 'u':  // unicode sequence
+                            case 'x':  // hexadecimal sequence
+
+                                // Only keep the '\' character for those
+                                // characters that need to be escaped...
+                                // Don't escape quoting characters...
+                                addToString('\\');
+                                break;
                         }
                     }
 
