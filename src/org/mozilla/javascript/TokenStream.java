@@ -542,6 +542,11 @@ class TokenStream
                                 // Don't escape quoting characters...
                                 addToString('\\');
                                 break;
+
+                            case '\n':
+                                // Remove line terminator after escape
+                                c = getChar();
+                                break;
                         }
                     }
 
