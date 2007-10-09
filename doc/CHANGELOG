@@ -1,3 +1,8 @@
+YUI Compressor 2.2.5, 2007-10-09
+--------------------------------
+
++ Remove line terminator after escape in string literals.
+
 YUI Compressor 2.2.4, 2007-10-01
 --------------------------------
 
