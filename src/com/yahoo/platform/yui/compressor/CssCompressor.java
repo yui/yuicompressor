@@ -63,6 +63,9 @@ public class CssCompressor {
         // Normalize all whitespace strings to single spaces. Easier to work with that way.
         css = css.replaceAll("\\s+", " ");
 
+        // Make a pseudo class for the Box Model Hack
+        css = css.replaceAll("\"\\\\\"}\\\\\"\"", "___PSEUDOCLASSBMH___");
+
         // Remove the spaces before the things that should not have spaces before them.
         // But, be careful not to turn "p :link {...}" into "p:link{...}"
         // Swap out any pseudo-class colons with the token, and then swap back.
@@ -160,6 +163,9 @@ public class CssCompressor {
 
             css = sb.toString();
         }
+
+        // Replace the pseudo class for the Box Model Hack
+        css = css.replaceAll("___PSEUDOCLASSBMH___", "\"\\\\\"}\\\\\"\"");
 
         // Trim the final string (for any leading or trailing white spaces)
         css = css.trim();
