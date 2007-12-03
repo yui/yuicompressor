@@ -1118,8 +1118,10 @@ public class JavaScriptCompressor {
 
                 case Token.SEMI:
                     // No need to output a semi-colon if the next character is a right-curly...
-                    if (preserveAllSemiColons || offset < length && getToken(0).getType() != Token.RC)
+                    if (preserveAllSemiColons || offset < length && getToken(0).getType() != Token.RC) {
                         result.append(";");
+                    }
+
                     if (linebreakpos >= 0 && result.length() - linestartpos > linebreakpos) {
                         // Some source control tools don't like it when files containing lines longer
                         // than, say 8000 characters, are checked in. The linebreak option is used in
@@ -1144,6 +1146,14 @@ public class JavaScriptCompressor {
                     }
                     break;
             }
+        }
+
+        // Append a semi-colon at the end, even if unnecessary semi-colons are
+        // supposed to be removed. This is especially useful when concatenating
+        // several minified files (the absence of an ending semi-colon at the
+        // end of one file may very likely cause a syntax error)
+        if (!preserveAllSemiColons) {
+            result.append(";");
         }
 
         return result;
