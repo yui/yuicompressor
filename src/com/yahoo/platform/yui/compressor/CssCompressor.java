@@ -38,11 +38,24 @@ public class CssCompressor {
         int startIndex, endIndex;
 
         // Remove all comment blocks...
+        startIndex = 0;
+        boolean iemac = false;
         sb = new StringBuffer(srcsb.toString());
-        while ((startIndex = sb.indexOf("/*")) >= 0) {
+        while ((startIndex = sb.indexOf("/*", startIndex)) >= 0) {
             endIndex = sb.indexOf("*/", startIndex + 2);
-            if (endIndex >= startIndex + 2)
-                sb.delete(startIndex, endIndex + 2);
+            if (endIndex >= startIndex + 2) {
+                if (sb.charAt(endIndex-1) == '\\') {
+                    // Looks like a comment to hide rules from IE Mac.
+                    // Leave this comment, and the following one, alone...
+                    startIndex = endIndex + 2;
+                    iemac = true;
+                } else if (iemac) {
+                    startIndex = endIndex + 2;
+                    iemac = false;
+                } else {
+                    sb.delete(startIndex, endIndex + 2);
+                }
+            }
         }
 
         css = sb.toString();
