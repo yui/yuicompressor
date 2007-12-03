@@ -114,8 +114,7 @@ class ScriptOrFnScope {
                 freeSymbols.removeAll(getAllUsedSymbols());
             }
             if (freeSymbols.size() == 0) {
-                System.err.println("The YUI Compressor ran out of symbols. Aborting...");
-                System.exit(1);
+                throw new IllegalStateException("The YUI Compressor ran out of symbols. Aborting...");
             }
 
             Enumeration elements = identifiers.elements();
@@ -127,8 +126,7 @@ class ScriptOrFnScope {
                     } else if (pickFromSet == 3) {
                         freeSymbols.addAll(JavaScriptCompressor.threes);
                     } else {
-                        System.err.println("The YUI Compressor ran out of symbols. Aborting...");
-                        System.exit(1);
+                        throw new IllegalStateException("The YUI Compressor ran out of symbols. Aborting...");
                     }
                     // It is essential to remove the symbols already used in
                     // the containing scopes, or some of the variables declared
