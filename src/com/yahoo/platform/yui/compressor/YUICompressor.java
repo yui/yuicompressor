@@ -21,7 +21,7 @@ public class YUICompressor {
 
         CmdLineParser parser = new CmdLineParser();
         CmdLineParser.Option typeOpt = parser.addStringOption("type");
-        CmdLineParser.Option warnOpt = parser.addBooleanOption("warn");
+        CmdLineParser.Option verboseOpt = parser.addBooleanOption('v', "verbose");
         CmdLineParser.Option nomungeOpt = parser.addBooleanOption("nomunge");
         CmdLineParser.Option linebreakOpt = parser.addStringOption("line-break");
         CmdLineParser.Option preserveSemiOpt = parser.addBooleanOption("preserve-semi");
@@ -43,13 +43,25 @@ public class YUICompressor {
                 System.exit(0);
             }
 
+            boolean verbose = parser.getOptionValue(verboseOpt) != null;
+
+            // Check the JVM vendor
+            if (verbose) {
+                String jvmVendor = System.getProperty("java.vendor");
+                if (!jvmVendor.equalsIgnoreCase("Sun Microsystems Inc.")) {
+                    System.err.println("\n[INFO] It is recommended to use Sun Microsystems' JVM [java.vendor = " + jvmVendor + "]");
+                }
+            }
+
             String charset = (String) parser.getOptionValue(charsetOpt);
             if (charset == null || !Charset.isSupported(charset)) {
                 charset = System.getProperty("file.encoding");
                 if (charset == null) {
                     charset = "UTF-8";
                 }
-                System.err.println("\n[INFO] Using charset " + charset);
+                if (verbose) {
+                    System.err.println("\n[INFO] Using charset " + charset);
+                }
             }
 
             String[] fileArgs = parser.getRemainingArgs();
@@ -112,7 +124,7 @@ public class YUICompressor {
                             if (line < 0) {
                                 System.err.println("\n[WARNING] " + message);
                             } else {
-                                System.err.println("\n" + line + ':' + lineOffset + ':' + message);
+                                System.err.println("\n[WARNING] " + line + ':' + lineOffset + ':' + message);
                             }
                         }
 
@@ -121,7 +133,7 @@ public class YUICompressor {
                             if (line < 0) {
                                 System.err.println("\n[ERROR] " + message);
                             } else {
-                                System.err.println("\n" + line + ':' + lineOffset + ':' + message);
+                                System.err.println("\n[ERROR] " + line + ':' + lineOffset + ':' + message);
                             }
                         }
 
@@ -143,11 +155,10 @@ public class YUICompressor {
                     }
 
                     boolean munge = parser.getOptionValue(nomungeOpt) == null;
-                    boolean warn = parser.getOptionValue(warnOpt) != null;
                     boolean preserveAllSemiColons = parser.getOptionValue(preserveSemiOpt) != null;
                     boolean preserveStringLiterals = parser.getOptionValue(preserveStringLiteralsOpt) != null;
 
-                    compressor.compress(out, linebreakpos, munge, warn,
+                    compressor.compress(out, linebreakpos, munge, verbose,
                             preserveAllSemiColons, preserveStringLiterals);
 
                 } catch (EvaluatorException e) {
@@ -214,10 +225,10 @@ public class YUICompressor {
                         + "  --type <js|css>         Specifies the type of the input file\n"
                         + "  --charset <charset>     Read the input file using <charset>\n"
                         + "  --line-break <column>   Insert a line break after the specified column number\n"
+                        + "  -v, --verbose           Display informational messages and warnings\n"
                         + "  -o <file>               Place the output into <file>. Defaults to stdout.\n\n"
 
                         + "JavaScript Options\n"
-                        + "  --warn                  Display possible errors in the code\n"
                         + "  --nomunge               Minify only, do not obfuscate\n"
                         + "  --preserve-semi         Preserve all semicolons\n"
                         + "  --preserve-strings      Do not merge concatenated string literals\n\n"

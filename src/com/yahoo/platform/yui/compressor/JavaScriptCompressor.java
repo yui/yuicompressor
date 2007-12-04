@@ -377,7 +377,7 @@ public class JavaScriptCompressor {
     private ErrorReporter logger;
 
     private boolean munge;
-    private boolean warn;
+    private boolean verbose;
 
     private static final int BUILDING_SYMBOL_TREE = 1;
     private static final int CHECKING_SYMBOL_TREE = 2;
@@ -397,12 +397,12 @@ public class JavaScriptCompressor {
         this.srctokens = parse(in, reporter);
     }
 
-    public void compress(Writer out, int linebreak, boolean munge, boolean warn,
+    public void compress(Writer out, int linebreak, boolean munge, boolean verbose,
             boolean preserveAllSemiColons, boolean preserveStringLiterals)
             throws IOException {
 
         this.munge = munge;
-        this.warn = warn;
+        this.verbose = verbose;
 
         this.tokens = processStringLiterals(this.srctokens, !preserveStringLiterals);
 
@@ -490,7 +490,7 @@ public class JavaScriptCompressor {
     }
 
     private void warn(String message, boolean showDebugString) {
-        if (warn) {
+        if (verbose) {
             if (showDebugString) {
                 message = message + "\n" + getDebugString(10);
             }
@@ -513,7 +513,7 @@ public class JavaScriptCompressor {
                 // Get the name of the function and declare it in the current scope.
                 symbol = token.getValue();
                 if (currentScope.getIdentifier(symbol) != null) {
-                    warn("[WARNING] The function " + symbol + " has already been declared in the same scope...", true);
+                    warn("The function " + symbol + " has already been declared in the same scope...", true);
                 }
                 currentScope.declareIdentifier(symbol);
             }
@@ -570,7 +570,7 @@ public class JavaScriptCompressor {
                 if (idx <= 0 || idx >= hint.length() - 1) {
                     if (mode == BUILDING_SYMBOL_TREE) {
                         // No need to report the error twice, hence the test...
-                        warn("[WARNING] Invalid hint syntax: " + hint, true);
+                        warn("Invalid hint syntax: " + hint, true);
                     }
                     break;
                 }
@@ -584,10 +584,10 @@ public class JavaScriptCompressor {
                         if (variableType.equals("nomunge")) {
                             identifier.preventMunging();
                         } else {
-                            warn("[WARNING] Unsupported hint value: " + hint, true);
+                            warn("Unsupported hint value: " + hint, true);
                         }
                     } else {
-                        warn("[WARNING] Hint refers to an unknown identifier: " + hint, true);
+                        warn("Hint refers to an unknown identifier: " + hint, true);
                     }
                 }
             }
@@ -692,7 +692,7 @@ public class JavaScriptCompressor {
                 case Token.IECC:
                     if (mode == BUILDING_SYMBOL_TREE) {
                         protectScopeFromObfuscation(currentScope);
-                        warn("[WARNING] Using JScript conditional comments is not recommended..." + (munge ? "\n[INFO] Using JSCript conditional comments reduces the level of compression!" : ""), true);
+                        warn("Using JScript conditional comments is not recommended." + (munge ? " Moreover, using JScript conditional comments reduces the level of compression!" : ""), true);
                     }
                     break;
 
@@ -704,7 +704,7 @@ public class JavaScriptCompressor {
                         if (symbol.equals("eval")) {
 
                             protectScopeFromObfuscation(currentScope);
-                            warn("[WARNING] Using 'eval' is not recommended..." + (munge ? "\n[INFO] Using 'eval' reduces the level of compression!" : ""), true);
+                            warn("Using 'eval' is not recommended." + (munge ? " Moreover, using 'eval' reduces the level of compression!" : ""), true);
 
                         }
 
@@ -726,7 +726,7 @@ public class JavaScriptCompressor {
                                     // We don't need to declare longer symbols since they won't cause
                                     // any conflict with other munged symbols.
                                     globalScope.declareIdentifier(symbol);
-                                    warn("[WARNING] Found an undeclared symbol: " + symbol, true);
+                                    warn("Found an undeclared symbol: " + symbol, true);
                                 }
 
                             } else {
@@ -771,7 +771,7 @@ public class JavaScriptCompressor {
                             if (scope.getIdentifier(symbol) == null) {
                                 scope.declareIdentifier(symbol);
                             } else {
-                                warn("[WARNING] The variable " + symbol + " has already been declared in the same scope...", true);
+                                warn("The variable " + symbol + " has already been declared in the same scope...", true);
                             }
                         }
 
@@ -819,7 +819,7 @@ public class JavaScriptCompressor {
                         // do is turn the obfuscation off for the highest scope
                         // containing the 'with' block.
                         protectScopeFromObfuscation(scope);
-                        warn("[WARNING] Using 'with' is not recommended" + (munge ? "(and it reduces the level of compression)" : ""), true);
+                        warn("Using 'with' is not recommended." + (munge ? " Moreover, using 'with' reduces the level of compression!" : ""), true);
                     }
                     break;
 
@@ -830,7 +830,7 @@ public class JavaScriptCompressor {
                 case Token.IECC:
                     if (mode == BUILDING_SYMBOL_TREE) {
                         protectScopeFromObfuscation(scope);
-                        warn("[WARNING] Using JScript conditional comments is not recommended..." + (munge ? "\n[INFO] Using JSCript conditional comments reduces the level of compression!" : ""), true);
+                        warn("Using JScript conditional comments is not recommended." + (munge ? " Moreover, using JScript conditional comments reduces the level of compression." : ""), true);
                     }
                     break;
 
@@ -842,7 +842,7 @@ public class JavaScriptCompressor {
                         if (symbol.equals("eval")) {
 
                             protectScopeFromObfuscation(scope);
-                            warn("[WARNING] Using 'eval' is not recommended..." + (munge ? "\n[INFO] Using 'eval' reduces the level of compression!" : ""), true);
+                            warn("Using 'eval' is not recommended." + (munge ? " Moreover, using 'eval' reduces the level of compression!" : ""), true);
 
                         }
 
@@ -861,7 +861,7 @@ public class JavaScriptCompressor {
                                     // We don't need to declare longer symbols since they won't cause
                                     // any conflict with other munged symbols.
                                     globalScope.declareIdentifier(symbol);
-                                    warn("[WARNING] Found an undeclared symbol: " + symbol, true);
+                                    warn("Found an undeclared symbol: " + symbol, true);
                                 }
 
                             } else {
@@ -964,7 +964,7 @@ public class JavaScriptCompressor {
                                 result.append(symbol);
                             }
                             if (currentScope != globalScope && identifier.getRefcount() == 0) {
-                                warn("[WARNING] The symbol " + symbol + " is declared but is apparently never used.\nThis code can probably be written in a more efficient way.", true);
+                                warn("The symbol " + symbol + " is declared but is apparently never used.\nThis code can probably be written in a more efficient way.", true);
                             }
                         } else {
                             result.append(symbol);
@@ -991,11 +991,11 @@ public class JavaScriptCompressor {
                             // We must keep a white space here. Otherwise, x +++ y would be
                             // interpreted as x ++ + y by the compiler, which is a bug (due
                             // to the implicit assignment being done on the wrong variable)
-                            result.append(" ");
+                            result.append(' ');
                         } else if (token.getType() == Token.POS && getToken(-1).getType() == Token.ADD ||
                                 token.getType() == Token.NEG && getToken(-1).getType() == Token.SUB) {
                             // Handle the case x + + y and x - - y
-                            result.append(" ");
+                            result.append(' ');
                         }
                     }
                     break;
@@ -1004,7 +1004,7 @@ public class JavaScriptCompressor {
                     result.append("function");
                     token = consumeToken();
                     if (token.getType() == Token.NAME) {
-                        result.append(" ");
+                        result.append(' ');
                         symbol = token.getValue();
                         identifier = getIdentifier(symbol, currentScope);
                         assert identifier != null;
@@ -1014,12 +1014,12 @@ public class JavaScriptCompressor {
                             result.append(symbol);
                         }
                         if (currentScope != globalScope && identifier.getRefcount() == 0) {
-                            warn("[WARNING] The symbol " + symbol + " is declared but is apparently never used.\nThis code can probably be written in a more efficient way.", true);
+                            warn("The symbol " + symbol + " is declared but is apparently never used.\nThis code can probably be written in a more efficient way.", true);
                         }
                         token = consumeToken();
                     }
                     assert token.getType() == Token.LP;
-                    result.append("(");
+                    result.append('(');
                     currentScope = (ScriptOrFnScope) indexedScopes.get(new Integer(offset));
                     enterScope(currentScope);
                     while ((token = consumeToken()).getType() != Token.RP) {
@@ -1034,13 +1034,13 @@ public class JavaScriptCompressor {
                                 result.append(symbol);
                             }
                         } else if (token.getType() == Token.COMMA) {
-                            result.append(",");
+                            result.append(',');
                         }
                     }
-                    result.append(")");
+                    result.append(')');
                     token = consumeToken();
                     assert token.getType() == Token.LC;
-                    result.append("{");
+                    result.append('{');
                     braceNesting++;
                     token = getToken(0);
                     if (token.getType() == Token.STRING) {
@@ -1063,7 +1063,7 @@ public class JavaScriptCompressor {
                                 token.getType() != Token.LC &&
                                 token.getType() != Token.STRING &&
                                 token.getType() != Token.REGEXP) {
-                            result.append(" ");
+                            result.append(' ');
                         }
                     }
                     break;
@@ -1072,7 +1072,7 @@ public class JavaScriptCompressor {
                     result.append("case");
                     // White-space needed after 'case' when not followed by a string.
                     if (offset < length && getToken(0).getType() != Token.STRING) {
-                        result.append(" ");
+                        result.append(' ');
                     }
                     break;
 
@@ -1080,7 +1080,7 @@ public class JavaScriptCompressor {
                     // White-space needed after 'throw' when not followed by a string.
                     result.append("throw");
                     if (offset < length && getToken(0).getType() != Token.STRING) {
-                        result.append(" ");
+                        result.append(' ');
                     }
                     break;
 
@@ -1089,7 +1089,7 @@ public class JavaScriptCompressor {
                     if (offset < length && getToken(0).getType() != Token.SEMI) {
                         // If 'break' is not followed by a semi-colon, it must be
                         // followed by a label, hence the need for a white space.
-                        result.append(" ");
+                        result.append(' ');
                     }
                     break;
 
@@ -1098,17 +1098,17 @@ public class JavaScriptCompressor {
                     if (offset < length && getToken(0).getType() != Token.SEMI) {
                         // If 'continue' is not followed by a semi-colon, it must be
                         // followed by a label, hence the need for a white space.
-                        result.append(" ");
+                        result.append(' ');
                     }
                     break;
 
                 case Token.LC:
-                    result.append("{");
+                    result.append('{');
                     braceNesting++;
                     break;
 
                 case Token.RC:
-                    result.append("}");
+                    result.append('}');
                     braceNesting--;
                     assert braceNesting >= currentScope.getBraceNesting();
                     if (braceNesting == currentScope.getBraceNesting()) {
@@ -1119,14 +1119,14 @@ public class JavaScriptCompressor {
                 case Token.SEMI:
                     // No need to output a semi-colon if the next character is a right-curly...
                     if (preserveAllSemiColons || offset < length && getToken(0).getType() != Token.RC) {
-                        result.append(";");
+                        result.append(';');
                     }
 
                     if (linebreakpos >= 0 && result.length() - linestartpos > linebreakpos) {
                         // Some source control tools don't like it when files containing lines longer
                         // than, say 8000 characters, are checked in. The linebreak option is used in
                         // that case to split long lines after a specific column.
-                        result.append("\n");
+                        result.append('\n');
                         linestartpos = result.length();
                     }
                     break;
@@ -1142,7 +1142,7 @@ public class JavaScriptCompressor {
                     if (literal != null) {
                         result.append(literal);
                     } else {
-                        warn("[WARNING] This symbol cannot be printed: " + symbol, true);
+                        warn("This symbol cannot be printed: " + symbol, true);
                     }
                     break;
             }
@@ -1153,7 +1153,11 @@ public class JavaScriptCompressor {
         // several minified files (the absence of an ending semi-colon at the
         // end of one file may very likely cause a syntax error)
         if (!preserveAllSemiColons) {
-            result.append(";");
+            if (result.charAt(result.length()-1) == '\n') {
+                result.setCharAt(result.length()-1, ';');
+            } else {
+                result.append(';');
+            }
         }
 
         return result;
