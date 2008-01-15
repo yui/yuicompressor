@@ -547,6 +547,14 @@ class TokenStream
                                 // Remove line terminator after escape
                                 c = getChar();
                                 break;
+
+                            default:
+                                if (isDigit(c)) {
+                                    // Octal representation of a character.
+                                    // Preserve the escaping (see Y! bug #1637286)
+                                    addToString('\\');
+                                }
+                                break;
                         }
                     }
 
