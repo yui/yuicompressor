@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.*;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 public class JavaScriptCompressor {
 
@@ -274,48 +276,46 @@ public class JavaScriptCompressor {
         return tokens;
     }
 
-    private static ArrayList processStringLiterals(ArrayList tokens, boolean merge) {
+    private static void processStringLiterals(ArrayList tokens, boolean merge) {
 
         String tv;
-        int i, length;
-        ArrayList result = new ArrayList();
+        int i, length = tokens.size();
         JavaScriptToken token, prevToken, nextToken;
 
-        // Concatenate string literals that are being appended wherever
-        // it is safe to do so. Note that we take care of the case:
-        //     "a" + "b".toUpperCase()
+        if (merge) {
 
-        for (i = 0, length = tokens.size(); i < length; i++) {
-            token = (JavaScriptToken) tokens.get(i);
-            switch (token.getType()) {
+            // Concatenate string literals that are being appended wherever
+            // it is safe to do so. Note that we take care of the case:
+            //     "a" + "b".toUpperCase()
 
-                case Token.ADD:
-                    if (merge) {
+            for (i = 0; i < length; i++) {
+                token = (JavaScriptToken) tokens.get(i);
+                switch (token.getType()) {
+
+                    case Token.ADD:
                         if (i > 0 && i < length) {
-                            prevToken = (JavaScriptToken) result.get(result.size() - 1);
+                            prevToken = (JavaScriptToken) tokens.get(i - 1);
                             nextToken = (JavaScriptToken) tokens.get(i + 1);
                             if (prevToken.getType() == Token.STRING && nextToken.getType() == Token.STRING &&
                                     (i == length - 1 || ((JavaScriptToken) tokens.get(i + 2)).getType() != Token.DOT)) {
-                                result.set(result.size() - 1, new JavaScriptToken(Token.STRING,
+                                tokens.set(i - 1, new JavaScriptToken(Token.STRING,
                                         prevToken.getValue() + nextToken.getValue()));
-                                i++; // not a good practice, but oh well...
+                                tokens.remove(i + 1);
+                                tokens.remove(i);
+                                i = i - 1;
+                                length = length - 2;
                                 break;
                             }
                         }
-                    }
-
-                    /* FALLSTHROUGH */
-
-                default:
-                    result.add(token);
-                    break;
+                }
             }
+
         }
 
         // Second pass...
 
-        for (i = 0, length = result.size(); i < length; i++) {
-            token = (JavaScriptToken) result.get(i);
+        for (i = 0; i < length; i++) {
+            token = (JavaScriptToken) tokens.get(i);
             if (token.getType() == Token.STRING) {
                 tv = token.getValue();
 
@@ -346,11 +346,9 @@ public class JavaScriptCompressor {
                     tv = tv.replaceAll("<\\/script", "<\\\\/script");
                 }
 
-                result.set(i, new JavaScriptToken(Token.STRING, tv));
+                tokens.set(i, new JavaScriptToken(Token.STRING, tv));
             }
         }
-
-        return result;
     }
 
     // Add necessary escaping that was removed in Rhino's tokenizer.
@@ -374,6 +372,46 @@ public class JavaScriptCompressor {
         return sb.toString();
     }
 
+    /*
+     * Simple check to see whether a string is a valid identifier name.
+     * If a string matches this pattern, it means it IS a valid
+     * identifier name. If a string doesn't match it, it does not
+     * necessarily mean it is not a valid identifier name.
+     */
+    private static final Pattern SIMPLE_IDENTIFIER_NAME_PATTERN = Pattern.compile("^[a-zA-Z_][a-zA-Z0-9_]*$");
+
+    /*
+    * Transforms obj["foo"] into obj.foo whenever possible, saving 3 bytes.
+    */
+    private static void optimizeObjectMemberAccess(ArrayList tokens) {
+
+        String tv;
+        Matcher m;
+        int i, length;
+        JavaScriptToken token;
+
+        for (i = 0, length = tokens.size(); i < length; i++) {
+
+            if (((JavaScriptToken) tokens.get(i)).getType() == Token.LB &&
+                    i > 0 && i < length - 2 &&
+                    ((JavaScriptToken) tokens.get(i - 1)).getType() == Token.NAME &&
+                    ((JavaScriptToken) tokens.get(i + 1)).getType() == Token.STRING &&
+                    ((JavaScriptToken) tokens.get(i + 2)).getType() == Token.RB) {
+                token = (JavaScriptToken) tokens.get(i + 1);
+                tv = token.getValue();
+                tv = tv.substring(1, tv.length() - 1);
+                m = SIMPLE_IDENTIFIER_NAME_PATTERN.matcher(tv);
+                if (m.matches()) {
+                    tokens.set(i, new JavaScriptToken(Token.DOT, "."));
+                    tokens.set(i + 1, new JavaScriptToken(Token.NAME, tv));
+                    tokens.remove(i + 2);
+                    i += 2;
+                    break;
+                }
+            }
+        }
+    }
+
     private ErrorReporter logger;
 
     private boolean munge;
@@ -385,7 +423,7 @@ public class JavaScriptCompressor {
     private int mode;
     private int offset;
     private int braceNesting;
-    private ArrayList srctokens, tokens;
+    private ArrayList tokens;
     private Stack scopes = new Stack();
     private ScriptOrFnScope globalScope = new ScriptOrFnScope(-1, null);
     private Hashtable indexedScopes = new Hashtable();
@@ -394,7 +432,7 @@ public class JavaScriptCompressor {
             throws IOException, EvaluatorException {
 
         this.logger = reporter;
-        this.srctokens = parse(in, reporter);
+        this.tokens = parse(in, reporter);
     }
 
     public void compress(Writer out, int linebreak, boolean munge, boolean verbose,
@@ -404,7 +442,8 @@ public class JavaScriptCompressor {
         this.munge = munge;
         this.verbose = verbose;
 
-        this.tokens = processStringLiterals(this.srctokens, !preserveStringLiterals);
+        processStringLiterals(this.tokens, !preserveStringLiterals);
+        optimizeObjectMemberAccess(this.tokens);
 
         buildSymbolTree();
         mungeSymboltree();
@@ -1153,8 +1192,8 @@ public class JavaScriptCompressor {
         // several minified files (the absence of an ending semi-colon at the
         // end of one file may very likely cause a syntax error)
         if (!preserveAllSemiColons) {
-            if (result.charAt(result.length()-1) == '\n') {
-                result.setCharAt(result.length()-1, ';');
+            if (result.charAt(result.length() - 1) == '\n') {
+                result.setCharAt(result.length() - 1, ';');
             } else {
                 result.append(';');
             }
