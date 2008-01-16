@@ -837,7 +837,8 @@ class TokenStream
         }
 
         int c;
-        while ((c = getChar()) != '/') {
+        boolean inClass = false;
+        while ((c = getChar()) != '/' || inClass) {
             if (c == '\n' || c == EOF_CHAR) {
                 ungetChar(c);
                 throw parser.reportError("msg.unterminated.re.lit");
@@ -845,6 +846,10 @@ class TokenStream
             if (c == '\\') {
                 addToString(c);
                 c = getChar();
+            } else if (c == '[') {
+                inClass = true;
+            } else if (c == ']') {
+                inClass = false;
             }
 
             addToString(c);
