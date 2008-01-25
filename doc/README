@@ -15,10 +15,10 @@ SYNOPSIS
     --type <js|css>         Specifies the type of the input file
     --charset <charset>     Read the input file using <charset>
     --line-break <column>   Insert a line break after the specified column number
+    -v, --verbose           Display informational messages and warnings
     -o <file>               Place the output into <file>. Defaults to stdout.
 
   JavaScript Options
-    --warn                  Display possible errors in the code
     --nomunge               Minify only, do not obfuscate
     --preserve-semi         Preserve all semicolons
     --preserve-strings      Do not merge concatenated string literals
@@ -63,14 +63,13 @@ GLOBAL OPTIONS
       Place output in file outfile. If not specified, the YUI Compressor will
       default to the standard output, which you can redirect to a file.
 
+  -v, --verbose
+      Display informational messages and warnings.
+
 JAVASCRIPT ONLY OPTIONS
 
   --nomunge
       Minify only. Do not obfuscate local symbols.
-
-  --warn
-      Prints additional warnings such as duplicate variable declarations,
-      missing variable declaration, unrecommended practices, etc.
 
   --preserve-semi
       Preserve unnecessary semicolons (such as right before a '}') This option

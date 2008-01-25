@@ -1,3 +1,38 @@
+YUI Compressor 2.3, 2008-xx-xx
+------------------------------
+
++ Always output a ';' at the end of a minified JavaScript file. This allows
+  the concatenating of several minified files without the fear of introducing
+  a syntax error.
++ Removed all System.exit() statements. Throw exceptions instead. This is
+  especially useful when running the compressor from within a J2EE container.
+  [SourceForge bug #1834750]
++ Transform obj["foo"] into obj.foo whenever possible, saving 3 bytes.
++ Added support for multi-line string literals [SourceForge bug #1871453]
++ Added support for unescaped slashes inside character classes in regexp.
++ Minor performance improvements.
++ Preserve the escaping for an octal representation of a character in string
+  literals [SourceForge bug #1844894]
+
+    var a = '\001';
+
++ CSS: Preserve comments ending with that hide CSS rules from IE Mac:
+
+    /* Hides from IE-mac \*/
+    ...
+    /* End hide from IE-mac */
+
++ CSS: Added support for box model hack [SourceForge bug #1862107]
+
+    div.content {
+      width:400px;
+      voice-family: "\"}\"";
+      voice-family:inherit;
+      width:300px;
+    }
+
+
+
 YUI Compressor 2.2.5, 2007-10-09
 --------------------------------
 
