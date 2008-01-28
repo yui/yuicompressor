@@ -11,17 +11,17 @@ SYNOPSIS
   Usage: java -jar yuicompressor-x.y.z.jar [options] [input file]
 
   Global Options
-    -h, --help              Displays this information
-    --type <js|css>         Specifies the type of the input file
-    --charset <charset>     Read the input file using <charset>
-    --line-break <column>   Insert a line break after the specified column number
-    -v, --verbose           Display informational messages and warnings
-    -o <file>               Place the output into <file>. Defaults to stdout.
+    -h, --help                Displays this information
+    --type <js|css>           Specifies the type of the input file
+    --charset <charset>       Read the input file using <charset>
+    --line-break <column>     Insert a line break after the specified column number
+    -v, --verbose             Display informational messages and warnings
+    -o <file>                 Place the output into <file>. Defaults to stdout.
 
   JavaScript Options
-    --nomunge               Minify only, do not obfuscate
-    --preserve-semi         Preserve all semicolons
-    --preserve-strings      Do not merge concatenated string literals
+    --nomunge                 Minify only, do not obfuscate
+    --preserve-semi           Preserve all semicolons
+    --disable-optimizations   Disable all micro optimizations
 
 DESCRIPTION
 
@@ -76,9 +76,8 @@ JAVASCRIPT ONLY OPTIONS
       is useful when compressed code has to be run through JSLint (which is the
       case of YUI for example)
 
-  --preserve-strings
-      Use this option to specify that concatenated string literals should
-      never be merged.
+  --disable-optimizations
+      Disable all the built-in micro optimizations.
 
 NOTES
 
