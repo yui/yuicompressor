@@ -44,26 +44,7 @@
         </jar>
     </target>
 
-    <target name="build.web" depends="build.jar">
-        <mkdir dir="${build.dir}/web"/>
-        <!-- Do not apply the filter to all files. Applying
-             a filter to a binary files may corrupt them -->
-        <copy file="web/index.php" todir="${build.dir}/web" overwrite="true">
-            <filterset>
-                <filter token="VERSION.NUMBER" value="${version.number}"/>
-            </filterset>
-        </copy>
-        <copy todir="${build.dir}/web" overwrite="true">
-            <fileset dir="web">
-                <include name="**/*"/>
-                <exclude name="index.php"/>
-                <exclude name="**/CVS"/>
-            </fileset>
-        </copy>
-        <copy file="${build.dir}/${jar.name}" todir="${build.dir}/web" overwrite="true"/>
-    </target>
-
-    <target name="build.dist.package" depends="build.jar, build.web">
+    <target name="build.dist.package" depends="build.jar">
         <mkdir dir="${build.dir}/${dist.package.name}"/>
         <mkdir dir="${build.dir}/${dist.package.name}/build"/>
         <copy file="${build.dir}/${jar.name}" todir="${build.dir}/${dist.package.name}/build"/>
@@ -74,7 +55,6 @@
                 <include name="src/**/*"/>
                 <exclude name="**/CVS"/>
             </fileset>
-            <fileset dir="${build.dir}" includes="web/**/*"/>
         </copy>
         <zip destfile="${build.dir}/${dist.package.name}.zip"
              basedir="${build.dir}"
