@@ -1,4 +1,4 @@
-YUI Compressor 2.3, 2008-xx-xx
+YUI Compressor 2.3, 2008-01-28
 ------------------------------
 
 + Always output a ';' at the end of a minified JavaScript file. This allows
@@ -8,6 +8,7 @@ YUI Compressor 2.3, 2008-xx-xx
   especially useful when running the compressor from within a J2EE container.
   [SourceForge bug #1834750]
 + Transform obj["foo"] into obj.foo whenever possible, saving 3 bytes.
++ Transform 'foo': ... into foo: ... whenever possible, saving 2 bytes.
 + Added support for multi-line string literals [SourceForge bug #1871453]
 + Added support for unescaped slashes inside character classes in regexp.
 + Minor performance improvements.
@@ -16,7 +17,7 @@ YUI Compressor 2.3, 2008-xx-xx
 
     var a = '\001';
 
-+ CSS: Preserve comments ending with that hide CSS rules from IE Mac:
++ CSS: Preserve comments that hide CSS rules from IE Mac:
 
     /* Hides from IE-mac \*/
     ...
@@ -30,8 +31,6 @@ YUI Compressor 2.3, 2008-xx-xx
       voice-family:inherit;
       width:300px;
     }
-
-
 
 YUI Compressor 2.2.5, 2007-10-09
 --------------------------------
