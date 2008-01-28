@@ -536,16 +536,15 @@ class TokenStream
                             case 'd':  // octal sequence
                             case 'u':  // unicode sequence
                             case 'x':  // hexadecimal sequence
-
                                 // Only keep the '\' character for those
                                 // characters that need to be escaped...
                                 // Don't escape quoting characters...
                                 addToString('\\');
+                                addToString(c);
                                 break;
 
                             case '\n':
                                 // Remove line terminator after escape
-                                c = getChar();
                                 break;
 
                             default:
@@ -554,11 +553,15 @@ class TokenStream
                                     // Preserve the escaping (see Y! bug #1637286)
                                     addToString('\\');
                                 }
+                                addToString(c);
                                 break;
                         }
+
+                    } else {
+
+                        addToString(c);
                     }
 
-                    addToString(c);
                     c = getChar();
                 }
 
