@@ -548,11 +548,13 @@ public class JavaScriptCompressor {
         int end = Math.min(offset + max, tokens.size());
         for (int i = start; i < end; i++) {
             JavaScriptToken token = (JavaScriptToken) tokens.get(i);
-            if (i == offset)
+            if (i == offset - 1) {
                 result.append(" ---> ");
+            }
             result.append(token.getValue());
-            if (i == offset)
+            if (i == offset - 1) {
                 result.append(" <--- ");
+            }
         }
         return result.toString();
     }
