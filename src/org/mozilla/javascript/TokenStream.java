@@ -558,11 +558,6 @@ class TokenStream
                         }
                     }
 
-                    if (c == quoteChar) {
-                        // This case happens in the case of multiline string literals (see Y! bug #1694601)
-                        break;
-                    }
-
                     addToString(c);
                     c = getChar();
                 }
