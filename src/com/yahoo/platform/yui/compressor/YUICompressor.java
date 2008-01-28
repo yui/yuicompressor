@@ -25,7 +25,7 @@ public class YUICompressor {
         CmdLineParser.Option nomungeOpt = parser.addBooleanOption("nomunge");
         CmdLineParser.Option linebreakOpt = parser.addStringOption("line-break");
         CmdLineParser.Option preserveSemiOpt = parser.addBooleanOption("preserve-semi");
-        CmdLineParser.Option preserveStringLiteralsOpt = parser.addBooleanOption("preserve-strings");
+        CmdLineParser.Option disableOptimizationsOpt = parser.addBooleanOption("disable-optimizations");
         CmdLineParser.Option helpOpt = parser.addBooleanOption('h', "help");
         CmdLineParser.Option charsetOpt = parser.addStringOption("charset");
         CmdLineParser.Option outputFilenameOpt = parser.addStringOption('o', "output");
@@ -156,10 +156,10 @@ public class YUICompressor {
 
                     boolean munge = parser.getOptionValue(nomungeOpt) == null;
                     boolean preserveAllSemiColons = parser.getOptionValue(preserveSemiOpt) != null;
-                    boolean preserveStringLiterals = parser.getOptionValue(preserveStringLiteralsOpt) != null;
+                    boolean disableOptimizations = parser.getOptionValue(disableOptimizationsOpt) != null;
 
                     compressor.compress(out, linebreakpos, munge, verbose,
-                            preserveAllSemiColons, preserveStringLiterals);
+                            preserveAllSemiColons, disableOptimizations);
 
                 } catch (EvaluatorException e) {
 
@@ -221,17 +221,17 @@ public class YUICompressor {
                 "\nUsage: java -jar yuicompressor-x.y.z.jar [options] [input file]\n\n"
 
                         + "Global Options\n"
-                        + "  -h, --help              Displays this information\n"
-                        + "  --type <js|css>         Specifies the type of the input file\n"
-                        + "  --charset <charset>     Read the input file using <charset>\n"
-                        + "  --line-break <column>   Insert a line break after the specified column number\n"
-                        + "  -v, --verbose           Display informational messages and warnings\n"
-                        + "  -o <file>               Place the output into <file>. Defaults to stdout.\n\n"
+                        + "  -h, --help                Displays this information\n"
+                        + "  --type <js|css>           Specifies the type of the input file\n"
+                        + "  --charset <charset>       Read the input file using <charset>\n"
+                        + "  --line-break <column>     Insert a line break after the specified column number\n"
+                        + "  -v, --verbose             Display informational messages and warnings\n"
+                        + "  -o <file>                 Place the output into <file>. Defaults to stdout.\n\n"
 
                         + "JavaScript Options\n"
-                        + "  --nomunge               Minify only, do not obfuscate\n"
-                        + "  --preserve-semi         Preserve all semicolons\n"
-                        + "  --preserve-strings      Do not merge concatenated string literals\n\n"
+                        + "  --nomunge                 Minify only, do not obfuscate\n"
+                        + "  --preserve-semi           Preserve all semicolons\n"
+                        + "  --disable-optimizations   Disable all micro optimizations\n\n"
 
                         + "If no input file is specified, it defaults to stdin. In this case, the 'type'\n"
                         + "option is required. Otherwise, the 'type' option is required only if the input\n"

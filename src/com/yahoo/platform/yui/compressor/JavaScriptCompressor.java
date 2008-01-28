@@ -380,13 +380,17 @@ public class JavaScriptCompressor {
      */
     private static final Pattern SIMPLE_IDENTIFIER_NAME_PATTERN = Pattern.compile("^[a-zA-Z_][a-zA-Z0-9_]*$");
 
+    private static boolean isValidIdentifier(String s) {
+        Matcher m = SIMPLE_IDENTIFIER_NAME_PATTERN.matcher(s);
+        return m.matches();
+    }
+
     /*
     * Transforms obj["foo"] into obj.foo whenever possible, saving 3 bytes.
     */
     private static void optimizeObjectMemberAccess(ArrayList tokens) {
 
         String tv;
-        Matcher m;
         int i, length;
         JavaScriptToken token;
 
@@ -400,13 +404,34 @@ public class JavaScriptCompressor {
                 token = (JavaScriptToken) tokens.get(i + 1);
                 tv = token.getValue();
                 tv = tv.substring(1, tv.length() - 1);
-                m = SIMPLE_IDENTIFIER_NAME_PATTERN.matcher(tv);
-                if (m.matches()) {
+                if (isValidIdentifier(tv)) {
                     tokens.set(i, new JavaScriptToken(Token.DOT, "."));
                     tokens.set(i + 1, new JavaScriptToken(Token.NAME, tv));
                     tokens.remove(i + 2);
-                    i += 2;
-                    break;
+                    i = i + 2;
+                    length = length - 1;
+                }
+            }
+        }
+    }
+
+    /*
+     * Transforms 'foo': ... into foo: ... whenever possible, saving 2 bytes.
+     */
+    private static void optimizeObjLitMemberDecl(ArrayList tokens) {
+
+        String tv;
+        int i, length;
+        JavaScriptToken token;
+
+        for (i = 0, length = tokens.size(); i < length; i++) {
+            if (((JavaScriptToken) tokens.get(i)).getType() == Token.OBJECTLIT &&
+                    i > 0 && ((JavaScriptToken) tokens.get(i - 1)).getType() == Token.STRING) {
+                token = (JavaScriptToken) tokens.get(i - 1);
+                tv = token.getValue();
+                tv = tv.substring(1, tv.length() - 1);
+                if (isValidIdentifier(tv)) {
+                    tokens.set(i - 1, new JavaScriptToken(Token.NAME, tv));
                 }
             }
         }
@@ -436,14 +461,18 @@ public class JavaScriptCompressor {
     }
 
     public void compress(Writer out, int linebreak, boolean munge, boolean verbose,
-            boolean preserveAllSemiColons, boolean preserveStringLiterals)
+            boolean preserveAllSemiColons, boolean disableOptimizations)
             throws IOException {
 
         this.munge = munge;
         this.verbose = verbose;
 
-        processStringLiterals(this.tokens, !preserveStringLiterals);
-        optimizeObjectMemberAccess(this.tokens);
+        processStringLiterals(this.tokens, !disableOptimizations);
+
+        if (!disableOptimizations) {
+            optimizeObjectMemberAccess(this.tokens);
+            optimizeObjLitMemberDecl(this.tokens);
+        }
 
         buildSymbolTree();
         mungeSymboltree();
