@@ -25,6 +25,7 @@ public class JavaScriptCompressor {
 
     static final Set builtin = new HashSet();
     static final Map literals = new Hashtable();
+    static final Set reserved = new HashSet();
 
     static {
 
@@ -169,6 +170,67 @@ public class JavaScriptCompressor {
         literals.put(new Integer(Token.DOTDOT), "..");
         literals.put(new Integer(Token.DOTQUERY), ".(");
         literals.put(new Integer(Token.XMLATTR), "@");
+
+        // See http://developer.mozilla.org/en/docs/Core_JavaScript_1.5_Reference:Reserved_Words
+
+        // JavaScript 1.5 reserved words
+        reserved.add("break");
+        reserved.add("case");
+        reserved.add("catch");
+        reserved.add("continue");
+        reserved.add("default");
+        reserved.add("delete");
+        reserved.add("do");
+        reserved.add("else");
+        reserved.add("finally");
+        reserved.add("for");
+        reserved.add("function");
+        reserved.add("if");
+        reserved.add("in");
+        reserved.add("instanceof");
+        reserved.add("new");
+        reserved.add("return");
+        reserved.add("switch");
+        reserved.add("this");
+        reserved.add("throw");
+        reserved.add("try");
+        reserved.add("typeof");
+        reserved.add("var");
+        reserved.add("void");
+        reserved.add("while");
+        reserved.add("with");
+        // Words reserved for future use
+        reserved.add("abstract");
+        reserved.add("boolean");
+        reserved.add("byte");
+        reserved.add("char");
+        reserved.add("class");
+        reserved.add("const");
+        reserved.add("debugger");
+        reserved.add("double");
+        reserved.add("enum");
+        reserved.add("export");
+        reserved.add("extends");
+        reserved.add("final");
+        reserved.add("float");
+        reserved.add("goto");
+        reserved.add("implements");
+        reserved.add("import");
+        reserved.add("int");
+        reserved.add("interface");
+        reserved.add("long");
+        reserved.add("native");
+        reserved.add("package");
+        reserved.add("private");
+        reserved.add("protected");
+        reserved.add("public");
+        reserved.add("short");
+        reserved.add("static");
+        reserved.add("super");
+        reserved.add("synchronized");
+        reserved.add("throws");
+        reserved.add("transient");
+        reserved.add("volatile");
     }
 
     private static int countChar(String haystack, char needle) {
@@ -382,7 +444,7 @@ public class JavaScriptCompressor {
 
     private static boolean isValidIdentifier(String s) {
         Matcher m = SIMPLE_IDENTIFIER_NAME_PATTERN.matcher(s);
-        return m.matches();
+        return (m.matches() && !reserved.contains(s));
     }
 
     /*
