@@ -1,3 +1,8 @@
+YUI Compressor 2.3.1, 2008-01-30
+--------------------------------
+
++ Added test against list of reserved words in method isValidIdentifier.
+
 YUI Compressor 2.3, 2008-01-28
 ------------------------------
 
