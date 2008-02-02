@@ -1175,11 +1175,10 @@ public class JavaScriptCompressor {
                     result.append('{');
                     braceNesting++;
                     token = getToken(0);
-                    if (token.getType() == Token.STRING) {
+                    if (token.getType() == Token.STRING &&
+                            getToken(1).getType() == Token.SEMI) {
                         // This is a hint. Skip it!
                         consumeToken();
-                        token = getToken(0);
-                        assert token.getType() == Token.SEMI;
                         consumeToken();
                     }
                     break;
