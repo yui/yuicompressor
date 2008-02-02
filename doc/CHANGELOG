@@ -1,3 +1,10 @@
+YUI Compressor 2.3.2, 2008-02-01
+--------------------------------
+
++ Compressing an empty JS file throws an error [SourceForge bug #1884207]
++ When a string is the first token in a function body, it was removed from
+  the compressed file [SourceForge bug #1884314]
+
 YUI Compressor 2.3.1, 2008-01-30
 --------------------------------
 

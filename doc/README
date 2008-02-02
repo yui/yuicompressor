@@ -85,6 +85,26 @@ NOTES
 
   + The YUI Compressor requires Java version >= 1.4.
 
+  + It is possible to prevent a local variable, nested function or function
+    argument from being obfuscated by using "hints". A hint is a string that
+    is located at the very beginning of a function body like so:
+
+    function fn (arg1, arg2, arg3) {
+        "arg2:nomunge, localVar:nomunge, nestedFn:nomunge";
+
+        ...
+        var localVar;
+        ...
+
+        function nestedFn () {
+            ....
+        }
+
+        ...
+    }
+
+    The hint itself disappears from the compressed file.
+
 AUTHOR
 
   The YUI Compressor was written and is maintained by:
