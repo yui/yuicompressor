@@ -1284,7 +1284,7 @@ public class JavaScriptCompressor {
         // supposed to be removed. This is especially useful when concatenating
         // several minified files (the absence of an ending semi-colon at the
         // end of one file may very likely cause a syntax error)
-        if (!preserveAllSemiColons) {
+        if (!preserveAllSemiColons && result.length() > 0) {
             if (result.charAt(result.length() - 1) == '\n') {
                 result.setCharAt(result.length() - 1, ';');
             } else {
