@@ -251,7 +251,7 @@ public class Token
         SETCONST       = 150,
         SETCONSTVAR    = 151,
 
-        IECC           = 152, // Internet Explorer conditional comment
+        SPECIALCOMMENT = 152, // Internet Explorer conditional comment
 
         LAST_TOKEN     = 153;
 

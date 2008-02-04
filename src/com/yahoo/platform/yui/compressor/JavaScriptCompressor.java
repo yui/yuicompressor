@@ -14,8 +14,8 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.*;
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class JavaScriptCompressor {
 
@@ -311,7 +311,7 @@ public class JavaScriptCompressor {
             int tt = source.charAt(offset++);
             switch (tt) {
 
-                case Token.IECC:
+                case Token.SPECIALCOMMENT:
                 case Token.NAME:
                 case Token.REGEXP:
                 case Token.STRING:
@@ -821,7 +821,7 @@ public class JavaScriptCompressor {
                     parensNesting--;
                     break;
 
-                case Token.IECC:
+                case Token.SPECIALCOMMENT:
                     if (mode == BUILDING_SYMBOL_TREE) {
                         protectScopeFromObfuscation(currentScope);
                         warn("Using JScript conditional comments is not recommended." + (munge ? " Moreover, using JScript conditional comments reduces the level of compression!" : ""), true);
@@ -959,7 +959,7 @@ public class JavaScriptCompressor {
                     parseCatch();
                     break;
 
-                case Token.IECC:
+                case Token.SPECIALCOMMENT:
                     if (mode == BUILDING_SYMBOL_TREE) {
                         protectScopeFromObfuscation(scope);
                         warn("Using JScript conditional comments is not recommended." + (munge ? " Moreover, using JScript conditional comments reduces the level of compression." : ""), true);
@@ -1262,10 +1262,13 @@ public class JavaScriptCompressor {
                     }
                     break;
 
-                case Token.IECC:
+                case Token.SPECIALCOMMENT:
+                    if (result.length() > 0 && result.charAt(result.length() - 1) != '\n') {
+                        result.append("\n");
+                    }
                     result.append("/*");
                     result.append(symbol);
-                    result.append("*/");
+                    result.append("*/\n");
                     break;
 
                 default:

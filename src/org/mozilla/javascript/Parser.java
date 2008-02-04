@@ -164,7 +164,7 @@ public class Parser
         int tt = currentFlaggedToken;
         if (tt == Token.EOF) {
 
-            while ((tt = ts.getToken()) == Token.IECC) {
+            while ((tt = ts.getToken()) == Token.SPECIALCOMMENT) {
                 /* Support for JScript conditional comments */
                 decompiler.addJScriptConditionalComment(ts.getString());
             }
@@ -173,12 +173,12 @@ public class Parser
                 do {
                     tt = ts.getToken();
 
-                    if (tt == Token.IECC) {
+                    if (tt == Token.SPECIALCOMMENT) {
                         /* Support for JScript conditional comments */
                         decompiler.addJScriptConditionalComment(ts.getString());
                     }
 
-                } while (tt == Token.EOL || tt == Token.IECC);
+                } while (tt == Token.EOL || tt == Token.SPECIALCOMMENT);
                 tt |= TI_AFTER_EOL;
             }
             currentFlaggedToken = tt;
