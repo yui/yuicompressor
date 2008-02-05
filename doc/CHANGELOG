@@ -1,3 +1,9 @@
+YUI Compressor 2.3.3, 2008-02-04
+--------------------------------
+
++ C-style comments starting with /*! are preserved. This is especially
+  useful with comments containing copyright/license information.
+
 YUI Compressor 2.3.2, 2008-02-01
 --------------------------------
 
