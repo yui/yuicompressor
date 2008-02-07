@@ -231,6 +231,16 @@ public class JavaScriptCompressor {
         reserved.add("throws");
         reserved.add("transient");
         reserved.add("volatile");
+        // These are not reserved, but should be taken into account
+        // in isValidIdentifier (See jslint source code)
+        reserved.add("arguments");
+        reserved.add("eval");
+        reserved.add("true");
+        reserved.add("false");
+        reserved.add("Infinity");
+        reserved.add("NaN");
+        reserved.add("null");
+        reserved.add("undefined");
     }
 
     private static int countChar(String haystack, char needle) {

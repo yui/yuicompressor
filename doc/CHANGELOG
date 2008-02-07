@@ -1,3 +1,8 @@
+YUI Compressor 2.3.4, 2008-02-07
+--------------------------------
+
++ Expanded the list of reserved words used by isValidIdentifier()
+
 YUI Compressor 2.3.3, 2008-02-04
 --------------------------------
 
