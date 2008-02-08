@@ -20,6 +20,7 @@ class ScriptOrFnScope {
     private Hashtable identifiers = new Hashtable();
     private Hashtable hints = new Hashtable();
     private boolean markedForMunging = true;
+    private int varcount = 0;
 
     ScriptOrFnScope(int braceNesting, ScriptOrFnScope parentScope) {
         this.braceNesting = braceNesting;
@@ -85,6 +86,11 @@ class ScriptOrFnScope {
             scope = scope.parentScope;
         }
         return result;
+    }
+
+    int incrementVarCount() {
+        varcount++;
+        return varcount;
     }
 
     void munge() {

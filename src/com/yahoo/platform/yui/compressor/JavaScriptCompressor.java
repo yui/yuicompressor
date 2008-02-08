@@ -547,6 +547,7 @@ public class JavaScriptCompressor {
         }
 
         buildSymbolTree();
+        // DO NOT TOUCH this.tokens BETWEEN THESE TWO PHASES (BECAUSE OF this.indexedScopes)
         mungeSymboltree();
         StringBuffer sb = printSymbolTree(linebreak, preserveAllSemiColons);
 
@@ -899,6 +900,13 @@ public class JavaScriptCompressor {
             switch (token.getType()) {
 
                 case Token.VAR:
+
+                    if (mode == BUILDING_SYMBOL_TREE && scope.incrementVarCount() > 1) {
+                        warn("Try to use a single 'var' statement per scope.", true);
+                    }
+
+                    /* FALLSTHROUGH */
+
                 case Token.CONST:
 
                     // The var keyword is followed by at least one symbol name.
@@ -1106,7 +1114,7 @@ public class JavaScriptCompressor {
                                 result.append(symbol);
                             }
                             if (currentScope != globalScope && identifier.getRefcount() == 0) {
-                                warn("The symbol " + symbol + " is declared but is apparently never used.\nThis code can probably be written in a more efficient way.", true);
+                                warn("The symbol " + symbol + " is declared but is apparently never used.\nThis code can probably be written in a more compact way.", true);
                             }
                         } else {
                             result.append(symbol);
@@ -1156,7 +1164,7 @@ public class JavaScriptCompressor {
                             result.append(symbol);
                         }
                         if (currentScope != globalScope && identifier.getRefcount() == 0) {
-                            warn("The symbol " + symbol + " is declared but is apparently never used.\nThis code can probably be written in a more efficient way.", true);
+                            warn("The symbol " + symbol + " is declared but is apparently never used.\nThis code can probably be written in a more compact way.", true);
                         }
                         token = consumeToken();
                     }
