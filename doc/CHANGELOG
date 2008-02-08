@@ -1,3 +1,10 @@
+YUI Compressor 2.3.5, 2008-02-08
+--------------------------------
+
++ Added a warning when more than one 'var' statement is used in a single scope.
+  Automatic coalescence is extremely complicated, and would be unsafe if not
+  done properly.
+
 YUI Compressor 2.3.4, 2008-02-07
 --------------------------------
 
