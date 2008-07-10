@@ -169,6 +169,10 @@ public class CssCompressor {
         // Replace the pseudo class for the Box Model Hack
         css = css.replaceAll("___PSEUDOCLASSBMH___", "\"\\\\\"}\\\\\"\"");
 
+        // Replace multiple semi-colons in a row by a single one
+        // See SF bug #1980989
+        css = css.replaceAll(";;+", ";");
+
         // Trim the final string (for any leading or trailing white spaces)
         css = css.trim();
 
