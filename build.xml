@@ -51,7 +51,6 @@
         <copy todir="${build.dir}/${dist.package.name}">
             <fileset dir=".">
                 <include name="doc/**/*"/>
-                <include name="lib/**/*"/>
                 <include name="src/**/*"/>
                 <exclude name="**/CVS"/>
             </fileset>
