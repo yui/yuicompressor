@@ -1,3 +1,11 @@
+YUI Compressor 2.3.6, 2008-07-10
+--------------------------------
+
++ Fixed a few minor bugs with the CSS compressor
++ Changed packaging. The original Rhino library, which is used to build the
+  YUI Compressor, is not part of the downloadable archive. Too many people
+  put it in their classpath, generating a lot of invalid bugs.
+
 YUI Compressor 2.3.5, 2008-02-08
 --------------------------------
 
