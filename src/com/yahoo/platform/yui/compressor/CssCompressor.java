@@ -43,7 +43,9 @@ public class CssCompressor {
         sb = new StringBuffer(srcsb.toString());
         while ((startIndex = sb.indexOf("/*", startIndex)) >= 0) {
             endIndex = sb.indexOf("*/", startIndex + 2);
-            if (endIndex >= startIndex + 2) {
+            if (endIndex < 0) {
+                sb.delete(startIndex, sb.length());
+            } else if (endIndex >= startIndex + 2) {
                 if (sb.charAt(endIndex-1) == '\\') {
                     // Looks like a comment to hide rules from IE Mac.
                     // Leave this comment, and the following one, alone...
