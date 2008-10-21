@@ -90,7 +90,7 @@ public class JavaScriptCompressor {
         literals.put(new Integer(Token.FALSE), "false");
         literals.put(new Integer(Token.NULL), "null");
         literals.put(new Integer(Token.THIS), "this");
-        literals.put(new Integer(Token.FUNCTION), "function ");
+        literals.put(new Integer(Token.FUNCTION), "function");
         literals.put(new Integer(Token.COMMA), ",");
         literals.put(new Integer(Token.LC), "{");
         literals.put(new Integer(Token.RC), "}");
@@ -111,13 +111,13 @@ public class JavaScriptCompressor {
         literals.put(new Integer(Token.TRY), "try");
         literals.put(new Integer(Token.CATCH), "catch");
         literals.put(new Integer(Token.FINALLY), "finally");
-        literals.put(new Integer(Token.THROW), "throw ");
+        literals.put(new Integer(Token.THROW), "throw");
         literals.put(new Integer(Token.SWITCH), "switch");
-        literals.put(new Integer(Token.BREAK), "break ");
-        literals.put(new Integer(Token.CONTINUE), "continue ");
-        literals.put(new Integer(Token.CASE), "case ");
+        literals.put(new Integer(Token.BREAK), "break");
+        literals.put(new Integer(Token.CONTINUE), "continue");
+        literals.put(new Integer(Token.CASE), "case");
         literals.put(new Integer(Token.DEFAULT), "default");
-        literals.put(new Integer(Token.RETURN), "return ");
+        literals.put(new Integer(Token.RETURN), "return");
         literals.put(new Integer(Token.VAR), "var ");
         literals.put(new Integer(Token.SEMI), ";");
         literals.put(new Integer(Token.ASSIGN), "=");
@@ -152,7 +152,7 @@ public class JavaScriptCompressor {
         literals.put(new Integer(Token.LSH), "<<");
         literals.put(new Integer(Token.RSH), ">>");
         literals.put(new Integer(Token.URSH), ">>>");
-        literals.put(new Integer(Token.TYPEOF), "typeof ");
+        literals.put(new Integer(Token.TYPEOF), "typeof");
         literals.put(new Integer(Token.VOID), "void ");
         literals.put(new Integer(Token.CONST), "const ");
         literals.put(new Integer(Token.NOT), "!");
@@ -1202,8 +1202,9 @@ public class JavaScriptCompressor {
                     break;
 
                 case Token.RETURN:
-                    result.append("return");
-                    // No space needed after 'return' when followed
+                case Token.TYPEOF:
+                    result.append(literals.get(new Integer(token.getType())));
+                    // No space needed after 'return' and 'typeof' when followed
                     // by '(', '[', '{', a string or a regexp.
                     if (offset < length) {
                         token = getToken(0);
@@ -1219,35 +1220,20 @@ public class JavaScriptCompressor {
                     break;
 
                 case Token.CASE:
-                    result.append("case");
-                    // White-space needed after 'case' when not followed by a string.
-                    if (offset < length && getToken(0).getType() != Token.STRING) {
-                        result.append(' ');
-                    }
-                    break;
-
                 case Token.THROW:
-                    // White-space needed after 'throw' when not followed by a string.
-                    result.append("throw");
+                    result.append(literals.get(new Integer(token.getType())));
+                    // White-space needed after 'case' and 'throw' when not followed by a string.
                     if (offset < length && getToken(0).getType() != Token.STRING) {
                         result.append(' ');
                     }
                     break;
 
                 case Token.BREAK:
-                    result.append("break");
-                    if (offset < length && getToken(0).getType() != Token.SEMI) {
-                        // If 'break' is not followed by a semi-colon, it must be
-                        // followed by a label, hence the need for a white space.
-                        result.append(' ');
-                    }
-                    break;
-
                 case Token.CONTINUE:
-                    result.append("continue");
+                    result.append(literals.get(new Integer(token.getType())));
                     if (offset < length && getToken(0).getType() != Token.SEMI) {
-                        // If 'continue' is not followed by a semi-colon, it must be
-                        // followed by a label, hence the need for a white space.
+                        // If 'break' or 'continue' is not followed by a semi-colon, it must
+                        // be followed by a label, hence the need for a white space.
                         result.append(' ');
                     }
                     break;
