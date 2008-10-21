@@ -45,14 +45,6 @@ public class YUICompressor {
 
             boolean verbose = parser.getOptionValue(verboseOpt) != null;
 
-            // Check the JVM vendor
-            if (verbose) {
-                String jvmVendor = System.getProperty("java.vendor");
-                if (!jvmVendor.equalsIgnoreCase("Sun Microsystems Inc.")) {
-                    System.err.println("\n[INFO] It is recommended to use Sun Microsystems' JVM [java.vendor = " + jvmVendor + "]");
-                }
-            }
-
             String charset = (String) parser.getOptionValue(charsetOpt);
             if (charset == null || !Charset.isSupported(charset)) {
                 charset = System.getProperty("file.encoding");
