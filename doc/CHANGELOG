@@ -1,3 +1,13 @@
+YUI Compressor 2.4, 2008-10-21
+------------------------------
+
++ Allowed the YUI Compressor (which uses a modified version of Rhino)
+  to work alongside the original (unmodified) rhino library by using
+  a custom class loader.
++ Added all that's necessary to build the YUI Compressor to the
+  downloable package.
++ Fixed unnecessary white space after return / typeof when possible.
+
 YUI Compressor 2.3.6, 2008-07-10
 --------------------------------
 
