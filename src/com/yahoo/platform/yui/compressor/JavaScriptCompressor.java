@@ -1211,7 +1211,8 @@ public class JavaScriptCompressor {
                                 token.getType() != Token.LB &&
                                 token.getType() != Token.LC &&
                                 token.getType() != Token.STRING &&
-                                token.getType() != Token.REGEXP) {
+                                token.getType() != Token.REGEXP &&
+                                token.getType() != Token.SEMI) {
                             result.append(' ');
                         }
                     }
