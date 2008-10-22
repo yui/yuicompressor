@@ -15,7 +15,7 @@ public class Bootstrap {
     public static void main(String args[]) throws Exception {
         ClassLoader loader = new JarClassLoader();
         Thread.currentThread().setContextClassLoader(loader);
-        Class c = loader.loadClass("com.yahoo.platform.yui.compressor.YUICompressor");
+        Class c = loader.loadClass(YUICompressor.class.getName());
         Method main = c.getMethod("main", new Class[]{String[].class});
         main.invoke(null, new Object[]{args});
     }
