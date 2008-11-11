@@ -1,9 +1,17 @@
-YUI Compressor 2.4.1, 2008-11-10
+YUI Compressor 2.4.2, 2008-11-10
 --------------------------------
-+ Use lower case letters preferentially when obfuscating identifier names.
-  Thiss slightly boost the efficiency of any compression algorithm applied
-  on the minifed file (gzipping, etc.)
+
 + Preserved comments shouldn't prevent obfuscation (Thanks to Matjaz Lipus)
+
+YUI Compressor 2.4.1, 2008-10-28
+--------------------------------
+
++ Use preferentially lower case letters for obfuscated variable names.
+  Since JavaScript keywords use lower case letters most often, this
+  improves the efficiency of any compression algorithm (gzipping)
+  used after minification.
++ Don't append a semi-colon at the end of a JavaScript file when the
+  last token is a special comment.
 
 YUI Compressor 2.4, 2008-10-21
 ------------------------------
