@@ -1,3 +1,10 @@
+YUI Compressor 2.4.1, 2008-11-10
+--------------------------------
++ Use lower case letters preferentially when obfuscating identifier names.
+  Thiss slightly boost the efficiency of any compression algorithm applied
+  on the minifed file (gzipping, etc.)
++ Preserved comments shouldn't prevent obfuscation (Thanks to Matjaz Lipus)
+
 YUI Compressor 2.4, 2008-10-21
 ------------------------------
 
