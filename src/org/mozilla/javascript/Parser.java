@@ -164,21 +164,29 @@ public class Parser
         int tt = currentFlaggedToken;
         if (tt == Token.EOF) {
 
-            while ((tt = ts.getToken()) == Token.SPECIALCOMMENT) {
-                /* Support for JScript conditional comments */
-                decompiler.addJScriptConditionalComment(ts.getString());
+            while ((tt = ts.getToken()) == Token.CONDCOMMENT || tt == Token.KEEPCOMMENT) {
+                if (tt == Token.CONDCOMMENT) {
+                    /* Support for JScript conditional comments */
+                    decompiler.addJScriptConditionalComment(ts.getString());
+                } else {
+                    /* Support for preserved comments */
+                    decompiler.addPreservedComment(ts.getString());
+                }
             }
 
             if (tt == Token.EOL) {
                 do {
                     tt = ts.getToken();
 
-                    if (tt == Token.SPECIALCOMMENT) {
+                    if (tt == Token.CONDCOMMENT) {
                         /* Support for JScript conditional comments */
+                        decompiler.addJScriptConditionalComment(ts.getString());
+                    } else if (tt == Token.KEEPCOMMENT) {
+                        /* Support for preserved comments */
                         decompiler.addJScriptConditionalComment(ts.getString());
                     }
 
-                } while (tt == Token.EOL || tt == Token.SPECIALCOMMENT);
+                } while (tt == Token.EOL || tt == Token.CONDCOMMENT || tt == Token.KEEPCOMMENT);
                 tt |= TI_AFTER_EOL;
             }
             currentFlaggedToken = tt;

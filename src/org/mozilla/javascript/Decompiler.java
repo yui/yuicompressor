@@ -168,7 +168,13 @@ public class Decompiler
 
     void addJScriptConditionalComment(String str)
     {
-        addToken(Token.SPECIALCOMMENT);
+        addToken(Token.CONDCOMMENT);
+        appendString(str);
+    }
+
+    void addPreservedComment(String str)
+    {
+        addToken(Token.KEEPCOMMENT);
         appendString(str);
     }
 

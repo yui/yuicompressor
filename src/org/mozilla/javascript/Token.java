@@ -251,9 +251,10 @@ public class Token
         SETCONST       = 150,
         SETCONSTVAR    = 151,
 
-        SPECIALCOMMENT = 152, // Internet Explorer conditional comment
+        CONDCOMMENT    = 152,  // JScript conditional comment
+        KEEPCOMMENT    = 153,  // /*! ... */ comment
 
-        LAST_TOKEN     = 153;
+        LAST_TOKEN     = 154;
 
     public static String name(int token)
     {

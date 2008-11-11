@@ -717,20 +717,19 @@ class TokenStream
                         } else if (c == '/') {
                             if (lookForSlash) {
                                 sb.delete(sb.length()-2, sb.length());
-                                String s = sb.toString();
-                                if (s.startsWith("!") ||
-                                        s.startsWith("@cc_on") ||
-                                        s.startsWith("@if") ||
-                                        s.startsWith("@elif") ||
-                                        s.startsWith("@else") ||
-                                        s.startsWith("@end")) {
-                                    if (s.startsWith("!")) {
-                                        // Remove the leading '!'
-                                        this.string = s.substring(1);
-                                    } else {
-                                        this.string = s;
-                                    }
-                                    return Token.SPECIALCOMMENT;
+                                String s1 = sb.toString();
+                                String s2 = s1.trim();
+                                if (s1.startsWith("!")) {
+                                    // Remove the leading '!'
+                                    this.string = s1.substring(1);
+                                    return Token.KEEPCOMMENT;
+                                } else if (s2.startsWith("@cc_on") ||
+                                           s2.startsWith("@if")    ||
+                                           s2.startsWith("@elif")  ||
+                                           s2.startsWith("@else")  ||
+                                           s2.startsWith("@end")) {
+                                    this.string = s1;
+                                    return Token.CONDCOMMENT;
                                 } else {
                                     continue retry;
                                 }

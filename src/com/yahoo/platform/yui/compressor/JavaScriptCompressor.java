@@ -36,17 +36,17 @@ public class JavaScriptCompressor {
         builtin.add("top");
 
         ones = new ArrayList();
-        for (char c = 'A'; c <= 'Z'; c++)
-            ones.add(Character.toString(c));
         for (char c = 'a'; c <= 'z'; c++)
+            ones.add(Character.toString(c));
+        for (char c = 'A'; c <= 'Z'; c++)
             ones.add(Character.toString(c));
 
         twos = new ArrayList();
         for (int i = 0; i < ones.size(); i++) {
             String one = (String) ones.get(i);
-            for (char c = 'A'; c <= 'Z'; c++)
-                twos.add(one + Character.toString(c));
             for (char c = 'a'; c <= 'z'; c++)
+                twos.add(one + Character.toString(c));
+            for (char c = 'A'; c <= 'Z'; c++)
                 twos.add(one + Character.toString(c));
             for (char c = '0'; c <= '9'; c++)
                 twos.add(one + Character.toString(c));
@@ -63,9 +63,9 @@ public class JavaScriptCompressor {
         threes = new ArrayList();
         for (int i = 0; i < twos.size(); i++) {
             String two = (String) twos.get(i);
-            for (char c = 'A'; c <= 'Z'; c++)
-                threes.add(two + Character.toString(c));
             for (char c = 'a'; c <= 'z'; c++)
+                threes.add(two + Character.toString(c));
+            for (char c = 'A'; c <= 'Z'; c++)
                 threes.add(two + Character.toString(c));
             for (char c = '0'; c <= '9'; c++)
                 threes.add(two + Character.toString(c));
@@ -321,7 +321,8 @@ public class JavaScriptCompressor {
             int tt = source.charAt(offset++);
             switch (tt) {
 
-                case Token.SPECIALCOMMENT:
+                case Token.CONDCOMMENT:
+                case Token.KEEPCOMMENT:
                 case Token.NAME:
                 case Token.REGEXP:
                 case Token.STRING:
@@ -832,7 +833,7 @@ public class JavaScriptCompressor {
                     parensNesting--;
                     break;
 
-                case Token.SPECIALCOMMENT:
+                case Token.CONDCOMMENT:
                     if (mode == BUILDING_SYMBOL_TREE) {
                         protectScopeFromObfuscation(currentScope);
                         warn("Using JScript conditional comments is not recommended." + (munge ? " Moreover, using JScript conditional comments reduces the level of compression!" : ""), true);
@@ -977,7 +978,7 @@ public class JavaScriptCompressor {
                     parseCatch();
                     break;
 
-                case Token.SPECIALCOMMENT:
+                case Token.CONDCOMMENT:
                     if (mode == BUILDING_SYMBOL_TREE) {
                         protectScopeFromObfuscation(scope);
                         warn("Using JScript conditional comments is not recommended." + (munge ? " Moreover, using JScript conditional comments reduces the level of compression." : ""), true);
@@ -1267,7 +1268,8 @@ public class JavaScriptCompressor {
                     }
                     break;
 
-                case Token.SPECIALCOMMENT:
+                case Token.CONDCOMMENT:
+                case Token.KEEPCOMMENT:
                     if (result.length() > 0 && result.charAt(result.length() - 1) != '\n') {
                         result.append("\n");
                     }
@@ -1291,7 +1293,10 @@ public class JavaScriptCompressor {
         // supposed to be removed. This is especially useful when concatenating
         // several minified files (the absence of an ending semi-colon at the
         // end of one file may very likely cause a syntax error)
-        if (!preserveAllSemiColons && result.length() > 0) {
+        if (!preserveAllSemiColons &&
+                result.length() > 0 &&
+                getToken(-1).getType() != Token.CONDCOMMENT &&
+                getToken(-1).getType() != Token.KEEPCOMMENT) {
             if (result.charAt(result.length() - 1) == '\n') {
                 result.setCharAt(result.length() - 1, ';');
             } else {
