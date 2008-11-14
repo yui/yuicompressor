@@ -183,7 +183,7 @@ public class Parser
                         decompiler.addJScriptConditionalComment(ts.getString());
                     } else if (tt == Token.KEEPCOMMENT) {
                         /* Support for preserved comments */
-                        decompiler.addJScriptConditionalComment(ts.getString());
+                        decompiler.addPreservedComment(ts.getString());
                     }
 
                 } while (tt == Token.EOL || tt == Token.CONDCOMMENT || tt == Token.KEEPCOMMENT);
