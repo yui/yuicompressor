@@ -1,0 +1,9 @@
+build/
+.DS_Store
+.*.swp
+.svn
+CVS/
+# Ignore all backup files
+*~
+# Ignore Emacs auto saved files
+*#*#
