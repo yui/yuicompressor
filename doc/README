@@ -130,6 +130,11 @@ AUTHOR
 
 COPYRIGHT
 
-  Copyright (c) 2007, Yahoo! Inc. All rights reserved.
-  Code licensed under the BSD License:
-      http://developer.yahoo.net/yui/license.txt
+  Copyright (c) 2007-2009, Yahoo! Inc. All rights reserved.
+
+LICENSE
+
+  All code specific to YUI Compressor is issued under a BSD license.
+  YUI Compressor extends and implements code from Mozilla's Rhino project.
+  Rhino is issued under the Mozilla Public License (MPL), and MPL applies
+  to the Rhino source and binaries that are distributed with YUI Compressor.
