@@ -122,19 +122,22 @@ NOTES
      * Copyright 2001 Robert Penner All rights reserved.
      */
 
+MODIFIED RHINO FILES
+
+  YUI Compressor uses a modified version of the Rhino library
+  (http://www.mozilla.org/rhino/) The changes were made to support
+  JScript conditional comments, preserved comments, unescaped slash
+  characters in regular expressions, and to allow for the optimization
+  of escaped quotes in string literals.
+
 AUTHOR
 
   The YUI Compressor was written and is maintained by:
-      Julien Lecomte <jlecomte@yahoo-inc.com>
+      Julien Lecomte - http://www.julienlecomte.net/
   The CSS portion is a port of Isaac Schlueter's cssmin utility.
 
-COPYRIGHT
+COPYRIGHT AND LICENSE
 
-  Copyright (c) 2007-2009, Yahoo! Inc. All rights reserved.
-
-LICENSE
-
-  All code specific to YUI Compressor is issued under a BSD license.
-  YUI Compressor extends and implements code from Mozilla's Rhino project.
-  Rhino is issued under the Mozilla Public License (MPL), and MPL applies
-  to the Rhino source and binaries that are distributed with YUI Compressor.
+  Copyright (c) 2009 Yahoo! Inc.  All rights reserved.
+  The copyrights embodied in the content of this file are licensed
+  by Yahoo! Inc. under the BSD (revised) open source license.

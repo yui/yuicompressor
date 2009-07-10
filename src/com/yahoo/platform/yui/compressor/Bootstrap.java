@@ -1,9 +1,9 @@
 /*
  * YUI Compressor
- * Author: Julien Lecomte <jlecomte@yahoo-inc.com>
- * Copyright (c) 2007, Yahoo! Inc. All rights reserved.
- * Code licensed under the BSD License:
- *     http://developer.yahoo.net/yui/license.txt
+ * Author: Julien Lecomte - http://www.julienlecomte.net/
+ * Copyright (c) 2009 Yahoo! Inc.  All rights reserved.
+ * The copyrights embodied in the content of this file are licensed
+ * by Yahoo! Inc. under the BSD (revised) open source license.
  */
 
 package com.yahoo.platform.yui.compressor;
