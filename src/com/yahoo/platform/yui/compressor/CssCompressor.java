@@ -85,7 +85,14 @@ public class CssCompressor {
         }
         m.appendTail(sb);
         css = sb.toString();
+        
+        // Remove spaces before the things that should not have spaces before them.
         css = css.replaceAll("\\s+([!{};:>+\\(\\)\\],])", "$1");
+        
+        // Put the space back in some cases, to support stuff like
+        // @media screen and (-webkit-min-device-pixel-ratio:0){
+        css = css.replaceAll("(@media[^{]*[^\\s])\\(", "$1 (");        
+        
         css = css.replaceAll("___PSEUDOCLASSCOLON___", ":");
 
         // Remove the spaces after the things that should not have spaces after them.
