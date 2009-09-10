@@ -89,9 +89,13 @@ public class CssCompressor {
         // Remove spaces before the things that should not have spaces before them.
         css = css.replaceAll("\\s+([!{};:>+\\(\\)\\],])", "$1");
         
+        // If there is a @charset, then only allow one, and push to the top of the file.
+        css = css.replaceAll("^(.*)(@charset \"[^\"]*\";)", "$2$1");
+        css = css.replaceAll("^(\\s*@charset [^;]+;\\s*)+", "$1");
+        
         // Put the space back in some cases, to support stuff like
         // @media screen and (-webkit-min-device-pixel-ratio:0){
-        css = css.replaceAll("(@media[^{]*[^\\s])\\(", "$1 (");        
+        css = css.replaceAll("(@media[^{]*[^\\s])\\(", "$1 (");       
         
         css = css.replaceAll("___PSEUDOCLASSCOLON___", ":");
 
