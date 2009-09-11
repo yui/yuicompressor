@@ -1,5 +1,5 @@
 PRODUCT_NAME = yuicompressor
-VERSION      = `cat ant.properties | grep version.number | head -n1 | awk -F= '{print $2}'`
+VERSION      = `cat ../ant.properties | grep version.number | egrep -o '[0-9]+(\.[0-9])+' | head -n1`
 LONG_DESC    = `cat ../doc/README`
 SHORT_DESC   = YUI Compressor
 PERM         = 0644
@@ -13,4 +13,6 @@ PACKAGE_OS_SPECIFIC = no
 # Actions
 ############################################################
 f 0755 - - bin/yuicompressor yuicompressor
-f 0644 - - bin/yuicompressor.jar yuicompressor.jar
+# Build with ant, piping to stderr, then get the biggest-named jar file.
+JAR=`( cd .. && (ant 1>&2) && ls $PWD/build/*.jar | sort | tail -n1 && exit 0 ) || ( echo "Build Failed" && exit 1 )`
+f 0644 - - bin/yuicompressor.jar $(JAR)
