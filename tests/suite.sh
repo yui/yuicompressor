@@ -3,12 +3,14 @@
 cd $(dirname $0)
 
 ls *.{css,js} | egrep -v '\.min$' | while read testfile; do
+	# Get the jar to use.
+	jar="$(ls ../build/*.jar | sort | tail -n1)"
 	
 	expected="$(
 		cat $( ls $testfile* | egrep '\.min$' )
 	)"
 	actual="$(
-		java -jar ../build/yuicompressor*.jar $testfile
+		java -jar $jar $testfile
 	)"
 
 	if [ "$expected" == "$actual" ]; then
