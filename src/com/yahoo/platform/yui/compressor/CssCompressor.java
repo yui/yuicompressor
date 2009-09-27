@@ -95,15 +95,15 @@ public class CssCompressor {
         
         // Put the space back in some cases, to support stuff like
         // @media screen and (-webkit-min-device-pixel-ratio:0){
-        css = css.replaceAll("(@media[^{]*[^\\s])\\(", "$1 (");       
+        css = css.replaceAll("\\band\\(", "and (");       
         
         css = css.replaceAll("___PSEUDOCLASSCOLON___", ":");
 
         // Remove the spaces after the things that should not have spaces after them.
         css = css.replaceAll("([!{}:;>+\\(\\[,])\\s+", "$1");
 
-        // Add the semicolon where it's missing.
-        css = css.replaceAll("([^;\\}])}", "$1;}");
+        // remove unnecessary semicolons
+        css = css.replaceAll(";+}", "}");
 
         // Replace 0(px,em,%) with 0.
         css = css.replaceAll("([\\s:])(0)(px|em|%|in|cm|mm|pc|pt|ex)", "$1$2");
