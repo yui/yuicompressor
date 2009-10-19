@@ -161,7 +161,7 @@ public class CssCompressor {
         css = sb.toString();
 
         // Remove empty rules.
-        css = css.replaceAll("[^\\}]+\\{;\\}", "");
+        css = css.replaceAll("[^\\}\\{]+\\{\\}", "");
 
         if (linebreakpos >= 0) {
             // Some source control tools don't like it when files containing lines longer
