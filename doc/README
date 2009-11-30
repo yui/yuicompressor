@@ -134,6 +134,7 @@ AUTHOR
 
   The YUI Compressor was written and is maintained by:
       Julien Lecomte - http://www.julienlecomte.net/
+
   The CSS portion is a port of Isaac Schlueter's cssmin utility.
 
 COPYRIGHT AND LICENSE
