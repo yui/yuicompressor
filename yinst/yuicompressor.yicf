@@ -5,7 +5,7 @@ SHORT_DESC   = YUI Compressor
 PERM         = 0644
 OWNER        = root
 GROUP        = users
-CUSTODIAN    = jlecomte@yahoo-inc.com http://www.julienlecomte.net/yuicompressor/
+CUSTODIAN    = ci-tools@yahoo-inc.com http://developer.yahoo.com/yui/compressor/
 
 PACKAGE_OS_SPECIFIC = no
 
