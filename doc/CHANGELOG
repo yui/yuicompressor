@@ -3,6 +3,11 @@ YUI Compressor 2.4.2, 2008-11-10
 
 + Preserved comments shouldn't prevent obfuscation (Thanks to Matjaz Lipus)
 
+YUI Compressor 2.4.3, 2009-12-07
+-------------------------------
+
++ Changed custodian to ci-tools@
+
 YUI Compressor 2.4.1, 2008-10-28
 --------------------------------
 
