@@ -31,7 +31,6 @@ YAHOO.compressor.cssmin = function (css, linebreakpos){
     while ((startIndex = css.indexOf("/*", startIndex)) >= 0) {
         preserve = css.length > startIndex + 2 && css[startIndex + 2] === '!';
         endIndex = css.indexOf("*/", startIndex + 2);
-        token = css.slice(startIndex+2, endIndex);
         if (endIndex < 0) {
             if (!preserve) {
                 css = css.slice(0, startIndex);
@@ -51,6 +50,7 @@ YAHOO.compressor.cssmin = function (css, linebreakpos){
                 css = css.slice(0, startIndex) + css.slice(endIndex + 2);
             } else {
                 // preserve
+                token = css.slice(startIndex+3, endIndex); // 3 is "/*!".length
                 preservedTokens.push(token);
                 css = css.slice(0, startIndex+2) + "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.length - 1) + "___" + css.slice(endIndex);
                 if (iemac) iemac = false;
@@ -69,10 +69,6 @@ YAHOO.compressor.cssmin = function (css, linebreakpos){
     // Normalize all whitespace strings to single spaces. Easier to work with that way.
     css = css.replace(/\s+/g, " ");
 
-    // Make a pseudo class for the Box Model Hack
-    css = css.replace(/"\\"\}\\""/g, "___YUICSSMIN_PSEUDOCLASSBMH___");
-
-
     // Remove the spaces before the things that should not have spaces before them.
     // But, be careful not to turn "p :link {...}" into "p:link{...}"
     // Swap out any pseudo-class colons with the token, and then swap back.
@@ -80,6 +76,14 @@ YAHOO.compressor.cssmin = function (css, linebreakpos){
         return m.replace(":", "___YUICSSMIN_PSEUDOCLASSCOLON___");
     });
     css = css.replace(/\s+([!{};:>+\(\)\],])/g, '$1');
+    css = css.replace(/___YUICSSMIN_PSEUDOCLASSCOLON___/g, ":");
+
+    // retain space for special IE6 cases
+    css = css.replace(/:first-(line|letter)({|,)/g, ":first-$1 $2");
+        
+    // no space after the end of a preserved comment
+    css = css.replace(/\*\/ /g, '*/'); 
+    
      
     // If there is a @charset, then only allow one, and push to the top of the file.
     css = css.replace(/^(.*)(@charset "[^"]*";)/gi, '$2$1');
@@ -89,13 +93,12 @@ YAHOO.compressor.cssmin = function (css, linebreakpos){
     // @media screen and (-webkit-min-device-pixel-ratio:0){
     css = css.replace(/\band\(/gi, "and (");
     
-    css = css.replace(/___YUICSSMIN_PSEUDOCLASSCOLON___/g, ":");
 
     // Remove the spaces after the things that should not have spaces after them.
     css = css.replace(/([!{}:;>+\(\[,])\s+/g, '$1');
 
     // remove unnecessary semicolons
-    css = css.replace(/;+}/, "}");
+    css = css.replace(/;+}/g, "}");
 
     // Replace 0(px,em,%) with 0.
     css = css.replace(/([\s:])(0)(px|em|%|in|cm|mm|pc|pt|ex)/gi, "$1$2");
@@ -161,9 +164,6 @@ YAHOO.compressor.cssmin = function (css, linebreakpos){
         }
     }
 
-    // Replace the pseudo class for the Box Model Hack
-    css = css.replace(/___YUICSSMIN_PSEUDOCLASSBMH___/g, '"\\"}\\""');
-
     // Replace multiple semi-colons in a row by a single one
     // See SF bug #1980989
     css = css.replace(/;;+/g, ";");
@@ -172,7 +172,7 @@ YAHOO.compressor.cssmin = function (css, linebreakpos){
     for(i = 0, max = preservedTokens.length; i < max; i++) {
         css = css.replace("___YUICSSMIN_PRESERVED_TOKEN_" + i + "___", preservedTokens[i]);
     }
-
+    
     // Trim the final string (for any leading or trailing white spaces)
     css = css.replace(/^\s+|\s+$/g, "");
 
