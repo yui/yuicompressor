@@ -1,3 +1,10 @@
+/*! preserved */
+emptiness {}
+
+@import "another.css";
+/* I'm empty - delete me */
+empty { ;}
+
 @media print {
 	.noprint { display: none; }
 }

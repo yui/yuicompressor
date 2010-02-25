@@ -1,0 +1,6 @@
+/* preserving strings */
+.sele {
+  content: "\"keep  \"    me";
+  something: '\\\' .     . ';
+  else: 'empty{}';
+}

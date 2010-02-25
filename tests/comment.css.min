@@ -1,1 +1,1 @@
-html>/*!*/body{x:y}
+html>/**/body p{color:blue}
