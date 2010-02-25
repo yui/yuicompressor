@@ -1,6 +1,8 @@
 /*
  * YUI Compressor
- * Author: Julien Lecomte - http://www.julienlecomte.net/
+ * Author: Julien Lecomte -  http://www.julienlecomte.net/
+ * Author: Isaac Schlueter - http://foohack.com/ 
+ * Author: Stoyan Stefanov - http://phpied.com/
  * Copyright (c) 2009 Yahoo! Inc.  All rights reserved.
  * The copyrights embodied in the content of this file are licensed
  * by Yahoo! Inc. under the BSD (revised) open source license.
@@ -13,6 +15,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.ArrayList; 
 
 public class CssCompressor {
 
@@ -31,14 +34,17 @@ public class CssCompressor {
 
         Pattern p;
         Matcher m;
-        String css;
+        String css, token;
         StringBuffer sb;
         int startIndex, endIndex;
+        ArrayList preservedTokens;
+        
 
         // Remove all comment blocks...
         startIndex = 0;
         boolean iemac = false;
         boolean preserve = false;
+        preservedTokens = new ArrayList(0);
         sb = new StringBuffer(srcsb.toString());
         while ((startIndex = sb.indexOf("/*", startIndex)) >= 0) {
             preserve = sb.length() > startIndex + 2 && sb.charAt(startIndex + 2) == '!';
@@ -50,27 +56,47 @@ public class CssCompressor {
             } else if (endIndex >= startIndex + 2) {
                 if (sb.charAt(endIndex-1) == '\\') {
                     // Looks like a comment to hide rules from IE Mac.
-                    // Leave this comment, and the following one, alone...
-                    startIndex = endIndex + 2;
+                    // Leave this comment, and the following one, but shorten them.
+                    sb.replace(startIndex, endIndex + 2, "/*\\*/");
+                    startIndex += 5;
                     iemac = true;
-                } else if (iemac) {
-                    startIndex = endIndex + 2;
+                } else if (iemac && !preserve) {
+                    sb.replace(startIndex, endIndex + 2, "/**/");
+                    startIndex += 4;
                     iemac = false;
                 } else if (!preserve) {
                     sb.delete(startIndex, endIndex + 2);
-                } else {
-                    startIndex = endIndex + 2;
+                } else {                    
+                    // preserve
+                    token = sb.substring(startIndex + 3, endIndex); // 3 is "/*!".length
+                    preservedTokens.add(token);
+                    token = "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___";
+                    sb.replace(startIndex + 2, endIndex, token);
+                    if (iemac) iemac = false;
+                    startIndex += 2;
                 }
             }
         }
 
         css = sb.toString();
 
+        // preserve strings so their content doesn't get accidentally minified
+        sb = new StringBuffer();
+        p = Pattern.compile("(\"([^\\\\\"]|\\\\.|\\\\)*\")|(\'([^\\\\\']|\\\\.|\\\\)*\')");
+        m = p.matcher(css);
+        while (m.find()) {
+            token = m.group();
+            char quote = token.charAt(0);
+            token = token.substring(1, token.length() - 1);
+            preservedTokens.add(token);
+            String preserver = quote + "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___" + quote;
+            m.appendReplacement(sb, preserver);
+        }
+        m.appendTail(sb);
+        css = sb.toString();
+
         // Normalize all whitespace strings to single spaces. Easier to work with that way.
         css = css.replaceAll("\\s+", " ");
-
-        // Make a pseudo class for the Box Model Hack
-        css = css.replaceAll("\"\\\\\"}\\\\\"\"", "___PSEUDOCLASSBMH___");
 
         // Remove the spaces before the things that should not have spaces before them.
         // But, be careful not to turn "p :link {...}" into "p:link{...}"
@@ -80,14 +106,21 @@ public class CssCompressor {
         m = p.matcher(css);
         while (m.find()) {
             String s = m.group();
-            s = s.replaceAll(":", "___PSEUDOCLASSCOLON___");
+            s = s.replaceAll(":", "___YUICSSMIN_PSEUDOCLASSCOLON___");
             m.appendReplacement(sb, s);
         }
         m.appendTail(sb);
         css = sb.toString();
-        
         // Remove spaces before the things that should not have spaces before them.
         css = css.replaceAll("\\s+([!{};:>+\\(\\)\\],])", "$1");
+        // bring back the colon
+        css = css.replaceAll("___YUICSSMIN_PSEUDOCLASSCOLON___", ":");
+        
+        // retain space for special IE6 cases
+        css = css.replaceAll(":first\\-(line|letter)(\\{|,)", ":first-$1 $2");
+        
+        // no space after the end of a preserved comment
+        css = css.replaceAll("\\*/ ", "*/"); 
         
         // If there is a @charset, then only allow one, and push to the top of the file.
         css = css.replaceAll("^(.*)(@charset \"[^\"]*\";)", "$2$1");
@@ -96,8 +129,6 @@ public class CssCompressor {
         // Put the space back in some cases, to support stuff like
         // @media screen and (-webkit-min-device-pixel-ratio:0){
         css = css.replaceAll("\\band\\(", "and (");       
-        
-        css = css.replaceAll("___PSEUDOCLASSCOLON___", ":");
 
         // Remove the spaces after the things that should not have spaces after them.
         css = css.replaceAll("([!{}:;>+\\(\\[,])\\s+", "$1");
@@ -161,7 +192,7 @@ public class CssCompressor {
         css = sb.toString();
 
         // Remove empty rules.
-        css = css.replaceAll("[^\\}\\{]+\\{\\}", "");
+        css = css.replaceAll("[^\\}\\{/;]+\\{\\}", "");
 
         if (linebreakpos >= 0) {
             // Some source control tools don't like it when files containing lines longer
@@ -181,12 +212,14 @@ public class CssCompressor {
             css = sb.toString();
         }
 
-        // Replace the pseudo class for the Box Model Hack
-        css = css.replaceAll("___PSEUDOCLASSBMH___", "\"\\\\\"}\\\\\"\"");
-
         // Replace multiple semi-colons in a row by a single one
         // See SF bug #1980989
         css = css.replaceAll(";;+", ";");
+
+        // restore preserved comments and strings
+        for(int i = 0, max = preservedTokens.size(); i < max; i++) {
+            css = css.replace("___YUICSSMIN_PRESERVED_TOKEN_" + i + "___", preservedTokens.get(i).toString());
+        }
 
         // Trim the final string (for any leading or trailing white spaces)
         css = css.trim();
