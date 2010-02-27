@@ -38,14 +38,27 @@ public class CssCompressor {
         StringBuffer sb;
         int startIndex, endIndex;
         ArrayList preservedTokens;
-        
+
+        // preserve strings so their content doesn't get accidentally minified
+        preservedTokens = new ArrayList(0);
+        css = srcsb.toString();
+        sb = new StringBuffer();
+        p = Pattern.compile("(\"([^\\\\\"]|\\\\.|\\\\)*\")|(\'([^\\\\\']|\\\\.|\\\\)*\')");
+        m = p.matcher(css);
+        while (m.find()) {
+            token = m.group();
+            char quote = token.charAt(0);
+            token = token.substring(1, token.length() - 1);
+            preservedTokens.add(token);
+            String preserver = quote + "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___" + quote;
+            m.appendReplacement(sb, preserver);
+        }
+        m.appendTail(sb);
 
         // Remove all comment blocks...
         startIndex = 0;
         boolean iemac = false;
         boolean preserve = false;
-        preservedTokens = new ArrayList(0);
-        sb = new StringBuffer(srcsb.toString());
         while ((startIndex = sb.indexOf("/*", startIndex)) >= 0) {
             preserve = sb.length() > startIndex + 2 && sb.charAt(startIndex + 2) == '!';
             endIndex = sb.indexOf("*/", startIndex + 2);
@@ -78,21 +91,6 @@ public class CssCompressor {
             }
         }
 
-        css = sb.toString();
-
-        // preserve strings so their content doesn't get accidentally minified
-        sb = new StringBuffer();
-        p = Pattern.compile("(\"([^\\\\\"]|\\\\.|\\\\)*\")|(\'([^\\\\\']|\\\\.|\\\\)*\')");
-        m = p.matcher(css);
-        while (m.find()) {
-            token = m.group();
-            char quote = token.charAt(0);
-            token = token.substring(1, token.length() - 1);
-            preservedTokens.add(token);
-            String preserver = quote + "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___" + quote;
-            m.appendReplacement(sb, preserver);
-        }
-        m.appendTail(sb);
         css = sb.toString();
 
         // Normalize all whitespace strings to single spaces. Easier to work with that way.

@@ -27,6 +27,13 @@ YAHOO.compressor.cssmin = function (css, linebreakpos){
         preservedTokens = [],
         token = '';
 
+    // preserve strings so their content doesn't get accidentally minified
+    css = css.replace(/("([^\\"]|\\.|\\)*")|('([^\\']|\\.|\\)*')/g, function(match) {
+        var quote = match[0];
+        preservedTokens.push(match.slice(1, -1));
+        return quote + "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.length - 1) + "___" + quote;
+    });
+
     // Remove all comment blocks...
     while ((startIndex = css.indexOf("/*", startIndex)) >= 0) {
         preserve = css.length > startIndex + 2 && css[startIndex + 2] === '!';
@@ -58,13 +65,6 @@ YAHOO.compressor.cssmin = function (css, linebreakpos){
             }
         }
     }
-    
-    // preserve strings so their content doesn't get accidentally minified
-    css = css.replace(/("([^\\"]|\\.|\\)*")|('([^\\']|\\.|\\)*')/g, function(match) {
-        var quote = match[0];
-        preservedTokens.push(match.slice(1, -1));
-        return quote + "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.length - 1) + "___" + quote;
-    });
     
     // Normalize all whitespace strings to single spaces. Easier to work with that way.
     css = css.replace(/\s+/g, " ");
