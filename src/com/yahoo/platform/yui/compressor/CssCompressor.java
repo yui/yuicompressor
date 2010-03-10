@@ -138,11 +138,11 @@ public class CssCompressor {
         css = css.replaceAll("([\\s:])(0)(px|em|%|in|cm|mm|pc|pt|ex)", "$1$2");
 
         // Replace 0 0 0 0; with 0.
-        css = css.replaceAll(":0 0 0 0;", ":0;");
-        css = css.replaceAll(":0 0 0;", ":0;");
-        css = css.replaceAll(":0 0;", ":0;");
+        css = css.replaceAll(":0 0 0 0(;|})", ":0$1");
+        css = css.replaceAll(":0 0 0(;|})", ":0$1");
+        css = css.replaceAll(":0 0(;|})", ":0$1");
         // Replace background-position:0; with background-position:0 0;
-        css = css.replaceAll("background-position:0;", "background-position:0 0;");
+        css = css.replaceAll("background-position:0(;|})", "background-position:0 0$1");
 
         // Replace 0.6 to .6, but only when preceded by : or a white-space
         css = css.replaceAll("(:|\\s)0+\\.(\\d+)", "$1.$2");

@@ -104,11 +104,11 @@ YAHOO.compressor.cssmin = function (css, linebreakpos){
     css = css.replace(/([\s:])(0)(px|em|%|in|cm|mm|pc|pt|ex)/gi, "$1$2");
 
     // Replace 0 0 0 0; with 0.
-    css = css.replace(/:0 0 0 0;/g, ":0;");
-    css = css.replace(/:0 0 0;/g, ":0;");
-    css = css.replace(/:0 0;/g, ":0;");
+    css = css.replace(/:0 0 0 0(;|})/g, ":0$1");
+    css = css.replace(/:0 0 0(;|})/g, ":0$1");
+    css = css.replace(/:0 0(;|})/g, ":0$1");
     // Replace background-position:0; with background-position:0 0;
-    css = css.replace(/background-position:0;/gi, "background-position:0 0;");
+    css = css.replace(/background-position:0(;|})/gi, "background-position:0 0$1");
 
     // Replace 0.6 to .6, but only when preceded by : or a white-space
     css = css.replace(/(:|\s)0+\.(\d+)/g, "$1.$2");
