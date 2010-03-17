@@ -209,7 +209,7 @@ public class YUICompressor {
     }
 
     private static void usage() {
-        System.out.println(
+        System.err.println(
                 "\nUsage: java -jar yuicompressor-x.y.z.jar [options] [input file]\n\n"
 
                         + "Global Options\n"
