@@ -47,10 +47,15 @@ public class YUICompressor {
 
             String charset = (String) parser.getOptionValue(charsetOpt);
             if (charset == null || !Charset.isSupported(charset)) {
-                charset = System.getProperty("file.encoding");
-                if (charset == null) {
-                    charset = "UTF-8";
-                }
+                // charset = System.getProperty("file.encoding");
+                // if (charset == null) {
+                //     charset = "UTF-8";
+                // }
+
+                // UTF-8 seems to be a better choice than what the system is reporting
+                charset = "UTF-8";
+
+
                 if (verbose) {
                     System.err.println("\n[INFO] Using charset " + charset);
                 }
@@ -209,7 +214,7 @@ public class YUICompressor {
     }
 
     private static void usage() {
-        System.out.println(
+        System.err.println(
                 "\nUsage: java -jar yuicompressor-x.y.z.jar [options] [input file]\n\n"
 
                         + "Global Options\n"
