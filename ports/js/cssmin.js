@@ -17,7 +17,7 @@
 */
 var YAHOO = YAHOO || {};
 YAHOO.compressor = YAHOO.compressor || {};
-YAHOO.compressor.cssmin = function (css, linebreakpos){
+YAHOO.compressor.cssmin = function (css, linebreakpos) {
 
     var startIndex = 0, 
         endIndex = 0,
@@ -25,61 +25,78 @@ YAHOO.compressor.cssmin = function (css, linebreakpos){
         preserve = false,
         i = 0, max = 0,
         preservedTokens = [],
-        token = '';
+        comments = [],
+        token = '',
+        totallen = css.length;
+
+    // collect all comment blocks...
+    while ((startIndex = css.indexOf("/*", startIndex)) >= 0) {
+        endIndex = css.indexOf("*/", startIndex + 2);
+        if (endIndex < 0) {
+            endIndex = totallen;
+        }
+        token = css.slice(startIndex + 2, endIndex);
+        comments.push(token);
+        css = css.slice(0, startIndex + 2) + "___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_" + (comments.length - 1) + "___" + css.slice(endIndex);
+        startIndex += 2;
+    }
 
     // preserve strings so their content doesn't get accidentally minified
-    css = css.replace(/("([^\\"]|\\.|\\)*")|('([^\\']|\\.|\\)*')/g, function(match) {
-        var quote = match[0];
-        preservedTokens.push(match.slice(1, -1));
+    css = css.replace(/("([^\\"]|\\.|\\)*")|('([^\\']|\\.|\\)*')/g, function (match) {
+        var i, max, quote = match[0];
+        
+        match = match.slice(1, -1);
+        
+        // maybe the string contains a comment-like substring?
+        // one, maybe more? put'em back then
+        if (match.indexOf("___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_") >= 0) {
+            for (i = 0, max = comments.length; i < max; i = i + 1) {
+                match = match.replace("___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_" + i + "___", comments[i]);
+            }
+        }
+        preservedTokens.push(match);
         return quote + "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.length - 1) + "___" + quote;
     });
 
-    // Remove all comment blocks...
-    while ((startIndex = css.indexOf("/*", startIndex)) >= 0) {
-        preserve = css.length > startIndex + 2 && css[startIndex + 2] === '!';
-        endIndex = css.indexOf("*/", startIndex + 2);
-        if (endIndex < 0) {
-            if (!preserve) {
-                css = css.slice(0, startIndex);
-            }
-        } else if (endIndex >= startIndex + 2) {
-            if (css[endIndex - 1] === '\\') {
-                // Looks like a comment to hide rules from IE Mac.
-                // Leave this comment, and the following one, but shorten them
-                css = css.slice(0, startIndex) + "/*\\*/" + css.slice(endIndex + 2);
-                startIndex += 5;
-                iemac = true;
-            } else if (iemac && !preserve) {
-                css = css.slice(0, startIndex) + "/**/" + css.slice(endIndex + 2);
-                startIndex += 4;
-                iemac = false;
-            } else if (!preserve) {
-                css = css.slice(0, startIndex) + css.slice(endIndex + 2);
-            } else {
-                // preserve
-                token = css.slice(startIndex+3, endIndex); // 3 is "/*!".length
-                preservedTokens.push(token);
-                css = css.slice(0, startIndex+2) + "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.length - 1) + "___" + css.slice(endIndex);
-                if (iemac) iemac = false;
-                startIndex += 2;
-            }
+    // strings are safe, now wrestle the comments
+    for (i = 0, max = comments.length; i < max; i = i + 1) {
+        
+        // ! in the first position of the comment means preserve
+        // so push to the preserved tokens while stripping the !
+        if (comments[i].charAt(0) === "!") {
+            preservedTokens.push(comments[i].slice(1));
+            css = css.replace("___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_" + i + "___",  "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.length - 1) + "___");
+            continue;
         }
+        // \ in the last position looks like hack for Mac/IE5
+        // shorten that to /*\*/ and the next one to /**/
+        if (comments[i].charAt(comments[i].length - 1) === "\\") {
+            preservedTokens.push("\\");
+            css = css.replace("___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_" + i + "___",  "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.length - 1) + "___");
+            i = i + 1; // attn: advancing the loop
+            preservedTokens.push("");
+            css = css.replace("___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_" + i + "___",  "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.length - 1) + "___");            
+            continue;
+        }
+        // in all other cases kill the comment
+        css = css.replace("/*___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_" + i + "___*/", "");
     }
-    
+
+
     // Normalize all whitespace strings to single spaces. Easier to work with that way.
     css = css.replace(/\s+/g, " ");
 
     // Remove the spaces before the things that should not have spaces before them.
     // But, be careful not to turn "p :link {...}" into "p:link{...}"
     // Swap out any pseudo-class colons with the token, and then swap back.
-    css = css.replace(/(^|\})(([^\{:])+:)+([^\{]*\{)/g, function(m) {
+    css = css.replace(/(^|\})(([^\{:])+:)+([^\{]*\{)/g, function (m) {
         return m.replace(":", "___YUICSSMIN_PSEUDOCLASSCOLON___");
     });
     css = css.replace(/\s+([!{};:>+\(\)\],])/g, '$1');
     css = css.replace(/___YUICSSMIN_PSEUDOCLASSCOLON___/g, ":");
 
     // retain space for special IE6 cases
-    css = css.replace(/:first-(line|letter)({|,)/g, ":first-$1 $2");
+    css = css.replace(/:first-(line|letter)(\{|,)/g, ":first-$1 $2");
         
     // no space after the end of a preserved comment
     css = css.replace(/\*\/ /g, '*/'); 
@@ -98,26 +115,26 @@ YAHOO.compressor.cssmin = function (css, linebreakpos){
     css = css.replace(/([!{}:;>+\(\[,])\s+/g, '$1');
 
     // remove unnecessary semicolons
-    css = css.replace(/;+}/g, "}");
+    css = css.replace(/;+\}/g, "}");
 
     // Replace 0(px,em,%) with 0.
     css = css.replace(/([\s:])(0)(px|em|%|in|cm|mm|pc|pt|ex)/gi, "$1$2");
 
     // Replace 0 0 0 0; with 0.
-    css = css.replace(/:0 0 0 0(;|})/g, ":0$1");
-    css = css.replace(/:0 0 0(;|})/g, ":0$1");
-    css = css.replace(/:0 0(;|})/g, ":0$1");
+    css = css.replace(/:0 0 0 0(;|\})/g, ":0$1");
+    css = css.replace(/:0 0 0(;|\})/g, ":0$1");
+    css = css.replace(/:0 0(;|\})/g, ":0$1");
     // Replace background-position:0; with background-position:0 0;
-    css = css.replace(/background-position:0(;|})/gi, "background-position:0 0$1");
+    css = css.replace(/background-position:0(;|\})/gi, "background-position:0 0$1");
 
     // Replace 0.6 to .6, but only when preceded by : or a white-space
     css = css.replace(/(:|\s)0+\.(\d+)/g, "$1.$2");
 
     // Shorten colors from rgb(51,102,153) to #336699
     // This makes it more likely that it'll get further compressed in the next step.
-    css = css.replace(/rgb\s*\(\s*([0-9,\s]+)\s*\)/gi, function(){
-        var rgbcolors = arguments[1].split(',');
-        for (var i = 0; i < rgbcolors.length; i++) {
+    css = css.replace(/rgb\s*\(\s*([0-9,\s]+)\s*\)/gi, function () {
+        var i, rgbcolors = arguments[1].split(',');
+        for (i = 0; i < rgbcolors.length; i = i + 1) {
             rgbcolors[i] = parseInt(rgbcolors[i], 10).toString(16);
             if (rgbcolors[i].length === 1) {
                 rgbcolors[i] = '0' + rgbcolors[i];
@@ -133,7 +150,7 @@ YAHOO.compressor.cssmin = function (css, linebreakpos){
     // would become
     //     filter: chroma(color="#FFF");
     // which makes the filter break in IE.
-    css = css.replace(/([^"'=\s])(\s*)#([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])/gi, function(){ 
+    css = css.replace(/([^"'=\s])(\s*)#([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])/gi, function () { 
         var group = arguments;
         if (
             group[3].toLowerCase() === group[4].toLowerCase() &&
@@ -157,7 +174,8 @@ YAHOO.compressor.cssmin = function (css, linebreakpos){
         startIndex = 0; 
         i = 0;
         while (i < css.length) {
-            if (css[i++] === '}' && i - startIndex > linebreakpos) {
+            i = i + 1;
+            if (css[i - 1] === '}' && i - startIndex > linebreakpos) {
                 css = css.slice(0, i) + '\n' + css.slice(i);
                 startIndex = i;
             }
@@ -169,7 +187,7 @@ YAHOO.compressor.cssmin = function (css, linebreakpos){
     css = css.replace(/;;+/g, ";");
 
     // restore preserved comments and strings
-    for(i = 0, max = preservedTokens.length; i < max; i++) {
+    for (i = 0, max = preservedTokens.length; i < max; i = i + 1) {
         css = css.replace("___YUICSSMIN_PRESERVED_TOKEN_" + i + "___", preservedTokens[i]);
     }
     
