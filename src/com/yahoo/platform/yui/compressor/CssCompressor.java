@@ -34,14 +34,34 @@ public class CssCompressor {
 
         Pattern p;
         Matcher m;
-        String css, token;
-        StringBuffer sb;
-        int startIndex, endIndex;
-        ArrayList preservedTokens;
+        String css = srcsb.toString();
+        StringBuffer sb = new StringBuffer(css);
+        
+        int startIndex = 0;
+        int endIndex = 0;
+        int i = 0;
+        int max = 0;
+        ArrayList preservedTokens = new ArrayList(0);
+        ArrayList comments = new ArrayList(0);
+        String token;
+        int totallen = css.length();
+
+
+        // collect all comment blocks...
+        while ((startIndex = sb.indexOf("/*", startIndex)) >= 0) {
+            endIndex = sb.indexOf("*/", startIndex + 2);
+            if (endIndex < 0) {
+                endIndex = totallen;
+            }
+            
+            token = sb.substring(startIndex + 2, endIndex);
+            comments.add(token);
+            sb.replace(startIndex + 2, endIndex, "___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_" + (comments.size() - 1) + "___");
+            startIndex += 2;
+        }
+        css = sb.toString();
 
         // preserve strings so their content doesn't get accidentally minified
-        preservedTokens = new ArrayList(0);
-        css = srcsb.toString();
         sb = new StringBuffer();
         p = Pattern.compile("(\"([^\\\\\"]|\\\\.|\\\\)*\")|(\'([^\\\\\']|\\\\.|\\\\)*\')");
         m = p.matcher(css);
@@ -49,49 +69,49 @@ public class CssCompressor {
             token = m.group();
             char quote = token.charAt(0);
             token = token.substring(1, token.length() - 1);
+            
+            // maybe the string contains a comment-like substring?
+            // one, maybe more? put'em back then
+            if (token.indexOf("___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_") >= 0) {
+                for (i = 0, max = comments.size(); i < max; i += 1) {
+                    token = token.replace("___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_" + i + "___", comments.get(i).toString());
+                }
+            }
+            
             preservedTokens.add(token);
             String preserver = quote + "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___" + quote;
             m.appendReplacement(sb, preserver);
         }
         m.appendTail(sb);
+        css = sb.toString();
 
-        // Remove all comment blocks...
-        startIndex = 0;
-        boolean iemac = false;
-        boolean preserve = false;
-        while ((startIndex = sb.indexOf("/*", startIndex)) >= 0) {
-            preserve = sb.length() > startIndex + 2 && sb.charAt(startIndex + 2) == '!';
-            endIndex = sb.indexOf("*/", startIndex + 2);
-            if (endIndex < 0) {
-                if (!preserve) {
-                    sb.delete(startIndex, sb.length());
-                }
-            } else if (endIndex >= startIndex + 2) {
-                if (sb.charAt(endIndex-1) == '\\') {
-                    // Looks like a comment to hide rules from IE Mac.
-                    // Leave this comment, and the following one, but shorten them.
-                    sb.replace(startIndex, endIndex + 2, "/*\\*/");
-                    startIndex += 5;
-                    iemac = true;
-                } else if (iemac && !preserve) {
-                    sb.replace(startIndex, endIndex + 2, "/**/");
-                    startIndex += 4;
-                    iemac = false;
-                } else if (!preserve) {
-                    sb.delete(startIndex, endIndex + 2);
-                } else {                    
-                    // preserve
-                    token = sb.substring(startIndex + 3, endIndex); // 3 is "/*!".length
-                    preservedTokens.add(token);
-                    token = "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___";
-                    sb.replace(startIndex + 2, endIndex, token);
-                    if (iemac) iemac = false;
-                    startIndex += 2;
-                }
+
+        // strings are safe, now wrestle the comments
+        for (i = 0, max = comments.size(); i < max; i += 1) {
+
+            token = comments.get(i).toString();
+
+            // ! in the first position of the comment means preserve
+            // so push to the preserved tokens while stripping the !
+            if (token.startsWith("!")) {
+                preservedTokens.add(token.substring(1));
+                css = css.replace("___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_" + i + "___",  "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___");
+                continue;
             }
+            // \ in the last position looks like hack for Mac/IE5
+            // shorten that to /*\*/ and the next one to /**/
+            if (token.endsWith("\\")) {
+                preservedTokens.add("\\");
+                css = css.replace("___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_" + i + "___",  "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___");
+                i = i + 1; // attn: advancing the loop
+                preservedTokens.add("");
+                css = css.replace("___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_" + i + "___",  "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___");            
+                continue;
+            }
+            // in all other cases kill the comment
+            css = css.replace("/*___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_" + i + "___*/", "");
         }
 
-        css = sb.toString();
 
         // Normalize all whitespace strings to single spaces. Easier to work with that way.
         css = css.replaceAll("\\s+", " ");
@@ -155,7 +175,7 @@ public class CssCompressor {
         while (m.find()) {
             String[] rgbcolors = m.group(1).split(",");
             StringBuffer hexcolor = new StringBuffer("#");
-            for (int i = 0; i < rgbcolors.length; i++) {
+            for (i = 0; i < rgbcolors.length; i++) {
                 int val = Integer.parseInt(rgbcolors[i]);
                 if (val < 16) {
                     hexcolor.append("0");
@@ -196,7 +216,7 @@ public class CssCompressor {
             // Some source control tools don't like it when files containing lines longer
             // than, say 8000 characters, are checked in. The linebreak option is used in
             // that case to split long lines after a specific column.
-            int i = 0;
+            i = 0;
             int linestartpos = 0;
             sb = new StringBuffer(css);
             while (i < sb.length()) {
@@ -215,7 +235,7 @@ public class CssCompressor {
         css = css.replaceAll(";;+", ";");
 
         // restore preserved comments and strings
-        for(int i = 0, max = preservedTokens.size(); i < max; i++) {
+        for(i = 0, max = preservedTokens.size(); i < max; i++) {
             css = css.replace("___YUICSSMIN_PRESERVED_TOKEN_" + i + "___", preservedTokens.get(i).toString());
         }
 
