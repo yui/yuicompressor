@@ -61,42 +61,6 @@ public class YUICompressor {
                 }
             }
 
-            String[] fileArgs = parser.getRemainingArgs();
-            String type = (String) parser.getOptionValue(typeOpt);
-
-            if (fileArgs.length == 0) {
-
-                if (type == null || !type.equalsIgnoreCase("js") && !type.equalsIgnoreCase("css")) {
-                    usage();
-                    System.exit(1);
-                }
-
-                in = new InputStreamReader(System.in, charset);
-
-            } else {
-
-                if (type != null && !type.equalsIgnoreCase("js") && !type.equalsIgnoreCase("css")) {
-                    usage();
-                    System.exit(1);
-                }
-
-                String inputFilename = fileArgs[0];
-
-                if (type == null) {
-                    int idx = inputFilename.lastIndexOf('.');
-                    if (idx >= 0 && idx < inputFilename.length() - 1) {
-                        type = inputFilename.substring(idx + 1);
-                    }
-                }
-
-                if (type == null || !type.equalsIgnoreCase("js") && !type.equalsIgnoreCase("css")) {
-                    usage();
-                    System.exit(1);
-                }
-
-                in = new InputStreamReader(new FileInputStream(inputFilename), charset);
-            }
-
             int linebreakpos = -1;
             String linebreakstr = (String) parser.getOptionValue(linebreakOpt);
             if (linebreakstr != null) {
@@ -108,108 +72,155 @@ public class YUICompressor {
                 }
             }
 
-            String outputFilename = (String) parser.getOptionValue(outputFilenameOpt);
-
-            if (type.equalsIgnoreCase("js")) {
-
-                try {
-
-                    JavaScriptCompressor compressor = new JavaScriptCompressor(in, new ErrorReporter() {
-
-                        public void warning(String message, String sourceName,
-                                int line, String lineSource, int lineOffset) {
-                            if (line < 0) {
-                                System.err.println("\n[WARNING] " + message);
-                            } else {
-                                System.err.println("\n[WARNING] " + line + ':' + lineOffset + ':' + message);
-                            }
-                        }
-
-                        public void error(String message, String sourceName,
-                                int line, String lineSource, int lineOffset) {
-                            if (line < 0) {
-                                System.err.println("\n[ERROR] " + message);
-                            } else {
-                                System.err.println("\n[ERROR] " + line + ':' + lineOffset + ':' + message);
-                            }
-                        }
-
-                        public EvaluatorException runtimeError(String message, String sourceName,
-                                int line, String lineSource, int lineOffset) {
-                            error(message, sourceName, line, lineSource, lineOffset);
-                            return new EvaluatorException(message);
-                        }
-                    });
-
-                    // Close the input stream first, and then open the output stream,
-                    // in case the output file should override the input file.
-                    in.close(); in = null;
-
-                    if (outputFilename == null) {
-                        out = new OutputStreamWriter(System.out, charset);
-                    } else {
-                        out = new OutputStreamWriter(new FileOutputStream(outputFilename), charset);
-                    }
-
-                    boolean munge = parser.getOptionValue(nomungeOpt) == null;
-                    boolean preserveAllSemiColons = parser.getOptionValue(preserveSemiOpt) != null;
-                    boolean disableOptimizations = parser.getOptionValue(disableOptimizationsOpt) != null;
-
-                    compressor.compress(out, linebreakpos, munge, verbose,
-                            preserveAllSemiColons, disableOptimizations);
-
-                } catch (EvaluatorException e) {
-
-                    e.printStackTrace();
-                    // Return a special error code used specifically by the web front-end.
-                    System.exit(2);
-
-                }
-
-            } else if (type.equalsIgnoreCase("css")) {
-
-                CssCompressor compressor = new CssCompressor(in);
-
-                // Close the input stream first, and then open the output stream,
-                // in case the output file should override the input file.
-                in.close(); in = null;
-
-                if (outputFilename == null) {
-                    out = new OutputStreamWriter(System.out, charset);
-                } else {
-                    out = new OutputStreamWriter(new FileOutputStream(outputFilename), charset);
-                }
-
-                compressor.compress(out, linebreakpos);
+            String type = (String) parser.getOptionValue(typeOpt);
+            if (type != null && !type.equalsIgnoreCase("js") && !type.equalsIgnoreCase("css")) {
+                usage();
+                System.exit(1);
             }
 
+            String[] fileArgs = parser.getRemainingArgs();
+            java.util.List files = java.util.Arrays.asList(fileArgs);
+            if (files.isEmpty()) {
+                files = new java.util.ArrayList();
+                files.add("-"); // read from stdin
+            }
+
+            String output = (String) parser.getOptionValue(outputFilenameOpt);
+            String pattern[] = output != null ? output.split(":") : new String[0];
+
+            java.util.Iterator filenames = files.iterator();
+            while(filenames.hasNext()) {
+                String inputFilename = (String)filenames.next();
+
+                try {
+                    if (inputFilename.equals("-")) {
+
+                        in = new InputStreamReader(System.in, charset);
+
+                    } else {
+
+                        if (type == null) {
+                            int idx = inputFilename.lastIndexOf('.');
+                            if (idx >= 0 && idx < inputFilename.length() - 1) {
+                                type = inputFilename.substring(idx + 1);
+                            }
+                        }
+
+                        if (type == null || !type.equalsIgnoreCase("js") && !type.equalsIgnoreCase("css")) {
+                            usage();
+                            System.exit(1);
+                        }
+
+                        in = new InputStreamReader(new FileInputStream(inputFilename), charset);
+                    }
+
+                    String outputFilename = output;
+                    // if a substitution pattern was passed in
+                    if (pattern.length > 1 && files.size() > 1) {
+                        outputFilename = inputFilename.replaceFirst(pattern[0], pattern[1]);
+                    }
+
+                    if (type.equalsIgnoreCase("js")) {
+
+                        try {
+
+                            JavaScriptCompressor compressor = new JavaScriptCompressor(in, new ErrorReporter() {
+
+                                public void warning(String message, String sourceName,
+                                        int line, String lineSource, int lineOffset) {
+                                    if (line < 0) {
+                                        System.err.println("\n[WARNING] " + message);
+                                    } else {
+                                        System.err.println("\n[WARNING] " + line + ':' + lineOffset + ':' + message);
+                                    }
+                                }
+
+                                public void error(String message, String sourceName,
+                                        int line, String lineSource, int lineOffset) {
+                                    if (line < 0) {
+                                        System.err.println("\n[ERROR] " + message);
+                                    } else {
+                                        System.err.println("\n[ERROR] " + line + ':' + lineOffset + ':' + message);
+                                    }
+                                }
+
+                                public EvaluatorException runtimeError(String message, String sourceName,
+                                        int line, String lineSource, int lineOffset) {
+                                    error(message, sourceName, line, lineSource, lineOffset);
+                                    return new EvaluatorException(message);
+                                }
+                            });
+
+                            // Close the input stream first, and then open the output stream,
+                            // in case the output file should override the input file.
+                            in.close(); in = null;
+
+                            if (outputFilename == null) {
+                                out = new OutputStreamWriter(System.out, charset);
+                            } else {
+                                out = new OutputStreamWriter(new FileOutputStream(outputFilename), charset);
+                            }
+
+                            boolean munge = parser.getOptionValue(nomungeOpt) == null;
+                            boolean preserveAllSemiColons = parser.getOptionValue(preserveSemiOpt) != null;
+                            boolean disableOptimizations = parser.getOptionValue(disableOptimizationsOpt) != null;
+
+                            compressor.compress(out, linebreakpos, munge, verbose,
+                                    preserveAllSemiColons, disableOptimizations);
+
+                        } catch (EvaluatorException e) {
+
+                            e.printStackTrace();
+                            // Return a special error code used specifically by the web front-end.
+                            System.exit(2);
+
+                        }
+
+                    } else if (type.equalsIgnoreCase("css")) {
+
+                        CssCompressor compressor = new CssCompressor(in);
+
+                        // Close the input stream first, and then open the output stream,
+                        // in case the output file should override the input file.
+                        in.close(); in = null;
+
+                        if (outputFilename == null) {
+                            out = new OutputStreamWriter(System.out, charset);
+                        } else {
+                            out = new OutputStreamWriter(new FileOutputStream(outputFilename), charset);
+                        }
+
+                        compressor.compress(out, linebreakpos);
+                    }
+
+                } catch (IOException e) {
+
+                    e.printStackTrace();
+                    System.exit(1);
+
+                } finally {
+
+                    if (in != null) {
+                        try {
+                            in.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    if (out != null) {
+                        try {
+                            out.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
         } catch (CmdLineParser.OptionException e) {
 
             usage();
             System.exit(1);
-
-        } catch (IOException e) {
-
-            e.printStackTrace();
-            System.exit(1);
-
-        } finally {
-
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
 
@@ -223,7 +234,10 @@ public class YUICompressor {
                         + "  --charset <charset>       Read the input file using <charset>\n"
                         + "  --line-break <column>     Insert a line break after the specified column number\n"
                         + "  -v, --verbose             Display informational messages and warnings\n"
-                        + "  -o <file>                 Place the output into <file>. Defaults to stdout.\n\n"
+                        + "  -o <file>                 Place the output into <file>. Defaults to stdout.\n"
+                        + "                            Multiple files can be processed using the following syntax:\n"
+                        + "                            java -jar yuicompressor.jar -o '.css$:-min.css' *.css\n"
+                        + "                            java -jar yuicompressor.jar -o '.js$:-min.js' *.js\n\n"
 
                         + "JavaScript Options\n"
                         + "  --nomunge                 Minify only, do not obfuscate\n"

@@ -870,7 +870,15 @@ public class JavaScriptCompressor {
                                     // We don't need to declare longer symbols since they won't cause
                                     // any conflict with other munged symbols.
                                     globalScope.declareIdentifier(symbol);
-                                    warn("Found an undeclared symbol: " + symbol, true);
+
+                                    // I removed the warning since was only being done when
+                                    // for identifiers 3 chars or less, and was just causing
+                                    // noise for people who happen to rely on an externally
+                                    // declared variable that happen to be that short.  We either
+                                    // should always warn or never warn -- the fact that we
+                                    // declare the short symbols in the global space doesn't
+                                    // change anything.
+                                    // warn("Found an undeclared symbol: " + symbol, true);
                                 }
 
                             } else {
