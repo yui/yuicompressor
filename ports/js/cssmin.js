@@ -21,8 +21,6 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
 
     var startIndex = 0, 
         endIndex = 0,
-        iemac = false,
-        preserve = false,
         i = 0, max = 0,
         preservedTokens = [],
         comments = [],
