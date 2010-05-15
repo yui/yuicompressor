@@ -125,6 +125,7 @@ public class CssCompressor {
         while (m.find()) {
             String s = m.group();
             s = s.replaceAll(":", "___YUICSSMIN_PSEUDOCLASSCOLON___");
+            s = s.replaceAll( "\\\\", "\\\\\\\\" ).replaceAll( "\\$", "\\\\\\$" );
             m.appendReplacement(sb, s);
         }
         m.appendTail(sb);
