@@ -52,6 +52,10 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
                 match = match.replace("___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_" + i + "___", comments[i]);
             }
         }
+        
+        // minify alpha opacity in filter strings
+        match = match.replace(/progid:DXImageTransform\.Microsoft\.Alpha\(Opacity=/gi, "alpha(opacity=");
+        
         preservedTokens.push(match);
         return quote + "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.length - 1) + "___" + quote;
     });
@@ -161,6 +165,8 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
         }
     });
     
+    // shorter opacity IE filter
+    css = css.replace(/progid:DXImageTransform\.Microsoft\.Alpha\(Opacity=/gi, "alpha(opacity=");
 
     // Remove empty rules.
     css = css.replace(/[^\};\{\/]+\{\}/g, "");

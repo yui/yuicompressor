@@ -78,6 +78,9 @@ public class CssCompressor {
                 }
             }
             
+            // minify alpha opacity in filter strings
+            token = token.replaceAll("(?i)progid:DXImageTransform.Microsoft.Alpha\\(Opacity=", "alpha(opacity=");
+            
             preservedTokens.add(token);
             String preserver = quote + "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___" + quote;
             m.appendReplacement(sb, preserver);
@@ -163,7 +166,7 @@ public class CssCompressor {
         css = css.replaceAll(":0 0 0(;|})", ":0$1");
         css = css.replaceAll(":0 0(;|})", ":0$1");
         // Replace background-position:0; with background-position:0 0;
-        css = css.replaceAll("background-position:0(;|})", "background-position:0 0$1");
+        css = css.replaceAll("(?i)background-position:0(;|})", "background-position:0 0$1");
 
         // Replace 0.6 to .6, but only when preceded by : or a white-space
         css = css.replaceAll("(:|\\s)0+\\.(\\d+)", "$1.$2");
@@ -209,6 +212,9 @@ public class CssCompressor {
         }
         m.appendTail(sb);
         css = sb.toString();
+
+        // shorter opacity IE filter
+        css = css.replaceAll("(?i)progid:DXImageTransform.Microsoft.Alpha\\(Opacity=", "alpha(opacity=");
 
         // Remove empty rules.
         css = css.replaceAll("[^\\}\\{/;]+\\{\\}", "");
