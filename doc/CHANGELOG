@@ -4,6 +4,16 @@ YUI Compressor 2.4.4, 2010-11-05
 + Errors/messages/usage info all are sent to stderr.
 + Removed unnecessary warning about short undeclared global symbols.
 + Added support for processing multiple files with a single invokation
++ $ in CSS files doesn't throw exceptions
++ white space in ! important comments preserved in CSS
++ fix in greedy empty CSS declaration blocks removal
++ safe handling of strings and comments in CSS files
++ shorter alpha opacity CSS filers
++ shorter Mac/IE5 hack -> /*\*/ hack {mac: 1} /**/
++ JS port of the CSS minifier
++ safe @media queries handling
++ stripping the trailing ; in CSS declaration blocks
++ tests++
 
 YUI Compressor 2.4.3, 2009-12-07
 -------------------------------
