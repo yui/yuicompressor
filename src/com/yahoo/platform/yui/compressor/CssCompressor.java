@@ -205,9 +205,9 @@ public class CssCompressor {
             if (m.group(3).equalsIgnoreCase(m.group(4)) &&
                     m.group(5).equalsIgnoreCase(m.group(6)) &&
                     m.group(7).equalsIgnoreCase(m.group(8))) {
-                m.appendReplacement(sb, m.group(1) + m.group(2) + "#" + m.group(3) + m.group(5) + m.group(7));
+                m.appendReplacement(sb, (m.group(1) + m.group(2) + "#" + m.group(3) + m.group(5) + m.group(7)).toLowerCase());
             } else {
-                m.appendReplacement(sb, m.group());
+                m.appendReplacement(sb, m.group().toLowerCase());
             }
         }
         m.appendTail(sb);
