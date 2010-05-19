@@ -703,8 +703,10 @@ class TokenStream
                                 String s1 = sb.toString();
                                 String s2 = s1.trim();
                                 if (s1.startsWith("!")) {
-                                    // Remove the leading '!'
-                                    this.string = s1.substring(1);
+                                    // Remove the leading '!' ** EDIT actually don't remove it:
+                                    // http://yuilibrary.com/projects/yuicompressor/ticket/2528008
+                                    // this.string = s1.substring(1);
+                                    this.string = s1;
                                     return Token.KEEPCOMMENT;
                                 } else if (s2.startsWith("@cc_on") ||
                                            s2.startsWith("@if")    ||

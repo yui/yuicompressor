@@ -4,6 +4,7 @@ cd $(dirname $0)
 	
 # Get the jar to use.
 jar="$(ls ../build/*.jar | sort | tail -n1)"
+echo "jar: $jar"
 
 runtest () {
 	testfile="$1"
