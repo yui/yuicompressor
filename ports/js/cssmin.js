@@ -25,7 +25,8 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
         preservedTokens = [],
         comments = [],
         token = '',
-        totallen = css.length;
+        totallen = css.length,
+        placeholder = '';
 
     // collect all comment blocks...
     while ((startIndex = css.indexOf("/*", startIndex)) >= 0) {
@@ -63,25 +64,42 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
     // strings are safe, now wrestle the comments
     for (i = 0, max = comments.length; i < max; i = i + 1) {
         
+        token = comments[i];
+        placeholder = "___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_" + i + "___";
+        
         // ! in the first position of the comment means preserve
-        // so push to the preserved tokens while stripping the !
-        if (comments[i].charAt(0) === "!") {
-            preservedTokens.push(comments[i].slice(1));
-            css = css.replace("___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_" + i + "___",  "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.length - 1) + "___");
+        // so push to the preserved tokens keeping the !
+        if (token.charAt(0) === "!") {
+            preservedTokens.push(token);
+            css = css.replace(placeholder,  "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.length - 1) + "___");
             continue;
         }
+        
         // \ in the last position looks like hack for Mac/IE5
         // shorten that to /*\*/ and the next one to /**/
-        if (comments[i].charAt(comments[i].length - 1) === "\\") {
+        if (token.charAt(token.length - 1) === "\\") {
             preservedTokens.push("\\");
-            css = css.replace("___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_" + i + "___",  "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.length - 1) + "___");
+            css = css.replace(placeholder,  "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.length - 1) + "___");
             i = i + 1; // attn: advancing the loop
             preservedTokens.push("");
             css = css.replace("___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_" + i + "___",  "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.length - 1) + "___");            
             continue;
         }
+
+        // keep empty comments after child selectors (IE7 hack)
+        // e.g. html >/**/ body
+        if (token.length === 0) {
+            startIndex = css.indexOf(placeholder);
+            if (startIndex > 2) {
+                if (css.charAt(startIndex - 3) === '>') {
+                    preservedTokens.push("");
+                    css = css.replace(placeholder,  "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.length - 1) + "___");
+                }
+            }
+        }
+                
         // in all other cases kill the comment
-        css = css.replace("/*___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_" + i + "___*/", "");
+        css = css.replace("/*" + placeholder + "*/", "");
     }
 
 

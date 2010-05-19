@@ -45,6 +45,7 @@ public class CssCompressor {
         ArrayList comments = new ArrayList(0);
         String token;
         int totallen = css.length();
+        String placeholder;
 
 
         // collect all comment blocks...
@@ -93,26 +94,41 @@ public class CssCompressor {
         for (i = 0, max = comments.size(); i < max; i += 1) {
 
             token = comments.get(i).toString();
-
+            placeholder = "___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_" + i + "___";
+            
             // ! in the first position of the comment means preserve
             // so push to the preserved tokens while stripping the !
             if (token.startsWith("!")) {
-                preservedTokens.add(token.substring(1));
-                css = css.replace("___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_" + i + "___",  "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___");
+                preservedTokens.add(token);
+                css = css.replace(placeholder,  "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___");
                 continue;
             }
+            
             // \ in the last position looks like hack for Mac/IE5
             // shorten that to /*\*/ and the next one to /**/
             if (token.endsWith("\\")) {
                 preservedTokens.add("\\");
-                css = css.replace("___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_" + i + "___",  "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___");
+                css = css.replace(placeholder,  "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___");
                 i = i + 1; // attn: advancing the loop
                 preservedTokens.add("");
                 css = css.replace("___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_" + i + "___",  "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___");            
                 continue;
             }
+            
+            // keep empty comments after child selectors (IE7 hack)
+            // e.g. html >/**/ body
+            if (token.length() == 0) {
+                startIndex = css.indexOf(placeholder);
+                if (startIndex > 2) {
+                    if (css.charAt(startIndex - 3) == '>') {
+                        preservedTokens.add("");
+                        css = css.replace(placeholder,  "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___");
+                    }
+                }
+            }
+            
             // in all other cases kill the comment
-            css = css.replace("/*___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_" + i + "___*/", "");
+            css = css.replace("/*" + placeholder + "*/", "");
         }
 
 
