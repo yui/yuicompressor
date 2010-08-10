@@ -24,7 +24,6 @@ public class YUICompressor {
         CmdLineParser.Option verboseOpt = parser.addBooleanOption('v', "verbose");
         CmdLineParser.Option nomungeOpt = parser.addBooleanOption("nomunge");
         CmdLineParser.Option linebreakOpt = parser.addStringOption("line-break");
-        CmdLineParser.Option globalsOpt = parser.addStringOption("globals");
         CmdLineParser.Option preserveSemiOpt = parser.addBooleanOption("preserve-semi");
         CmdLineParser.Option disableOptimizationsOpt = parser.addBooleanOption("disable-optimizations");
         CmdLineParser.Option helpOpt = parser.addBooleanOption('h', "help");
@@ -72,10 +71,6 @@ public class YUICompressor {
                     System.exit(1);
                 }
             }
-
-            String globalsStr = (String) parser.getOptionValue(globalsOpt);
-            String[] globals = globalsStr != null ?
-                globalsStr.split(",") : new String[0];
 
             String type = (String) parser.getOptionValue(typeOpt);
             if (type != null && !type.equalsIgnoreCase("js") && !type.equalsIgnoreCase("css")) {
@@ -129,7 +124,7 @@ public class YUICompressor {
 
                         try {
 
-                            JavaScriptCompressor compressor = new JavaScriptCompressor(globals, in, new ErrorReporter() {
+                            JavaScriptCompressor compressor = new JavaScriptCompressor(in, new ErrorReporter() {
 
                                 public void warning(String message, String sourceName,
                                         int line, String lineSource, int lineOffset) {

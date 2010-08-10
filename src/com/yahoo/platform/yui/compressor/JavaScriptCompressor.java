@@ -526,17 +526,11 @@ public class JavaScriptCompressor {
     private ScriptOrFnScope globalScope = new ScriptOrFnScope(-1, null);
     private Hashtable indexedScopes = new Hashtable();
 
-    public JavaScriptCompressor(String[] globals, Reader in, ErrorReporter reporter)
+    public JavaScriptCompressor(Reader in, ErrorReporter reporter)
             throws IOException, EvaluatorException {
 
         this.logger = reporter;
         this.tokens = parse(in, reporter);
-        for (int ii = 0; ii < globals.length; ii++) {
-            String symbol = globals[ii];
-            if (symbol.length() <= 3) {
-                globalScope.declareIdentifier(symbol);
-            }
-        }
     }
 
     public void compress(Writer out, int linebreak, boolean munge, boolean verbose,
