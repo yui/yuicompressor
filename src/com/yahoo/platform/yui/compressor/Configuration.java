@@ -41,7 +41,7 @@ public class Configuration implements Cloneable {
         try {
             cliParser.parse(args);
         } catch (CmdLineParser.OptionException ex) {
-            throw new ConfigurationException("Command line parse failed.");
+            throw new ConfigurationException(ex.getMessage());
         }
 
         setInputType((String) cliParser.getOptionValue(typeOpt));
