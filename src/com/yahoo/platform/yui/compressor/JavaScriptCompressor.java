@@ -1031,7 +1031,7 @@ public class JavaScriptCompressor {
                                     // We don't need to declare longer symbols since they won't cause
                                     // any conflict with other munged symbols.
                                     globalScope.declareIdentifier(symbol);
-                                    warn("Found an undeclared symbol: " + symbol, true);
+                                    // warn("Found an undeclared symbol: " + symbol, true);
                                 }
 
                             } else {
