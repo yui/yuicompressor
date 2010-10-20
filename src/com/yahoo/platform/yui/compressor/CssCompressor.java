@@ -181,9 +181,19 @@ public class CssCompressor {
         css = css.replaceAll(":0 0 0 0(;|})", ":0$1");
         css = css.replaceAll(":0 0 0(;|})", ":0$1");
         css = css.replaceAll(":0 0(;|})", ":0$1");
+        
+        
         // Replace background-position:0; with background-position:0 0;
-        css = css.replaceAll("(?i)background-position:0(;|})", "background-position:0 0$1");
-
+        // same for transform-origin
+        sb = new StringBuffer();
+        p = Pattern.compile("(?i)(background-position|transform-origin|webkit-transform-origin|moz-transform-origin|o-transform-origin|ms-transform-origin):0(;|})");
+        m = p.matcher(css);
+        while (m.find()) {
+            m.appendReplacement(sb, m.group(1).toLowerCase() + ":0 0" + m.group(2));
+        }
+        m.appendTail(sb);
+        css = sb.toString();
+        
         // Replace 0.6 to .6, but only when preceded by : or a white-space
         css = css.replaceAll("(:|\\s)0+\\.(\\d+)", "$1.$2");
 
@@ -225,6 +235,16 @@ public class CssCompressor {
             } else {
                 m.appendReplacement(sb, m.group().toLowerCase());
             }
+        }
+        m.appendTail(sb);
+        css = sb.toString();
+
+        // border: none -> border:0
+        sb = new StringBuffer();
+        p = Pattern.compile("(?i)(border|border-top|border-right|border-bottom|border-right|outline|background):none(;|})");
+        m = p.matcher(css);
+        while (m.find()) {
+            m.appendReplacement(sb, m.group(1).toLowerCase() + ":0" + m.group(2));
         }
         m.appendTail(sb);
         css = sb.toString();

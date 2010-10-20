@@ -144,8 +144,12 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
     css = css.replace(/:0 0 0 0(;|\})/g, ":0$1");
     css = css.replace(/:0 0 0(;|\})/g, ":0$1");
     css = css.replace(/:0 0(;|\})/g, ":0$1");
+
     // Replace background-position:0; with background-position:0 0;
-    css = css.replace(/background-position:0(;|\})/gi, "background-position:0 0$1");
+    // same for transform-origin
+    css = css.replace(/(background-position|transform-origin|webkit-transform-origin|moz-transform-origin|o-transform-origin|ms-transform-origin):0(;|\})/gi, function(all, prop, tail) {
+        return prop.toLowerCase() + ":0 0" + tail;
+    });
 
     // Replace 0.6 to .6, but only when preceded by : or a white-space
     css = css.replace(/(:|\s)0+\.(\d+)/g, "$1.$2");
@@ -183,6 +187,11 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
         }
     });
     
+    // border: none -> border:0
+    css = css.replace(/(border|border-top|border-right|border-bottom|border-right|outline|background):none(;|\})/gi, function(all, prop, tail) {
+        return prop.toLowerCase() + ":0" + tail;
+    });
+    
     // shorter opacity IE filter
     css = css.replace(/progid:DXImageTransform\.Microsoft\.Alpha\(Opacity=/gi, "alpha(opacity=");
 
@@ -202,7 +211,7 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
                 startIndex = i;
             }
         }
-    }
+    }   
 
     // Replace multiple semi-colons in a row by a single one
     // See SF bug #1980989
