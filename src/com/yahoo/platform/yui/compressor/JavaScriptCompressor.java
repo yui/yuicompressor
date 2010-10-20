@@ -533,6 +533,17 @@ public class JavaScriptCompressor {
         this.tokens = parse(in, reporter);
     }
 
+    public void compress(Writer out, Configuration config) throws IOException {
+        int linebreakpos = config.getLineBreak();
+        boolean munge = config.isMunge();
+        boolean preserveSemicolons = config.isPreserveSemicolons();
+        boolean disableOptimizations = !config.isOptimize();
+        boolean verbose = config.isVerbose();
+
+        compress(out, linebreakpos, munge, verbose,
+                                preserveSemicolons, disableOptimizations);
+    }
+
     public void compress(Writer out, int linebreak, boolean munge, boolean verbose,
             boolean preserveAllSemiColons, boolean disableOptimizations)
             throws IOException {
