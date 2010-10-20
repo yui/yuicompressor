@@ -84,8 +84,8 @@ public class CompressorHttpHandler implements HttpHandler {
 
         try {
             config = parseOptions(config, t); // get desired response format first
-            if (!t.getRequestMethod().toUpperCase().equals("POST")) {
-                throw new ConfigurationException("You must POST urlencoded JavaScript or CSS to this endpoint.");
+            if (!t.getRequestMethod().toUpperCase().equals("PUT")) {
+                throw new ConfigurationException("You must PUT JavaScript or CSS to this endpoint.");
             }
         } catch (ConfigurationException ex) {
             abort("Bad request", ex, HttpURLConnection.HTTP_BAD_REQUEST, config, t);
@@ -104,12 +104,13 @@ public class CompressorHttpHandler implements HttpHandler {
         String tmp = br.readLine();
         while (tmp != null) {
             sb.append(tmp);
+            sb.append("\n");
             tmp = br.readLine();
         }
         String incoming = sb.toString();
-        incoming = URLDecoder.decode(incoming, config.getCharset());
+        // incoming = URLDecoder.decode(incoming, config.getCharset());
 
-        // System.err.println(incoming.toCharArray());
+        // System.err.print(incoming.toCharArray());
 
         in = new InputStreamReader(new ByteArrayInputStream(incoming.getBytes()));
 
