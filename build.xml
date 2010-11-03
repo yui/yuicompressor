@@ -20,10 +20,9 @@
                includes="**/*.java"
                deprecation="off"
                debug="on"
-               source="6">
+               source="1.4">
             <classpath>
                 <pathelement location="${lib.dir}/jargs-1.0.jar"/>
-                <pathelement location="${lib.dir}/json.jar"/>
                 <pathelement location="${lib.dir}/rhino-1.6R7.jar"/>
             </classpath>
         </javac>
@@ -35,7 +34,6 @@
              (some of our own classes will override the Rhino classes) -->
         <unjar src="${lib.dir}/jargs-1.0.jar" dest="${build.dir}/jar"/>
         <unjar src="${lib.dir}/rhino-1.6R7.jar" dest="${build.dir}/jar"/>
-        <unjar src="${lib.dir}/json.jar" dest="${build.dir}/jar"/>
         <copy todir="${build.dir}/jar">
             <fileset dir="${build.dir}/classes" includes="**/*.class"/>
         </copy>
