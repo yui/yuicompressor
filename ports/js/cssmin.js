@@ -42,7 +42,7 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
 
     // preserve strings so their content doesn't get accidentally minified
     css = css.replace(/("([^\\"]|\\.|\\)*")|('([^\\']|\\.|\\)*')/g, function (match) {
-        var i, max, quote = match[0];
+        var i, max, quote = match.substring(0, 1);
         
         match = match.slice(1, -1);
         
