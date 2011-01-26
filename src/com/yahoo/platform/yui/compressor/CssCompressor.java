@@ -50,7 +50,6 @@ public class CssCompressor {
 
 
         startIndex = 0;
-        sb = new StringBuffer(srcsb.toString());
         ArrayList dataStrings = new ArrayList(0);
         // Take out data strings
         while((startIndex = sb.indexOf("url(\"data:", startIndex)) >= 0) {
@@ -61,6 +60,8 @@ public class CssCompressor {
         	}
         }
         
+        startIndex = 0;
+        endIndex = 0;
         // Remove all comment blocks...
         while ((startIndex = sb.indexOf("/*", startIndex)) >= 0) {
             endIndex = sb.indexOf("*/", startIndex + 2);
