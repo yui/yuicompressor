@@ -296,7 +296,7 @@ public class CssCompressor {
 
         // restore preserved comments and strings
         for(i = 0, max = preservedTokens.size(); i < max; i++) {
-            css = css.replace("___YUICSSMIN_PRESERVED_TOKEN_" + (i+1) + "___", preservedTokens.get(i).toString());
+            css = css.replace("___YUICSSMIN_PRESERVED_TOKEN_" + i + "___", preservedTokens.get(i).toString());
         }
 
         // Trim the final string (for any leading or trailing white spaces)
