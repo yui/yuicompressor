@@ -13,6 +13,7 @@ package com.yahoo.platform.yui.compressor;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.ArrayList; 
@@ -48,7 +49,19 @@ public class CssCompressor {
         String placeholder;
 
 
-        // collect all comment blocks...
+        startIndex = 0;
+        sb = new StringBuffer(srcsb.toString());
+        ArrayList dataStrings = new ArrayList(0);
+        // Take out data strings
+        while((startIndex = sb.indexOf("url(\"data:", startIndex)) >= 0) {
+        	endIndex = sb.indexOf("\"", startIndex+10);
+        	if(endIndex > startIndex + 10) {
+        		dataStrings.add(sb.substring(startIndex, endIndex));
+        		sb.replace(startIndex, endIndex, "__YUI_DATA_STRING_" + dataStrings.size() + "__");
+        	}
+        }
+        
+        // Remove all comment blocks...
         while ((startIndex = sb.indexOf("/*", startIndex)) >= 0) {
             endIndex = sb.indexOf("*/", startIndex + 2);
             if (endIndex < 0) {
@@ -273,13 +286,17 @@ public class CssCompressor {
             css = sb.toString();
         }
 
+        for(i = 0;i < dataStrings.size(); i++) {
+        	css = css.replaceAll("__YUI_DATA_STRING_"+ (i+1) + "__", (String)dataStrings.get(i));
+    	}
+
         // Replace multiple semi-colons in a row by a single one
         // See SF bug #1980989
         css = css.replaceAll(";;+", ";");
 
         // restore preserved comments and strings
         for(i = 0, max = preservedTokens.size(); i < max; i++) {
-            css = css.replace("___YUICSSMIN_PRESERVED_TOKEN_" + i + "___", preservedTokens.get(i).toString());
+            css = css.replace("___YUICSSMIN_PRESERVED_TOKEN_" + (i+1) + "___", preservedTokens.get(i).toString());
         }
 
         // Trim the final string (for any leading or trailing white spaces)
