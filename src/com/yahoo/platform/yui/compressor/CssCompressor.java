@@ -56,8 +56,8 @@ public class CssCompressor {
         while((startIndex = sb.indexOf("url(\"data:", startIndex)) >= 0) {
         	endIndex = sb.indexOf("\"", startIndex+10);
         	if(endIndex > startIndex + 10) {
-        		dataStrings.add(sb.substring(startIndex, endIndex));
-        		sb.replace(startIndex, endIndex, "__YUI_DATA_STRING_" + dataStrings.size() + "__");
+        		dataStrings.add(sb.substring(startIndex+4, endIndex+1));
+        		sb.replace(startIndex+4, endIndex+1, "__YUICSSMIN_DATA_STRING_" + dataStrings.size() + "__");
         	}
         }
         
@@ -285,9 +285,9 @@ public class CssCompressor {
 
             css = sb.toString();
         }
-
+        
         for(i = 0;i < dataStrings.size(); i++) {
-        	css = css.replaceAll("__YUI_DATA_STRING_"+ (i+1) + "__", (String)dataStrings.get(i));
+        	css = css.replaceAll("__YUICSSMIN_DATA_STRING_"+ (i+1) + "__", dataStrings.get(i).toString());
     	}
 
         // Replace multiple semi-colons in a row by a single one
