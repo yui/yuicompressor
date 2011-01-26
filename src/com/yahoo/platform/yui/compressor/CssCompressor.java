@@ -13,6 +13,7 @@ package com.yahoo.platform.yui.compressor;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -37,11 +38,22 @@ public class CssCompressor {
         StringBuffer sb;
         int startIndex, endIndex;
 
+        startIndex = 0;
+        sb = new StringBuffer(srcsb.toString());
+        ArrayList dataStrings = new ArrayList(0);
+        // Take out data strings
+        while((startIndex = sb.indexOf("url(\"data:", startIndex)) >= 0) {
+        	endIndex = sb.indexOf("\"", startIndex+10);
+        	if(endIndex > startIndex + 10) {
+        		dataStrings.add(sb.substring(startIndex, endIndex));
+        		sb.replace(startIndex, endIndex, "__YUI_DATA_STRING_" + dataStrings.size() + "__");
+        	}
+        }
+        
         // Remove all comment blocks...
         startIndex = 0;
         boolean iemac = false;
         boolean preserve = false;
-        sb = new StringBuffer(srcsb.toString());
         while ((startIndex = sb.indexOf("/*", startIndex)) >= 0) {
             preserve = sb.length() > startIndex + 2 && sb.charAt(startIndex + 2) == '!';
             endIndex = sb.indexOf("*/", startIndex + 2);
@@ -174,6 +186,10 @@ public class CssCompressor {
 
         // Replace the pseudo class for the Box Model Hack
         css = css.replaceAll("___PSEUDOCLASSBMH___", "\"\\\\\"}\\\\\"\"");
+        
+        for(int i = 0;i < dataStrings.size(); i++) {
+        	css = css.replaceAll("__YUI_DATA_STRING_"+ i + "__", (String)dataStrings.get(i));
+    	}
 
         // Replace multiple semi-colons in a row by a single one
         // See SF bug #1980989
