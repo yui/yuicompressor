@@ -2,16 +2,17 @@
  * cssmin.js
  * Author: Stoyan Stefanov - http://phpied.com/
  * This is a JavaScript port of the CSS minification tool
- * distributed with YUICompressor, itself a port 
- * of the cssmin utility by Isaac Schlueter - http://foohack.com/ 
+ * distributed with YUICompressor, itself a port
+ * of the cssmin utility by Isaac Schlueter - http://foohack.com/
  * Permission is hereby granted to use the JavaScript version under the same
  * conditions as the YUICompressor (original YUICompressor note below).
  */
- 
+
 /*
 * YUI Compressor
+* http://developer.yahoo.com/yui/compressor/
 * Author: Julien Lecomte - http://www.julienlecomte.net/
-* Copyright (c) 2009 Yahoo! Inc. All rights reserved.
+* Copyright (c) 2011 Yahoo! Inc. All rights reserved.
 * The copyrights embodied in the content of this file are licensed
 * by Yahoo! Inc. under the BSD (revised) open source license.
 */
@@ -19,7 +20,7 @@ var YAHOO = YAHOO || {};
 YAHOO.compressor = YAHOO.compressor || {};
 YAHOO.compressor.cssmin = function (css, linebreakpos) {
 
-    var startIndex = 0, 
+    var startIndex = 0,
         endIndex = 0,
         i = 0, max = 0,
         preservedTokens = [],
@@ -43,9 +44,9 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
     // preserve strings so their content doesn't get accidentally minified
     css = css.replace(/("([^\\"]|\\.|\\)*")|('([^\\']|\\.|\\)*')/g, function (match) {
         var i, max, quote = match.substring(0, 1);
-        
+
         match = match.slice(1, -1);
-        
+
         // maybe the string contains a comment-like substring?
         // one, maybe more? put'em back then
         if (match.indexOf("___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_") >= 0) {
@@ -53,20 +54,20 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
                 match = match.replace("___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_" + i + "___", comments[i]);
             }
         }
-        
+
         // minify alpha opacity in filter strings
         match = match.replace(/progid:DXImageTransform\.Microsoft\.Alpha\(Opacity=/gi, "alpha(opacity=");
-        
+
         preservedTokens.push(match);
         return quote + "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.length - 1) + "___" + quote;
     });
 
     // strings are safe, now wrestle the comments
     for (i = 0, max = comments.length; i < max; i = i + 1) {
-        
+
         token = comments[i];
         placeholder = "___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_" + i + "___";
-        
+
         // ! in the first position of the comment means preserve
         // so push to the preserved tokens keeping the !
         if (token.charAt(0) === "!") {
@@ -74,7 +75,7 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
             css = css.replace(placeholder,  "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.length - 1) + "___");
             continue;
         }
-        
+
         // \ in the last position looks like hack for Mac/IE5
         // shorten that to /*\*/ and the next one to /**/
         if (token.charAt(token.length - 1) === "\\") {
@@ -82,7 +83,7 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
             css = css.replace(placeholder,  "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.length - 1) + "___");
             i = i + 1; // attn: advancing the loop
             preservedTokens.push("");
-            css = css.replace("___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_" + i + "___",  "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.length - 1) + "___");            
+            css = css.replace("___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_" + i + "___",  "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.length - 1) + "___");
             continue;
         }
 
@@ -97,7 +98,7 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
                 }
             }
         }
-                
+
         // in all other cases kill the comment
         css = css.replace("/*" + placeholder + "*/", "");
     }
@@ -117,19 +118,19 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
 
     // retain space for special IE6 cases
     css = css.replace(/:first-(line|letter)(\{|,)/g, ":first-$1 $2");
-        
+
     // no space after the end of a preserved comment
-    css = css.replace(/\*\/ /g, '*/'); 
-    
-     
+    css = css.replace(/\*\/ /g, '*/');
+
+
     // If there is a @charset, then only allow one, and push to the top of the file.
     css = css.replace(/^(.*)(@charset "[^"]*";)/gi, '$2$1');
     css = css.replace(/^(\s*@charset [^;]+;\s*)+/gi, '$1');
-    
+
     // Put the space back in some cases, to support stuff like
     // @media screen and (-webkit-min-device-pixel-ratio:0){
     css = css.replace(/\band\(/gi, "and (");
-    
+
 
     // Remove the spaces after the things that should not have spaces after them.
     css = css.replace(/([!{}:;>+\(\[,])\s+/g, '$1');
@@ -166,7 +167,7 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
         }
         return '#' + rgbcolors.join('');
     });
-    
+
 
     // Shorten colors from #AABBCC to #ABC. Note that we want to make sure
     // the color is not preceded by either ", " or =. Indeed, the property
@@ -174,7 +175,7 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
     // would become
     //     filter: chroma(color="#FFF");
     // which makes the filter break in IE.
-    css = css.replace(/([^"'=\s])(\s*)#([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])/gi, function () { 
+    css = css.replace(/([^"'=\s])(\s*)#([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])/gi, function () {
         var group = arguments;
         if (
             group[3].toLowerCase() === group[4].toLowerCase() &&
@@ -186,12 +187,12 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
             return group[0].toLowerCase();
         }
     });
-    
+
     // border: none -> border:0
     css = css.replace(/(border|border-top|border-right|border-bottom|border-right|outline|background):none(;|\})/gi, function(all, prop, tail) {
         return prop.toLowerCase() + ":0" + tail;
     });
-    
+
     // shorter opacity IE filter
     css = css.replace(/progid:DXImageTransform\.Microsoft\.Alpha\(Opacity=/gi, "alpha(opacity=");
 
@@ -202,7 +203,7 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
         // Some source control tools don't like it when files containing lines longer
         // than, say 8000 characters, are checked in. The linebreak option is used in
         // that case to split long lines after a specific column.
-        startIndex = 0; 
+        startIndex = 0;
         i = 0;
         while (i < css.length) {
             i = i + 1;
@@ -211,7 +212,7 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
                 startIndex = i;
             }
         }
-    }   
+    }
 
     // Replace multiple semi-colons in a row by a single one
     // See SF bug #1980989
@@ -221,7 +222,7 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
     for (i = 0, max = preservedTokens.length; i < max; i = i + 1) {
         css = css.replace("___YUICSSMIN_PRESERVED_TOKEN_" + i + "___", preservedTokens[i]);
     }
-    
+
     // Trim the final string (for any leading or trailing white spaces)
     css = css.replace(/^\s+|\s+$/g, "");
 

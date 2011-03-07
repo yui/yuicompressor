@@ -1,4 +1,4 @@
-YUI Compressor 2.4.4, 2010-10-20
+YUI Compressor 2.4.5, 2011-03-13
 -------------------------------
 + Default file encoding changed from system default to UTF-8.
 + Errors/messages/usage info all are sent to stderr.
@@ -16,6 +16,9 @@ YUI Compressor 2.4.4, 2010-10-20
 + shorter border:none->0 where applicable
 + fixed transform-origin: 0 0 [bug 2528060]
 + tests++
+
+YUI Compressor 2.4.4, 2010-10-20
++ Interim 2.4.5 release
 
 YUI Compressor 2.4.3, 2009-12-07
 -------------------------------

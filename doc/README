@@ -16,7 +16,7 @@ SYNOPSIS
     --charset <charset>       Read the input file using <charset>
     --line-break <column>     Insert a line break after the specified column number
     -v, --verbose             Display informational messages and warnings
-    -o <file>                 Place the output into <file> or a file pattern. 
+    -o <file>                 Place the output into <file> or a file pattern.
                               Defaults to stdout.
 
   JavaScript Options
@@ -65,8 +65,8 @@ GLOBAL OPTIONS
       Place output in file outfile. If not specified, the YUI Compressor will
       default to the standard output, which you can redirect to a file.
       Supports a filter syntax for expressing the output pattern when there are
-      multiple input files.  ex: 
-          java -jar yuicompressor.jar -o '.css$:-min.css' *.css 
+      multiple input files.  ex:
+          java -jar yuicompressor.jar -o '.css$:-min.css' *.css
       ... will minify all .css files and save them as -min.css
 
   -v, --verbose
@@ -140,6 +140,6 @@ MODIFIED RHINO FILES
 
 COPYRIGHT AND LICENSE
 
-  Copyright (c) 2010 Yahoo! Inc.  All rights reserved.
+  Copyright (c) 2011 Yahoo! Inc.  All rights reserved.
   The copyrights embodied in the content of this file are licensed
   by Yahoo! Inc. under the BSD (revised) open source license.
