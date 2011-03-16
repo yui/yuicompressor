@@ -16,6 +16,7 @@ import java.io.Writer;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class CssCompressor {
 
@@ -294,7 +295,36 @@ public class CssCompressor {
         for(i = 0, max = preservedTokens.size(); i < max; i++) {
             css = css.replace("___YUICSSMIN_PRESERVED_TOKEN_" + i + "___", preservedTokens.get(i).toString());
         }
+        
+        // Alphabetically arrange properties in declaration block
+        sb = new StringBuffer(css);
+        startIndex = 0;
+        while ((startIndex = sb.indexOf("{", startIndex)) >= 0) {
+            endIndex = sb.indexOf("}", startIndex + 1);
+            if (endIndex < 0) {
+                endIndex = totallen;
+            }
 
+            token = sb.substring(startIndex + 1, endIndex);
+            
+            // Split string into an array and sort
+            String[] arr = token.split(";");
+            Arrays.sort(arr);
+            
+            // And glue it back
+            token = "";
+            for(i = 0, max = arr.length; i < max; i++) {
+            	if (token != "") {
+            		token += ";";
+            	}
+            	token += arr[i];
+            }
+            
+            sb.replace(startIndex + 1, endIndex, token);
+            startIndex++;
+        }
+        css = sb.toString();
+        
         // Trim the final string (for any leading or trailing white spaces)
         css = css.trim();
 
