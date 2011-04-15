@@ -81,6 +81,10 @@ public class YUICompressor {
             String[] fileArgs = parser.getRemainingArgs();
             java.util.List files = java.util.Arrays.asList(fileArgs);
             if (files.isEmpty()) {
+                if (type == null) {
+                    usage();
+                    System.exit(1);
+                }
                 files = new java.util.ArrayList();
                 files.add("-"); // read from stdin
             }
