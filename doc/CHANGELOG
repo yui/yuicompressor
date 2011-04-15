@@ -1,3 +1,7 @@
+YUI Compressor 2.4.6, 2011-04-15
+-------------------------------
++ Show usage information when started without arguments.
+
 YUI Compressor 2.4.5, 2011-03-13
 -------------------------------
 + Default file encoding changed from system default to UTF-8.
