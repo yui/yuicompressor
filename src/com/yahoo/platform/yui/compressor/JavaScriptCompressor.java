@@ -170,6 +170,8 @@ public class JavaScriptCompressor {
         literals.put(new Integer(Token.DOTDOT), "..");
         literals.put(new Integer(Token.DOTQUERY), ".(");
         literals.put(new Integer(Token.XMLATTR), "@");
+        literals.put(new Integer(Token.LET), "let ");
+        literals.put(new Integer(Token.YIELD), "yield ");
 
         // See http://developer.mozilla.org/en/docs/Core_JavaScript_1.5_Reference:Reserved_Words
 
@@ -308,6 +310,7 @@ public class JavaScriptCompressor {
             throws IOException, EvaluatorException {
 
         CompilerEnvirons env = new CompilerEnvirons();
+        env.setLanguageVersion(Context.VERSION_1_7);
         Parser parser = new Parser(env, reporter);
         parser.parse(in, null, 1);
         String source = parser.getEncodedSource();
