@@ -1170,6 +1170,7 @@ public class JavaScriptCompressor {
 		    if (lastToken.getType() != Token.GET && lastToken.getType() != Token.SET) {
 			result.append("function");
 		    }
+                    lastToken = token;
                     token = consumeToken();
                     if (token.getType() == Token.NAME) {
                         result.append(' ');
