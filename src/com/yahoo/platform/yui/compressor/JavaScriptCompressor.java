@@ -1091,6 +1091,7 @@ public class JavaScriptCompressor {
 
         String symbol;
         JavaScriptToken token;
+        JavaScriptToken lastToken = getToken(0);
         ScriptOrFnScope currentScope;
         JavaScriptIdentifier identifier;
 
@@ -1108,6 +1109,9 @@ public class JavaScriptCompressor {
             currentScope = getCurrentScope();
 
             switch (token.getType()) {
+                case Token.GET:
+                case Token.SET:
+                    lastToken = token;
 
                 case Token.NAME:
 
@@ -1163,7 +1167,9 @@ public class JavaScriptCompressor {
                     break;
 
                 case Token.FUNCTION:
-                    result.append("function");
+		    if (lastToken.getType() != Token.GET && lastToken.getType() != Token.SET) {
+			result.append("function");
+		    }
                     token = consumeToken();
                     if (token.getType() == Token.NAME) {
                         result.append(' ');
