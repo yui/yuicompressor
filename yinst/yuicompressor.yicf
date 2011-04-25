@@ -14,5 +14,6 @@ PACKAGE_OS_SPECIFIC = no
 ############################################################
 f 0755 - - bin/yuicompressor yuicompressor
 # Build with ant, piping to stderr, then get the biggest-named jar file.
-JAR=`( cd .. && (ant 1>&2) && ls $PWD/build/*.jar | sort | tail -n1 && exit 0 ) || ( echo "Build Failed" && exit 1 )`
+# JAR=`( cd .. && (ant 1>&2) && ls $PWD/build/*.jar | sort | tail -n1 && exit 0 ) || ( echo "Build Failed" && exit 1 )`
+JAR=`( cd .. && ls $PWD/build/*.jar | sort | tail -n1 && exit 0 ) || ( echo "Build Failed" && exit 1 )`
 f 0644 - - bin/yuicompressor.jar $(JAR)
