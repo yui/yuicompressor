@@ -94,7 +94,7 @@ class ScriptOrFnScope {
         return varcount;
     }
 
-    public void getFullMapping(StringBuffer outBuffer, String mungedPrefix, String valuePrefix) {
+    public void getFullMapping(StringBuffer outBuffer, String mungedPrefix) {
         Enumeration elements = identifiers.elements();
         while (elements.hasMoreElements()) {
             JavaScriptIdentifier identifier = (JavaScriptIdentifier) elements.nextElement();
@@ -104,11 +104,11 @@ class ScriptOrFnScope {
             }
             outBuffer.append(mungedPrefix + mungedValue);
             outBuffer.append(": ");
-            outBuffer.append(valuePrefix + identifier.getValue() + "\n");
+            outBuffer.append(identifier.getValue() + "\n");
         }
         for (int i = 0; i < subScopes.size(); i++) {
             ScriptOrFnScope scope = (ScriptOrFnScope) subScopes.get(i);
-            scope.getFullMapping(outBuffer, "\t"+mungedPrefix, "");
+            scope.getFullMapping(outBuffer, "\t"+mungedPrefix);
         }
     }
 

@@ -1320,7 +1320,7 @@ public class JavaScriptCompressor {
 
     private void printMungeMapping(Writer mapping) throws IOException {
         StringBuffer sb = new StringBuffer();
-        globalScope.getFullMapping(sb, "", "");
+        globalScope.getFullMapping(sb, "");
         mapping.write(sb.toString());
     }
 
