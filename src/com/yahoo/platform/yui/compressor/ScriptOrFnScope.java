@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
+
 class ScriptOrFnScope {
 
     private int braceNesting;
@@ -91,6 +92,24 @@ class ScriptOrFnScope {
     int incrementVarCount() {
         varcount++;
         return varcount;
+    }
+
+    public void getFullMapping(StringBuffer outBuffer, String mungedPrefix) {
+        Enumeration elements = identifiers.elements();
+        while (elements.hasMoreElements()) {
+            JavaScriptIdentifier identifier = (JavaScriptIdentifier) elements.nextElement();
+            String mungedValue = identifier.getMungedValue();
+            if (mungedValue == null) {
+                mungedValue = identifier.getValue();
+            }
+            outBuffer.append(mungedPrefix + mungedValue);
+            outBuffer.append(": ");
+            outBuffer.append(identifier.getValue() + "\n");
+        }
+        for (int i = 0; i < subScopes.size(); i++) {
+            ScriptOrFnScope scope = (ScriptOrFnScope) subScopes.get(i);
+            scope.getFullMapping(outBuffer, "\t"+mungedPrefix);
+        }
     }
 
     void munge() {
