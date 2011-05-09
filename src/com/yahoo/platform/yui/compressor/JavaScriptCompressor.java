@@ -536,7 +536,7 @@ public class JavaScriptCompressor {
         this.tokens = parse(in, reporter);
     }
 
-    public void compress(Writer out, int linebreak, boolean munge, boolean verbose,
+    public void compress(Writer out, Writer mapping, int linebreak, boolean munge, boolean verbose,
             boolean preserveAllSemiColons, boolean disableOptimizations)
             throws IOException {
 
@@ -556,6 +556,9 @@ public class JavaScriptCompressor {
         StringBuffer sb = printSymbolTree(linebreak, preserveAllSemiColons);
 
         out.write(sb.toString());
+        if (mapping != null) {
+            printMungeMapping(mapping);
+        }
     }
 
     private ScriptOrFnScope getCurrentScope() {
@@ -1324,4 +1327,11 @@ public class JavaScriptCompressor {
 
         return result;
     }
+
+    private void printMungeMapping(Writer mapping) throws IOException {
+        StringBuffer sb = new StringBuffer();
+        globalScope.getFullMapping(sb, "");
+        mapping.write(sb.toString());
+    }
+
 }

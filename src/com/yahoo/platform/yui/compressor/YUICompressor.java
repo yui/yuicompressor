@@ -29,10 +29,12 @@ public class YUICompressor {
         CmdLineParser.Option helpOpt = parser.addBooleanOption('h', "help");
         CmdLineParser.Option charsetOpt = parser.addStringOption("charset");
         CmdLineParser.Option outputFilenameOpt = parser.addStringOption('o', "output");
+        CmdLineParser.Option mappingFilenameOpt = parser.addStringOption('m', "mapping");
 
         Reader in = null;
         Writer out = null;
-
+        Writer mapping = null;
+        
         try {
 
             parser.parse(args);
@@ -91,6 +93,16 @@ public class YUICompressor {
 
             String output = (String) parser.getOptionValue(outputFilenameOpt);
             String pattern[] = output != null ? output.split(":") : new String[0];
+
+            try {
+                String mappingFilename = (String) parser.getOptionValue(mappingFilenameOpt);
+                if (mappingFilename != null) {
+                    mapping = new OutputStreamWriter(new FileOutputStream(mappingFilename), charset);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
 
             java.util.Iterator filenames = files.iterator();
             while(filenames.hasNext()) {
@@ -163,13 +175,16 @@ public class YUICompressor {
                                 out = new OutputStreamWriter(System.out, charset);
                             } else {
                                 out = new OutputStreamWriter(new FileOutputStream(outputFilename), charset);
+                                if (mapping != null) {
+                                    mapping.write("\n\nFile: "+outputFilename+"\n\n");
+                                }
                             }
 
                             boolean munge = parser.getOptionValue(nomungeOpt) == null;
                             boolean preserveAllSemiColons = parser.getOptionValue(preserveSemiOpt) != null;
                             boolean disableOptimizations = parser.getOptionValue(disableOptimizationsOpt) != null;
 
-                            compressor.compress(out, linebreakpos, munge, verbose,
+                            compressor.compress(out, mapping, linebreakpos, munge, verbose,
                                     preserveAllSemiColons, disableOptimizations);
 
                         } catch (EvaluatorException e) {
@@ -225,12 +240,20 @@ public class YUICompressor {
 
             usage();
             System.exit(1);
+        } finally {
+            if (mapping != null) {
+                try {
+                    mapping.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
     private static void usage() {
         System.err.println(
-                "\nUsage: java -jar yuicompressor-2.4.6.jar [options] [input file]\n\n"
+                "\nUsage: java -jar yuicompressor-x.y.z.jar [options] [input file]\n\n"
 
                         + "Global Options\n"
                         + "  -h, --help                Displays this information\n"
@@ -241,7 +264,8 @@ public class YUICompressor {
                         + "  -o <file>                 Place the output into <file>. Defaults to stdout.\n"
                         + "                            Multiple files can be processed using the following syntax:\n"
                         + "                            java -jar yuicompressor.jar -o '.css$:-min.css' *.css\n"
-                        + "                            java -jar yuicompressor.jar -o '.js$:-min.js' *.js\n\n"
+                        + "                            java -jar yuicompressor.jar -o '.js$:-min.js' *.js\n"
+                        + "  -m <file>                 Place a mapping of munged identifiers to originals in this file\n\n"
 
                         + "JavaScript Options\n"
                         + "  --nomunge                 Minify only, do not obfuscate\n"
