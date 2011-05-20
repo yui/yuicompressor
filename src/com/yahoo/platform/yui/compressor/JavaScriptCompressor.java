@@ -1167,9 +1167,9 @@ public class JavaScriptCompressor {
                     break;
 
                 case Token.FUNCTION:
-		    if (lastToken.getType() != Token.GET && lastToken.getType() != Token.SET) {
-			result.append("function");
-		    }
+                    if (lastToken.getType() != Token.GET && lastToken.getType() != Token.SET) {
+                        result.append("function");
+                    }
                     token = consumeToken();
                     if (token.getType() == Token.NAME) {
                         result.append(' ');
