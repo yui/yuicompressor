@@ -230,7 +230,7 @@ public class YUICompressor {
 
     private static void usage() {
         System.err.println(
-                "\nUsage: java -jar yuicompressor-x.y.z.jar [options] [input file]\n\n"
+                "\nUsage: java -jar yuicompressor-2.4.6.jar [options] [input file]\n\n"
 
                         + "Global Options\n"
                         + "  -h, --help                Displays this information\n"

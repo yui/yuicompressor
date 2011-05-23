@@ -588,6 +588,10 @@ public class Decompiler
                 result.append("var ");
                 break;
 
+            case Token.LET:
+              result.append("let ");
+              break;
+
             case Token.SEMI:
                 result.append(';');
                 if (Token.EOL != getNext(source, length, i)) {
@@ -745,7 +749,11 @@ public class Decompiler
             case Token.CONST:
                 result.append("const ");
                 break;
-
+                
+            case Token.YIELD:
+                result.append("yield ");
+                break;
+            
             case Token.NOT:
                 result.append('!');
                 break;
