@@ -240,12 +240,17 @@ public class CssCompressor {
         m = p.matcher(css);
         sb = new StringBuffer();
         while (m.find()) {
-            // Test for AABBCC pattern
-            if (m.group(3).equalsIgnoreCase(m.group(4)) &&
+            if (m.group(1).equals("}")) {
+                // Likely an ID selector. Don't touch.
+                // #AABBCC is a valid ID. IDs are case-sensitive.
+                m.appendReplacement(sb, m.group());
+            } else if (m.group(3).equalsIgnoreCase(m.group(4)) &&
                     m.group(5).equalsIgnoreCase(m.group(6)) &&
                     m.group(7).equalsIgnoreCase(m.group(8))) {
+                // #AABBCC pattern
                 m.appendReplacement(sb, (m.group(1) + m.group(2) + "#" + m.group(3) + m.group(5) + m.group(7)).toLowerCase());
             } else {
+                // Any other color.
                 m.appendReplacement(sb, m.group().toLowerCase());
             }
         }
