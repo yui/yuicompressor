@@ -18,7 +18,7 @@ runtest () {
 	
 	if [ "$2" == "cssminjs" ]; then 
 	    actual="$(
-		    java -jar ../lib/rhino-1.6R7.jar suite.rhino $testfile
+		    java -jar ../lib/rhino-1.7R2.jar suite.rhino $testfile
 	    )"
          
     else
