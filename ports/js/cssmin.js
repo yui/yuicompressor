@@ -157,13 +157,16 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
 
     // Shorten colors from rgb(51,102,153) to #336699
     // This makes it more likely that it'll get further compressed in the next step.
-    css = css.replace(/rgb\s*\(\s*([0-9,\s]+)\s*\)/gi, function () {
+    css = css.replace(/rgb\s*\(\s*([0-9,\s]+)\s*\)(\d+%)?/gi, function () {
         var i, rgbcolors = arguments[1].split(',');
         for (i = 0; i < rgbcolors.length; i = i + 1) {
             rgbcolors[i] = parseInt(rgbcolors[i], 10).toString(16);
             if (rgbcolors[i].length === 1) {
                 rgbcolors[i] = '0' + rgbcolors[i];
             }
+        }
+        if (arguments[2]) {
+            rgbcolors.push(' '+arguments[2]);
         }
         return '#' + rgbcolors.join('');
     });
@@ -177,6 +180,9 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
     // which makes the filter break in IE.
     css = css.replace(/([^"'=\s])(\s*)#([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])/gi, function () {
         var group = arguments;
+        if (group[1] == '}') {
+            return group[0];
+        }
         if (
             group[3].toLowerCase() === group[4].toLowerCase() &&
             group[5].toLowerCase() === group[6].toLowerCase() &&
