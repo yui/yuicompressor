@@ -23,7 +23,7 @@
                source="1.6">
             <classpath>
                 <pathelement location="${lib.dir}/jargs-1.0.jar"/>
-                <pathelement location="${lib.dir}/rhino-1.7R2.jar"/>
+                <pathelement location="${lib.dir}/rhino-1.7R3.jar"/>
             </classpath>
         </javac>
     </target>
@@ -33,7 +33,7 @@
         <!-- The order is important here. Rhino MUST be unjarred first!
              (some of our own classes will override the Rhino classes) -->
         <unjar src="${lib.dir}/jargs-1.0.jar" dest="${build.dir}/jar"/>
-        <unjar src="${lib.dir}/rhino-1.7R2.jar" dest="${build.dir}/jar"/>
+        <unjar src="${lib.dir}/rhino-1.7R3.jar" dest="${build.dir}/jar"/>
         <copy todir="${build.dir}/jar">
             <fileset dir="${build.dir}/classes" includes="**/*.class"/>
         </copy>
