@@ -15,9 +15,8 @@
 * The copyrights embodied in the content of this file are licensed
 * by Yahoo! Inc. under the BSD (revised) open source license.
 */
-var YAHOO = YAHOO || {};
-YAHOO.compressor = YAHOO.compressor || {};
-YAHOO.compressor.cssmin = function (css, linebreakpos){
+( function() {
+var cssmin = function (css, linebreakpos) {
 
     var startIndex = 0, 
         endIndex = 0,
@@ -179,3 +178,23 @@ YAHOO.compressor.cssmin = function (css, linebreakpos){
     return css;
 
 };
+
+//Node.js
+if ( typeof module === "object" && typeof exports === "object" && module.exports === exports ) {
+    exports.cssmin = cssmin;
+}
+
+//web browser
+else if ( typeof window === "object" ) {
+    if ( typeof YAHOO !== "object" ) {
+        YAHOO = { compressor: { cssmin:cssmin } };
+    }
+    else if ( typeof YAHOO.compressor !== "object" ) {
+        YAHOO.compressor = { cssmin:cssmin };
+    }
+    else {
+        YAHOO.compressor.cssmin = cssmin;
+    }
+}
+
+})();
