@@ -51,9 +51,17 @@ public class CssCompressor {
 
         startIndex = 0;
         ArrayList dataStrings = new ArrayList(0);
-        // Take out data strings
+        // Take out data strings for double quotes
         while((startIndex = sb.indexOf("url(\"data:", startIndex)) >= 0) {
         	endIndex = sb.indexOf("\"", startIndex+10);
+        	if(endIndex > startIndex + 10) {
+        		dataStrings.add(sb.substring(startIndex+4, endIndex+1));
+        		sb.replace(startIndex+4, endIndex+1, "___YUICSSMIN_DATA_STRING_" + dataStrings.size() + "___");
+        	}
+        }
+        // Take out data strings for single quotes (because I am lazy)
+        while((startIndex = sb.indexOf("url('data:", startIndex)) >= 0) {
+        	endIndex = sb.indexOf("'", startIndex+10);
         	if(endIndex > startIndex + 10) {
         		dataStrings.add(sb.substring(startIndex+4, endIndex+1));
         		sb.replace(startIndex+4, endIndex+1, "___YUICSSMIN_DATA_STRING_" + dataStrings.size() + "___");
