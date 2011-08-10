@@ -47,21 +47,22 @@ public class CssCompressor {
         int totallen = css.length();
         String placeholder;
 
-        // // leave data urls alone to increase parse performance.
-        // sb = new StringBuffer();
-        // p = Pattern.compile("url\\(.*data\\:(.*)\\)");
-        // m = p.matcher(css);
-        // while (m.find()) {
-        //     token = m.group();
-        //     token = token.substring(1, token.length() - 1);
-        //     preservedTokens.add(token);
-        //     String preserver = "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___";
-        //     m.appendReplacement(sb, preserver);
-        // }
-        // m.appendTail(sb);
-        // css = sb.toString();
+        // leave data urls alone to increase parse performance.
+        sb = new StringBuffer();
+        p = Pattern.compile("url\\(.*data\\:(.*)\\)");
+        m = p.matcher(css);
+        while (m.find()) {
+            token = m.group();
+            // token = token.substring(1, token.length() - 1);
+            preservedTokens.add(token);
+            String preserver = "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___";
+            m.appendReplacement(sb, preserver);
+        }
+        m.appendTail(sb);
+        css = sb.toString();
 
         // collect all comment blocks...
+        sb = new StringBuffer(css);
         while ((startIndex = sb.indexOf("/*", startIndex)) >= 0) {
             endIndex = sb.indexOf("*/", startIndex + 2);
             if (endIndex < 0) {
