@@ -29,13 +29,81 @@ public class CssCompressor {
         }
     }
 
+    // Leave data urls alone to increase parse performance.
+    protected String extractDataUrls(String css, ArrayList preservedTokens) {
+
+    	int startIndex, endIndex, appendIndex;
+    	int maxIndex = css.length()-1;
+    	boolean foundTerminator;
+    	String terminator;
+
+    	StringBuffer sb = new StringBuffer();
+
+        Pattern p = Pattern.compile("url\\(\\s*([\"']?)data\\:");
+        Matcher m = p.matcher(css);
+        
+        /* 
+         * Since we need to account for non-base64 data urls, we need to account
+         * ' and ) being part of the data string. Hence switching to indexOf,
+         * to determine whether or not we have matching string terminators and
+         * handling sb appends directly, instead of using matcher.append* methods.
+         */
+
+        appendIndex = 0;
+
+        while (m.find()) {
+
+        	startIndex = m.start() + 4;  // "url(".length()
+    		terminator = m.group(1);     // ', " or empty (not quoted)
+    		
+    		if (terminator.length() == 0) {
+    		 	terminator = ")";
+    		}
+
+    		foundTerminator = false;
+
+    		endIndex = m.end(1) - 1;
+    		while(foundTerminator == false && endIndex+1 <= maxIndex) {
+    			endIndex = css.indexOf(terminator, endIndex+1);
+
+    			// endIndex == 0 doesn't really apply here
+    			if ((endIndex > 0) && (css.charAt(endIndex-1) != '\\')) {
+    				foundTerminator = true;
+    				if (!")".equals(terminator)) {
+    					endIndex = css.indexOf(")", endIndex); 
+    				}
+    			}
+    		}
+
+    		// Enough searching, start moving stuff over
+			sb.append(css.substring(appendIndex, m.start()));
+
+    		if (foundTerminator) {
+    			String token = css.substring(startIndex, endIndex).trim();
+	    		preservedTokens.add(token);
+
+	    		String preserver = "url(___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___)";
+	    		sb.append(preserver);
+
+	    		appendIndex = endIndex + 1;
+    		} else {
+    			// No end terminator found, re-add the whole match. Should we throw/warn here?
+    			sb.append(css.substring(m.start(), m.end()));
+    			appendIndex = m.end();
+    		}
+        }
+
+        sb.append(css.substring(appendIndex));
+
+        return sb.toString();
+    }
+
     public void compress(Writer out, int linebreakpos)
             throws IOException {
 
         Pattern p;
         Matcher m;
         String css = srcsb.toString();
-        StringBuffer sb = new StringBuffer(css);
 
         int startIndex = 0;
         int endIndex = 0;
@@ -47,19 +115,9 @@ public class CssCompressor {
         int totallen = css.length();
         String placeholder;
 
-        // // leave data urls alone to increase parse performance.
-        // sb = new StringBuffer();
-        // p = Pattern.compile("url\\(.*data\\:(.*)\\)");
-        // m = p.matcher(css);
-        // while (m.find()) {
-        //     token = m.group();
-        //     token = token.substring(1, token.length() - 1);
-        //     preservedTokens.add(token);
-        //     String preserver = "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___";
-        //     m.appendReplacement(sb, preserver);
-        // }
-        // m.appendTail(sb);
-        // css = sb.toString();
+        css = this.extractDataUrls(css, preservedTokens);
+
+        StringBuffer sb = new StringBuffer(css);
 
         // collect all comment blocks...
         while ((startIndex = sb.indexOf("/*", startIndex)) >= 0) {
