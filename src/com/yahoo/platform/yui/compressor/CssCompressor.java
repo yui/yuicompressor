@@ -32,10 +32,8 @@ public class CssCompressor {
     // Leave data urls alone to increase parse performance.
     protected String extractDataUrls(String css, ArrayList preservedTokens) {
 
-    	int startIndex, endIndex, appendIndex;
     	int maxIndex = css.length()-1;
-    	boolean foundTerminator;
-    	String terminator;
+        int appendIndex = 0;
 
     	StringBuffer sb = new StringBuffer();
 
@@ -43,26 +41,24 @@ public class CssCompressor {
         Matcher m = p.matcher(css);
         
         /* 
-         * Since we need to account for non-base64 data urls, we need to account
+         * Since we need to account for non-base64 data urls, we need to handle 
          * ' and ) being part of the data string. Hence switching to indexOf,
          * to determine whether or not we have matching string terminators and
          * handling sb appends directly, instead of using matcher.append* methods.
          */
 
-        appendIndex = 0;
-
         while (m.find()) {
 
-        	startIndex = m.start() + 4;  // "url(".length()
-    		terminator = m.group(1);     // ', " or empty (not quoted)
+        	int startIndex = m.start() + 4;  // "url(".length()
+    		String terminator = m.group(1);     // ', " or empty (not quoted)
     		
     		if (terminator.length() == 0) {
     		 	terminator = ")";
     		}
 
-    		foundTerminator = false;
+    		boolean foundTerminator = false;
 
-    		endIndex = m.end(1) - 1;
+    		int endIndex = m.end(1) - 1;
     		while(foundTerminator == false && endIndex+1 <= maxIndex) {
     			endIndex = css.indexOf(terminator, endIndex+1);
 
@@ -75,11 +71,12 @@ public class CssCompressor {
     			}
     		}
 
-    		// Enough searching, start moving stuff over
+    		// Enough searching, start moving stuff over to the buffer
 			sb.append(css.substring(appendIndex, m.start()));
 
     		if (foundTerminator) {
     			String token = css.substring(startIndex, endIndex).trim();
+    			token = token.replaceAll("\\s+", "");
 	    		preservedTokens.add(token);
 
 	    		String preserver = "url(___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___)";
@@ -326,6 +323,7 @@ public class CssCompressor {
         // Remove empty rules.
         css = css.replaceAll("[^\\}\\{/;]+\\{\\}", "");
 
+        // TODO: Should this be after we re-insert tokens. These could alter the break points
         if (linebreakpos >= 0) {
             // Some source control tools don't like it when files containing lines longer
             // than, say 8000 characters, are checked in. The linebreak option is used in
