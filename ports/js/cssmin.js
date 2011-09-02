@@ -19,7 +19,7 @@
 var YAHOO = YAHOO || {};
 YAHOO.compressor = YAHOO.compressor || {};
 
-YAHOO.compressor._extractDataUrls = function(css, preservedTokens) {
+YAHOO.compressor._extractDataUrls = function (css, preservedTokens) {
 
     // Leave data urls alone to increase parse performance.
     var maxIndex = css.length - 1,
@@ -31,7 +31,7 @@ YAHOO.compressor._extractDataUrls = function(css, preservedTokens) {
         sb = [],
         m,
         preserver,
-        token
+        token,
         pattern = /url\(\s*(["']?)data\:/g;
 
     // Since we need to account for non-base64 data urls, we need to handle 
@@ -50,13 +50,13 @@ YAHOO.compressor._extractDataUrls = function(css, preservedTokens) {
 
         foundTerminator = false;
 
-        endIndex = pattern.lastIndex-1;
+        endIndex = pattern.lastIndex - 1;
 
         while(foundTerminator === false && endIndex+1 <= maxIndex) {
-            endIndex = css.indexOf(terminator, endIndex+1);
+            endIndex = css.indexOf(terminator, endIndex + 1);
     
-    		// endIndex == 0 doesn't really apply here
-        	if ((endIndex > 0) && (css.charAt(endIndex-1) != '\\')) {
+            // endIndex == 0 doesn't really apply here
+            if ((endIndex > 0) && (css.charAt(endIndex - 1) !== '\\')) {
                 foundTerminator = true;
                 if (")" != terminator) {
                     endIndex = css.indexOf(")", endIndex); 
@@ -76,7 +76,7 @@ YAHOO.compressor._extractDataUrls = function(css, preservedTokens) {
             sb.push(preserver);
     
             appendIndex = endIndex + 1;
-    	} else {
+        } else {
             // No end terminator found, re-add the whole match. Should we throw/warn here?
             sb.push(css.substring(m.index, pattern.lastIndex));
             appendIndex = pattern.lastIndex;
