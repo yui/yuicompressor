@@ -32,7 +32,7 @@ public class CssCompressor {
     // Leave data urls alone to increase parse performance.
     protected String extractDataUrls(String css, ArrayList preservedTokens) {
 
-    	int maxIndex = css.length()-1;
+    	int maxIndex = css.length() - 1;
         int appendIndex = 0;
 
     	StringBuffer sb = new StringBuffer();
@@ -49,7 +49,7 @@ public class CssCompressor {
 
         while (m.find()) {
 
-        	int startIndex = m.start() + 4;  // "url(".length()
+        	int startIndex = m.start() + 4;  	// "url(".length()
     		String terminator = m.group(1);     // ', " or empty (not quoted)
     		
     		if (terminator.length() == 0) {
@@ -58,11 +58,10 @@ public class CssCompressor {
 
     		boolean foundTerminator = false;
 
-    		int endIndex = m.end(1) - 1;
+    		int endIndex = m.end() - 1;
     		while(foundTerminator == false && endIndex+1 <= maxIndex) {
     			endIndex = css.indexOf(terminator, endIndex+1);
 
-    			// endIndex == 0 doesn't really apply here
     			if ((endIndex > 0) && (css.charAt(endIndex-1) != '\\')) {
     				foundTerminator = true;
     				if (!")".equals(terminator)) {
@@ -75,7 +74,7 @@ public class CssCompressor {
 			sb.append(css.substring(appendIndex, m.start()));
 
     		if (foundTerminator) {
-    			String token = css.substring(startIndex, endIndex).trim();
+    			String token = css.substring(startIndex, endIndex);
     			token = token.replaceAll("\\s+", "");
 	    		preservedTokens.add(token);
 
@@ -323,7 +322,8 @@ public class CssCompressor {
         // Remove empty rules.
         css = css.replaceAll("[^\\}\\{/;]+\\{\\}", "");
 
-        // TODO: Should this be after we re-insert tokens. These could alter the break points
+        // TODO: Should this be after we re-insert tokens. These could alter the break points. However then
+        // we'd need to make sure we don't break in the middle of a string etc.
         if (linebreakpos >= 0) {
             // Some source control tools don't like it when files containing lines longer
             // than, say 8000 characters, are checked in. The linebreak option is used in
