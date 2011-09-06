@@ -1,3 +1,9 @@
+YUI Compressor 2.4.7 
+--------------------
++ Handle data urls without blowing up Java memory (regex)
++ Ported data urls handling to JS port for consistency
++ Updated docs to reflect Java >= 1.5 required for CssProcessor
+
 YUI Compressor 2.4.6, 2011-04-15
 -------------------------------
 + Show usage information when started without arguments.
