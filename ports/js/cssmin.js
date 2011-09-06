@@ -18,6 +18,76 @@
 */
 var YAHOO = YAHOO || {};
 YAHOO.compressor = YAHOO.compressor || {};
+
+YAHOO.compressor._extractDataUrls = function (css, preservedTokens) {
+
+    // Leave data urls alone to increase parse performance.
+    var maxIndex = css.length - 1,
+        appendIndex = 0,
+        startIndex,
+        endIndex,
+        terminator,
+        foundTerminator,
+        sb = [],
+        m,
+        preserver,
+        token,
+        pattern = /url\(\s*(["']?)data\:/g;
+
+    // Since we need to account for non-base64 data urls, we need to handle 
+    // ' and ) being part of the data string. Hence switching to indexOf,
+    // to determine whether or not we have matching string terminators and
+    // handling sb appends directly, instead of using matcher.append* methods.
+
+    while ((m = pattern.exec(css)) !== null) {
+
+        startIndex = m.index + 4;  // "url(".length()
+        terminator = m[1];         // ', " or empty (not quoted)
+
+        if (terminator.length === 0) {
+            terminator = ")";
+        }
+
+        foundTerminator = false;
+
+        endIndex = pattern.lastIndex - 1;
+
+        while(foundTerminator === false && endIndex+1 <= maxIndex) {
+            endIndex = css.indexOf(terminator, endIndex + 1);
+    
+            // endIndex == 0 doesn't really apply here
+            if ((endIndex > 0) && (css.charAt(endIndex - 1) !== '\\')) {
+                foundTerminator = true;
+                if (")" != terminator) {
+                    endIndex = css.indexOf(")", endIndex); 
+                }
+            }
+        }
+
+        // Enough searching, start moving stuff over to the buffer
+        sb.push(css.substring(appendIndex, m.index));
+    
+        if (foundTerminator) {
+            token = css.substring(startIndex, endIndex);
+            token = token.replace(/\s+/g, "");
+            preservedTokens.push(token);
+
+            preserver = "url(___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.length - 1) + "___)";
+            sb.push(preserver);
+    
+            appendIndex = endIndex + 1;
+        } else {
+            // No end terminator found, re-add the whole match. Should we throw/warn here?
+            sb.push(css.substring(m.index, pattern.lastIndex));
+            appendIndex = pattern.lastIndex;
+        }
+    }
+
+    sb.push(css.substring(appendIndex));
+
+    return sb.join("");
+};
+
 YAHOO.compressor.cssmin = function (css, linebreakpos) {
 
     var startIndex = 0,
@@ -28,6 +98,8 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
         token = '',
         totallen = css.length,
         placeholder = '';
+
+    css = this._extractDataUrls(css, preservedTokens);
 
     // collect all comment blocks...
     while ((startIndex = css.indexOf("/*", startIndex)) >= 0) {

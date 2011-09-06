@@ -29,13 +29,77 @@ public class CssCompressor {
         }
     }
 
+    // Leave data urls alone to increase parse performance.
+    protected String extractDataUrls(String css, ArrayList preservedTokens) {
+
+        int maxIndex = css.length() - 1;
+        int appendIndex = 0;
+
+        StringBuffer sb = new StringBuffer();
+
+        Pattern p = Pattern.compile("url\\(\\s*([\"']?)data\\:");
+        Matcher m = p.matcher(css);
+        
+        /* 
+         * Since we need to account for non-base64 data urls, we need to handle 
+         * ' and ) being part of the data string. Hence switching to indexOf,
+         * to determine whether or not we have matching string terminators and
+         * handling sb appends directly, instead of using matcher.append* methods.
+         */
+
+        while (m.find()) {
+
+            int startIndex = m.start() + 4;  	// "url(".length()
+            String terminator = m.group(1);     // ', " or empty (not quoted)
+            
+            if (terminator.length() == 0) {
+                terminator = ")";
+            }
+
+            boolean foundTerminator = false;
+
+            int endIndex = m.end() - 1;
+            while(foundTerminator == false && endIndex+1 <= maxIndex) {
+                endIndex = css.indexOf(terminator, endIndex+1);
+
+                if ((endIndex > 0) && (css.charAt(endIndex-1) != '\\')) {
+                    foundTerminator = true;
+                    if (!")".equals(terminator)) {
+                        endIndex = css.indexOf(")", endIndex); 
+                    }
+                }
+            }
+
+            // Enough searching, start moving stuff over to the buffer
+            sb.append(css.substring(appendIndex, m.start()));
+
+            if (foundTerminator) {
+                String token = css.substring(startIndex, endIndex);
+                token = token.replaceAll("\\s+", "");
+                preservedTokens.add(token);
+
+                String preserver = "url(___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___)";
+                sb.append(preserver);
+
+                appendIndex = endIndex + 1;
+            } else {
+                // No end terminator found, re-add the whole match. Should we throw/warn here?
+                sb.append(css.substring(m.start(), m.end()));
+                appendIndex = m.end();
+            }
+        }
+
+        sb.append(css.substring(appendIndex));
+
+        return sb.toString();
+    }
+
     public void compress(Writer out, int linebreakpos)
             throws IOException {
 
         Pattern p;
         Matcher m;
         String css = srcsb.toString();
-        StringBuffer sb = new StringBuffer(css);
 
         int startIndex = 0;
         int endIndex = 0;
@@ -47,19 +111,9 @@ public class CssCompressor {
         int totallen = css.length();
         String placeholder;
 
-        // // leave data urls alone to increase parse performance.
-        // sb = new StringBuffer();
-        // p = Pattern.compile("url\\(.*data\\:(.*)\\)");
-        // m = p.matcher(css);
-        // while (m.find()) {
-        //     token = m.group();
-        //     token = token.substring(1, token.length() - 1);
-        //     preservedTokens.add(token);
-        //     String preserver = "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___";
-        //     m.appendReplacement(sb, preserver);
-        // }
-        // m.appendTail(sb);
-        // css = sb.toString();
+        css = this.extractDataUrls(css, preservedTokens);
+
+        StringBuffer sb = new StringBuffer(css);
 
         // collect all comment blocks...
         while ((startIndex = sb.indexOf("/*", startIndex)) >= 0) {
@@ -273,6 +327,8 @@ public class CssCompressor {
         // Remove empty rules.
         css = css.replaceAll("[^\\}\\{/;]+\\{\\}", "");
 
+        // TODO: Should this be after we re-insert tokens. These could alter the break points. However then
+        // we'd need to make sure we don't break in the middle of a string etc.
         if (linebreakpos >= 0) {
             // Some source control tools don't like it when files containing lines longer
             // than, say 8000 characters, are checked in. The linebreak option is used in
