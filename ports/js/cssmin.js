@@ -249,6 +249,11 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
     // which makes the filter break in IE.
     css = css.replace(/([^"'=\s])(\s*)#([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])/gi, function () {
         var group = arguments;
+        if (group[1] === '}') {
+            // Likely an ID selector. Don't touch.
+            // #AABBCC is a valid ID. IDs are case-sensitive.
+            return group[0];
+        }
         if (
             group[3].toLowerCase() === group[4].toLowerCase() &&
             group[5].toLowerCase() === group[6].toLowerCase() &&
