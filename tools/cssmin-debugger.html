@@ -48,14 +48,19 @@
 
         <script>
             (function() {
-
+                
                 var dumpContents = function(node, str) {
                     node.innerHTML = "";
                     node.appendChild(document.createTextNode(str));
-                };
-                
+                },
+                testFile,
+                changeHandler;
+
                 if (window.File && window.FileReader) {
-                    document.getElementById('testFile').addEventListener('change', function(e) {
+
+                    testFile = document.getElementById('testFile');
+
+                    changeHandler = function(e) {
                         var file = this.files[0],
                             fr = new FileReader(),
                             input = document.getElementById("in"),
@@ -69,8 +74,14 @@
                         };
         
                         fr.readAsText(file, "utf-8");
-                        
-                    }, false);            
+                    }
+
+                    if (testFile.addEventListener) {
+                        testFile.addEventListener('change', changeHandler, false);
+                    } else {
+                        testFile.attachEvent('onChange', changeHandler);
+                    }
+
                 } else {
                     document.getElementById("notsupportedmsg").removeClass("hidden");
                 }
