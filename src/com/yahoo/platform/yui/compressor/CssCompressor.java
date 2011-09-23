@@ -13,6 +13,7 @@ package com.yahoo.platform.yui.compressor;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.ArrayList;
@@ -115,7 +116,28 @@ public class CssCompressor {
 
         StringBuffer sb = new StringBuffer(css);
 
-        // collect all comment blocks...
+        startIndex = 0;
+        ArrayList dataStrings = new ArrayList(0);
+        // Take out data strings for double quotes
+        while((startIndex = sb.indexOf("url(\"data:", startIndex)) >= 0) {
+        	endIndex = sb.indexOf("\"", startIndex+10);
+        	if(endIndex > startIndex + 10) {
+        		dataStrings.add(sb.substring(startIndex+4, endIndex+1));
+        		sb.replace(startIndex+4, endIndex+1, "___YUICSSMIN_DATA_STRING_" + dataStrings.size() + "___");
+        	}
+        }
+        // Take out data strings for single quotes (because I am lazy)
+        while((startIndex = sb.indexOf("url('data:", startIndex)) >= 0) {
+        	endIndex = sb.indexOf("'", startIndex+10);
+        	if(endIndex > startIndex + 10) {
+        		dataStrings.add(sb.substring(startIndex+4, endIndex+1));
+        		sb.replace(startIndex+4, endIndex+1, "___YUICSSMIN_DATA_STRING_" + dataStrings.size() + "___");
+        	}
+        }
+        
+        startIndex = 0;
+        endIndex = 0;
+        // Remove all comment blocks...
         while ((startIndex = sb.indexOf("/*", startIndex)) >= 0) {
             endIndex = sb.indexOf("*/", startIndex + 2);
             if (endIndex < 0) {
@@ -349,6 +371,10 @@ public class CssCompressor {
 
             css = sb.toString();
         }
+        
+        for(i = 0;i < dataStrings.size(); i++) {
+        	css = css.replaceAll("___YUICSSMIN_DATA_STRING_"+ (i+1) + "___", dataStrings.get(i).toString());
+    	}
 
         // Replace multiple semi-colons in a row by a single one
         // See SF bug #1980989
