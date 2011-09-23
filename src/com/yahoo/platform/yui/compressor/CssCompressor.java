@@ -32,10 +32,10 @@ public class CssCompressor {
     // Leave data urls alone to increase parse performance.
     protected String extractDataUrls(String css, ArrayList preservedTokens) {
 
-        int maxIndex = css.length() - 1;
+    	int maxIndex = css.length() - 1;
         int appendIndex = 0;
 
-        StringBuffer sb = new StringBuffer();
+    	StringBuffer sb = new StringBuffer();
 
         Pattern p = Pattern.compile("url\\(\\s*([\"']?)data\\:");
         Matcher m = p.matcher(css);
@@ -49,44 +49,44 @@ public class CssCompressor {
 
         while (m.find()) {
 
-            int startIndex = m.start() + 4;  	// "url(".length()
-            String terminator = m.group(1);     // ', " or empty (not quoted)
-            
-            if (terminator.length() == 0) {
-                terminator = ")";
-            }
+        	int startIndex = m.start() + 4;  	// "url(".length()
+    		String terminator = m.group(1);     // ', " or empty (not quoted)
+    		
+    		if (terminator.length() == 0) {
+    		 	terminator = ")";
+    		}
 
-            boolean foundTerminator = false;
+    		boolean foundTerminator = false;
 
-            int endIndex = m.end() - 1;
-            while(foundTerminator == false && endIndex+1 <= maxIndex) {
-                endIndex = css.indexOf(terminator, endIndex+1);
+    		int endIndex = m.end() - 1;
+    		while(foundTerminator == false && endIndex+1 <= maxIndex) {
+    			endIndex = css.indexOf(terminator, endIndex+1);
 
-                if ((endIndex > 0) && (css.charAt(endIndex-1) != '\\')) {
-                    foundTerminator = true;
-                    if (!")".equals(terminator)) {
-                        endIndex = css.indexOf(")", endIndex); 
-                    }
-                }
-            }
+    			if ((endIndex > 0) && (css.charAt(endIndex-1) != '\\')) {
+    				foundTerminator = true;
+    				if (!")".equals(terminator)) {
+    					endIndex = css.indexOf(")", endIndex); 
+    				}
+    			}
+    		}
 
-            // Enough searching, start moving stuff over to the buffer
-            sb.append(css.substring(appendIndex, m.start()));
+    		// Enough searching, start moving stuff over to the buffer
+			sb.append(css.substring(appendIndex, m.start()));
 
-            if (foundTerminator) {
-                String token = css.substring(startIndex, endIndex);
-                token = token.replaceAll("\\s+", "");
-                preservedTokens.add(token);
+    		if (foundTerminator) {
+    			String token = css.substring(startIndex, endIndex);
+    			token = token.replaceAll("\\s+", "");
+	    		preservedTokens.add(token);
 
-                String preserver = "url(___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___)";
-                sb.append(preserver);
+	    		String preserver = "url(___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___)";
+	    		sb.append(preserver);
 
-                appendIndex = endIndex + 1;
-            } else {
-                // No end terminator found, re-add the whole match. Should we throw/warn here?
-                sb.append(css.substring(m.start(), m.end()));
-                appendIndex = m.end();
-            }
+	    		appendIndex = endIndex + 1;
+    		} else {
+    			// No end terminator found, re-add the whole match. Should we throw/warn here?
+    			sb.append(css.substring(m.start(), m.end()));
+    			appendIndex = m.end();
+    		}
         }
 
         sb.append(css.substring(appendIndex));
@@ -290,25 +290,28 @@ public class CssCompressor {
         // would become
         //     filter: chroma(color="#FFF");
         // which makes the filter break in IE.
-        p = Pattern.compile("([^\"'=\\s])(\\s*)#([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])");
+        // We also want to make sure we're only compressing #AABBCC patterns inside { }, not id selectors ( #FAABAC {} )
+        // We also want to avoid compressing invalid values (e.g. #AABBCCD to #ABCD)
+        p = Pattern.compile("([^\"'=\\s])" + "(\\s*)" + "#([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])" + "(:?\\}|[^0-9a-fA-F{][^{]*?\\})");
         m = p.matcher(css);
         sb = new StringBuffer();
-        while (m.find()) {
-            if (m.group(1).equals("}")) {
-                // Likely an ID selector. Don't touch.
-                // #AABBCC is a valid ID. IDs are case-sensitive.
-                m.appendReplacement(sb, m.group());
-            } else if (m.group(3).equalsIgnoreCase(m.group(4)) &&
+        int index = 0;
+        while (m.find(index)) {
+        	if (m.group(3).equalsIgnoreCase(m.group(4)) &&
                     m.group(5).equalsIgnoreCase(m.group(6)) &&
                     m.group(7).equalsIgnoreCase(m.group(8))) {
                 // #AABBCC pattern
-                m.appendReplacement(sb, (m.group(1) + m.group(2) + "#" + m.group(3) + m.group(5) + m.group(7)).toLowerCase());
+                sb.append(css.substring(index, m.start(1)));
+                sb.append((m.group(1) + m.group(2) + "#" + m.group(3) + m.group(5) + m.group(7)).toLowerCase());
+                index = m.end(8);
             } else {
                 // Any other color.
-                m.appendReplacement(sb, m.group().toLowerCase());
+                sb.append(css.substring(index, m.start(1)));
+                sb.append((m.group(1) + m.group(2) + "#" + m.group(3) + m.group(4) + m.group(5) + m.group(6) + m.group(7) + m.group(8)).toLowerCase());
+                index = m.end(8);
             }
         }
-        m.appendTail(sb);
+        sb.append(css.substring(index));
         css = sb.toString();
 
         // border: none -> border:0

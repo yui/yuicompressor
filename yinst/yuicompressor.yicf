@@ -9,6 +9,9 @@ CUSTODIAN    = ci-tools@yahoo-inc.com http://developer.yahoo.com/yui/compressor/
 
 PACKAGE_OS_SPECIFIC = no
 
+YINST bug-product yui tools
+YINST bug-component Compressor
+
 ############################################################
 # Actions
 ############################################################

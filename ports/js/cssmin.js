@@ -19,6 +19,17 @@
 var YAHOO = YAHOO || {};
 YAHOO.compressor = YAHOO.compressor || {};
 
+/**
+ * Utility method to replace all data urls with tokens before we start
+ * compressing, to avoid performance issues running some of the subsequent
+ * regexes against large strings chunks.
+ *
+ * @private
+ * @method _extractDataUrls
+ * @param {String} css The input css
+ * @param {Array} The global array of tokens to preserve
+ * @returns String The processed css
+ */
 YAHOO.compressor._extractDataUrls = function (css, preservedTokens) {
 
     // Leave data urls alone to increase parse performance.
@@ -66,7 +77,7 @@ YAHOO.compressor._extractDataUrls = function (css, preservedTokens) {
 
         // Enough searching, start moving stuff over to the buffer
         sb.push(css.substring(appendIndex, m.index));
-    
+
         if (foundTerminator) {
             token = css.substring(startIndex, endIndex);
             token = token.replace(/\s+/g, "");
@@ -74,7 +85,7 @@ YAHOO.compressor._extractDataUrls = function (css, preservedTokens) {
 
             preserver = "url(___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.length - 1) + "___)";
             sb.push(preserver);
-    
+
             appendIndex = endIndex + 1;
         } else {
             // No end terminator found, re-add the whole match. Should we throw/warn here?
@@ -84,6 +95,55 @@ YAHOO.compressor._extractDataUrls = function (css, preservedTokens) {
     }
 
     sb.push(css.substring(appendIndex));
+
+    return sb.join("");
+};
+
+/**
+ * Utility method to compress hex color values of the form #AABBCC to #ABC.
+ * 
+ * DOES NOT compress CSS ID selectors which match the above pattern (which would break things).
+ * e.g. #AddressForm { ... }
+ *
+ * DOES NOT compress IE filters, which have hex color values (which would break things). 
+ * e.g. filter: chroma(color="#FFFFFF");
+ * 
+ * DOES NOT compress invalid hex values.
+ * e.g. background-color: #aabbccdd
+ *
+ * @private
+ * @method _compressHexColors
+ * @param {String} css The input css
+ * @returns String The processed css
+ */
+YAHOO.compressor._compressHexColors = function(css) {
+
+    // Look for hex colors inside { ... } (to avoid IDs) and which don't have a =, or a " in front of them (to avoid filters)
+    var pattern = /([^"'=\s])(\s*)#([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])(\}|[^0-9a-fA-F{][^{]*?\})/gi,
+        m,
+        index = 0,
+        sb = [];
+
+    while ((m = pattern.exec(css)) !== null) {
+
+        if (m[3].toLowerCase() == m[4].toLowerCase() &&
+            m[5].toLowerCase() == m[6].toLowerCase() &&
+            m[7].toLowerCase() == m[8].toLowerCase()) {
+
+            // Enough searching, start moving stuff over to the buffer
+            sb.push(css.substring(index, m.index));
+            sb.push((m[1] + m[2] + "#" + m[3] + m[5] + m[7]).toLowerCase());
+
+            index = pattern.lastIndex = pattern.lastIndex - m[9].length;
+        } else {
+            sb.push(css.substring(index, m.index));
+            sb.push((m[1] + m[2] + "#" + m[3] + m[4] + m[5] + m[6] + m[7] + m[8]).toLowerCase());
+
+            index = pattern.lastIndex = pattern.lastIndex - m[9].length;
+        }
+    }
+
+    sb.push(css.substring(index));
 
     return sb.join("");
 };
@@ -240,25 +300,8 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
         return '#' + rgbcolors.join('');
     });
 
-
-    // Shorten colors from #AABBCC to #ABC. Note that we want to make sure
-    // the color is not preceded by either ", " or =. Indeed, the property
-    //     filter: chroma(color="#FFFFFF");
-    // would become
-    //     filter: chroma(color="#FFF");
-    // which makes the filter break in IE.
-    css = css.replace(/([^"'=\s])(\s*)#([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])/gi, function () {
-        var group = arguments;
-        if (
-            group[3].toLowerCase() === group[4].toLowerCase() &&
-            group[5].toLowerCase() === group[6].toLowerCase() &&
-            group[7].toLowerCase() === group[8].toLowerCase()
-        ) {
-            return (group[1] + group[2] + '#' + group[3] + group[5] + group[7]).toLowerCase();
-        } else {
-            return group[0].toLowerCase();
-        }
-    });
+    // Shorten colors from #AABBCC to #ABC.
+    css = this._compressHexColors(css);
 
     // border: none -> border:0
     css = css.replace(/(border|border-top|border-right|border-bottom|border-right|outline|background):none(;|\})/gi, function(all, prop, tail) {

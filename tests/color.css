@@ -1,7 +1,42 @@
 .color {
   me: rgb(123, 123, 123);
   impressed: #ffeedd;
+  again: #456789;
+  andagain:#aa66cc;
+  background-color:#aa66ccc;
   filter: chroma(color="#FFFFFF");
   background: none repeat scroll 0 0 rgb(255, 0,0);
   alpha: rgba(1, 2, 3, 4);
+  color:#1122aa
 }
+
+#AABBCC {
+  background-color:#ffee11;
+  filter: chroma(color="#FFFFFF");
+  color:#441122;
+}
+
+.foo #AABBCC {
+  background-color:#ffee11;
+  color:#441122;
+  filter: chroma(color="#FFFFFF")
+}
+
+.bar, #AABBCC {
+  background-color:#ffee11;
+  color:#441122;
+}
+
+.foo, #AABBCC.foobar {
+  background-color:#ffee11;
+  color:#441122;
+}
+
+@media screen {
+    .bar, #AABBCC {
+      background-color:#ffee11;
+      color:#441122
+    }
+}
+
+
