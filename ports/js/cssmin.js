@@ -119,7 +119,7 @@ YAHOO.compressor._extractDataUrls = function (css, preservedTokens) {
 YAHOO.compressor._compressHexColors = function(css) {
 
     // Look for hex colors inside { ... } (to avoid IDs) and which don't have a =, or a " in front of them (to avoid filters)
-    var pattern = /([^"'=\s])(\s*)#([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])(\}|[^0-9a-fA-F{][^{]*?\})/gi,
+    var pattern = /([^"'=\s])(\s*)#([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])(\}|[^0-9a-f{][^{]*?\})/gi,
         m,
         index = 0,
         sb = [];

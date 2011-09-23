@@ -1,6 +1,6 @@
 .color {
   me: rgb(123, 123, 123);
-  impressed: #ffeedd;
+  impressed: #FfEedD;
   again: #456789;
   andagain:#aa66cc;
   background-color:#aa66ccc;
@@ -14,16 +14,17 @@
   background-color:#ffee11;
   filter: chroma(color="#FFFFFF");
   color:#441122;
+  border-color:#aa66ccC
 }
 
 .foo #AABBCC {
-  background-color:#ffee11;
+  background-color:#fFEe11;
   color:#441122;
   filter: chroma(color="#FFFFFF")
 }
 
 .bar, #AABBCC {
-  background-color:#ffee11;
+  background-color:#FFee11;
   color:#441122;
 }
 
@@ -34,7 +35,7 @@
 
 @media screen {
     .bar, #AABBCC {
-      background-color:#ffee11;
+      background-color:#ffEE11;
       color:#441122
     }
 }
