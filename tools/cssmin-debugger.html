@@ -47,26 +47,34 @@
         <pre id="in"></pre>
 
         <script>
-            if (window.File && window.FileReader) {
-                document.getElementById('testFile').addEventListener('change', function(e) {
-                    var file = this.files[0],
-                        fr = new FileReader(),
-                        input = document.getElementById("in"),
-                        output = document.getElementById("out"),
-                        contents;
-                    
-                    fr.onload = function(e) {
-                        input.innerHTML = e.target.result; 
-                        var min = YAHOO.compressor.cssmin(e.target.result);
-                        output.innerHTML = min; 
-                    };
-    
-                    fr.readAsText(file, "utf-8");
-                    
-                }, false);            
-            } else {
-                document.getElementById("notsupportedmsg").removeClass("hidden");
-            }
+            (function() {
+
+                var dumpContents = function(node, str) {
+                    node.innerHTML = "";
+                    node.appendChild(document.createTextNode(str));
+                };
+                
+                if (window.File && window.FileReader) {
+                    document.getElementById('testFile').addEventListener('change', function(e) {
+                        var file = this.files[0],
+                            fr = new FileReader(),
+                            input = document.getElementById("in"),
+                            output = document.getElementById("out"),
+                            contents;
+
+                        fr.onload = function(e) {
+                            dumpContents(input, e.target.result); 
+                            var min = YAHOO.compressor.cssmin(e.target.result);
+                            dumpContents(output, min); 
+                        };
+        
+                        fr.readAsText(file, "utf-8");
+                        
+                    }, false);            
+                } else {
+                    document.getElementById("notsupportedmsg").removeClass("hidden");
+                }
+            })();
         </script>
     </body>
 </html>
