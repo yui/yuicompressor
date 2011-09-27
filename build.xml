@@ -20,7 +20,8 @@
                includes="**/*.java"
                deprecation="off"
                debug="on"
-               source="1.4">
+	       target="1.5"
+               source="1.5">
             <classpath>
                 <pathelement location="${lib.dir}/jargs-1.0.jar"/>
                 <pathelement location="${lib.dir}/rhino-1.6R7.jar"/>

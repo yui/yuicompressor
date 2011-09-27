@@ -292,25 +292,39 @@ public class CssCompressor {
         // which makes the filter break in IE.
         // We also want to make sure we're only compressing #AABBCC patterns inside { }, not id selectors ( #FAABAC {} )
         // We also want to avoid compressing invalid values (e.g. #AABBCCD to #ABCD)
-        p = Pattern.compile("([^\"'=\\s])" + "(\\s*)" + "#([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])" + "(:?\\}|[^0-9a-fA-F{][^{]*?\\})");
+        p = Pattern.compile("(\\=\\s*?[\"']?)?" + "#([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])" + "(:?\\}|[^0-9a-fA-F{][^{]*?\\})");
+
         m = p.matcher(css);
         sb = new StringBuffer();
         int index = 0;
+
         while (m.find(index)) {
-        	if (m.group(3).equalsIgnoreCase(m.group(4)) &&
-                    m.group(5).equalsIgnoreCase(m.group(6)) &&
-                    m.group(7).equalsIgnoreCase(m.group(8))) {
-                // #AABBCC pattern
-                sb.append(css.substring(index, m.start(1)));
-                sb.append((m.group(1) + m.group(2) + "#" + m.group(3) + m.group(5) + m.group(7)).toLowerCase());
-                index = m.end(8);
-            } else {
-                // Any other color.
-                sb.append(css.substring(index, m.start(1)));
-                sb.append((m.group(1) + m.group(2) + "#" + m.group(3) + m.group(4) + m.group(5) + m.group(6) + m.group(7) + m.group(8)).toLowerCase());
-                index = m.end(8);
+
+        	sb.append(css.substring(index, m.start()));
+
+        	boolean isFilter = (m.group(1) != null && !"".equals(m.group(1))); 
+
+        	if (isFilter) {
+        		// Restore, as is. Compression will break filters
+        		sb.append(m.group(1) + "#" + m.group(2) + m.group(3) + m.group(4) + m.group(5) + m.group(6) + m.group(7));
+        	} else {
+        		if( m.group(2).equalsIgnoreCase(m.group(3)) &&
+                    m.group(4).equalsIgnoreCase(m.group(5)) &&
+                    m.group(6).equalsIgnoreCase(m.group(7))) {
+
+	        		// #AABBCC pattern
+	                sb.append("#" + (m.group(3) + m.group(5) + m.group(7)).toLowerCase());
+
+        		} else {
+
+        			// Non-compressible color, restore, but lower case.
+        			sb.append("#" + (m.group(2) + m.group(3) + m.group(4) + m.group(5) + m.group(6) + m.group(7)).toLowerCase());
+        		}
             }
+
+        	index = m.end(7);
         }
+
         sb.append(css.substring(index));
         css = sb.toString();
 

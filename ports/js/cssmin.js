@@ -107,7 +107,7 @@ YAHOO.compressor._extractDataUrls = function (css, preservedTokens) {
  *
  * DOES NOT compress IE filters, which have hex color values (which would break things). 
  * e.g. filter: chroma(color="#FFFFFF");
- * 
+ *
  * DOES NOT compress invalid hex values.
  * e.g. background-color: #aabbccdd
  *
@@ -119,28 +119,35 @@ YAHOO.compressor._extractDataUrls = function (css, preservedTokens) {
 YAHOO.compressor._compressHexColors = function(css) {
 
     // Look for hex colors inside { ... } (to avoid IDs) and which don't have a =, or a " in front of them (to avoid filters)
-    var pattern = /([^"'=\s])(\s*)#([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])(\}|[^0-9a-f{][^{]*?\})/gi,
+    var pattern = /(\=\s*?["']?)?#([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])(\}|[^0-9a-f{][^{]*?\})/gi,
         m,
         index = 0,
+        isFilter,
         sb = [];
 
     while ((m = pattern.exec(css)) !== null) {
 
-        if (m[3].toLowerCase() == m[4].toLowerCase() &&
-            m[5].toLowerCase() == m[6].toLowerCase() &&
-            m[7].toLowerCase() == m[8].toLowerCase()) {
+        sb.push(css.substring(index, m.index));
 
-            // Enough searching, start moving stuff over to the buffer
-            sb.push(css.substring(index, m.index));
-            sb.push((m[1] + m[2] + "#" + m[3] + m[5] + m[7]).toLowerCase());
+        isFilter = m[1];
 
-            index = pattern.lastIndex = pattern.lastIndex - m[9].length;
+        if (isFilter) {
+            // Restore, maintain case, otherwise filter will break
+            sb.push(m[1] + "#" + (m[2] + m[3] + m[4] + m[5] + m[6] + m[7]));
         } else {
-            sb.push(css.substring(index, m.index));
-            sb.push((m[1] + m[2] + "#" + m[3] + m[4] + m[5] + m[6] + m[7] + m[8]).toLowerCase());
+            if (m[2].toLowerCase() == m[3].toLowerCase() &&
+                m[4].toLowerCase() == m[5].toLowerCase() &&
+                m[6].toLowerCase() == m[7].toLowerCase()) {
 
-            index = pattern.lastIndex = pattern.lastIndex - m[9].length;
+                // Compress.
+                sb.push("#" + (m[3] + m[5] + m[7]).toLowerCase());
+            } else {
+                // Non compressible color, restore but lower case.
+                sb.push("#" + (m[2] + m[3] + m[4] + m[5] + m[6] + m[7]).toLowerCase());
+            }
         }
+
+        index = pattern.lastIndex = pattern.lastIndex - m[8].length;
     }
 
     sb.push(css.substring(index));
