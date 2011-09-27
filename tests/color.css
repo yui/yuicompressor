@@ -1,7 +1,7 @@
 .color {
   me: rgb(123, 123, 123);
   impressed: #FfEedD;
-  again: #456789;
+  again: #ABCDEF;
   andagain:#aa66cc;
   background-color:#aa66ccc;
   filter: chroma(color="#FFFFFF");
@@ -12,24 +12,28 @@
 
 #AABBCC {
   background-color:#ffee11;
-  filter: chroma(color="#FFFFFF");
+  filter: chroma(color = #FFFFFF );
   color:#441122;
+  foo:#00fF11 #ABC #AABbCc #123344;
   border-color:#aa66ccC
 }
 
 .foo #AABBCC {
   background-color:#fFEe11;
   color:#441122;
-  filter: chroma(color="#FFFFFF")
+  border-color:#AbC;
+  filter: chroma(color= #FFFFFF)
 }
 
 .bar, #AABBCC {
   background-color:#FFee11;
+  border-color:#00fF11 #ABCDEF;
   color:#441122;
 }
 
 .foo, #AABBCC.foobar {
   background-color:#ffee11;
+  border-color:#00fF11 #ABCDEF #AABbCc;
   color:#441122;
 }
 
