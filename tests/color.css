@@ -28,6 +28,7 @@
 .bar, #AABBCC {
   background-color:#FFee11;
   border-color:#00fF11 #ABCDEF;
+  filter: chroma(color=#11FFFFFF);
   color:#441122;
 }
 
@@ -43,5 +44,3 @@
       color:#441122
     }
 }
-
-
