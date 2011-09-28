@@ -5,12 +5,12 @@ YUI Compressor 2.4.7
 + Fixed issue where we were breaking #AABBCC id selectors, with the 
   #AABBCC -> #ABC color compression.
 
-YUI Compressor 2.4.6, 2011-04-15
--------------------------------
+YUI Compressor 2.4.6
+--------------------
 + Show usage information when started without arguments.
 
-YUI Compressor 2.4.5, 2011-03-13
--------------------------------
+YUI Compressor 2.4.5
+--------------------
 + Default file encoding changed from system default to UTF-8.
 + Errors/messages/usage info all are sent to stderr.
 + Removed unnecessary warning about short undeclared global symbols.
@@ -28,21 +28,21 @@ YUI Compressor 2.4.5, 2011-03-13
 + fixed transform-origin: 0 0 [bug 2528060]
 + tests++
 
-YUI Compressor 2.4.4, 2010-10-20
+YUI Compressor 2.4.4
+--------------------
 + Interim 2.4.5 release
 
-YUI Compressor 2.4.3, 2009-12-07
--------------------------------
+YUI Compressor 2.4.3
+--------------------
 + Changed custodian to ci-tools@
 
-
-YUI Compressor 2.4.2, 2008-11-10
+YUI Compressor 2.4.2
 --------------------------------
 + Preserved comments shouldn't prevent obfuscation (Thanks to Matjaz Lipus)
 
 
-YUI Compressor 2.4.1, 2008-10-28
---------------------------------
+YUI Compressor 2.4.1
+--------------------
 
 + Use preferentially lower case letters for obfuscated variable names.
   Since JavaScript keywords use lower case letters most often, this
@@ -51,8 +51,8 @@ YUI Compressor 2.4.1, 2008-10-28
 + Don't append a semi-colon at the end of a JavaScript file when the
   last token is a special comment.
 
-YUI Compressor 2.4, 2008-10-21
-------------------------------
+YUI Compressor 2.4
+------------------
 
 + Allowed the YUI Compressor (which uses a modified version of Rhino)
   to work alongside the original (unmodified) rhino library by using
@@ -61,46 +61,46 @@ YUI Compressor 2.4, 2008-10-21
   downloable package.
 + Fixed unnecessary white space after return / typeof when possible.
 
-YUI Compressor 2.3.6, 2008-07-10
---------------------------------
+YUI Compressor 2.3.6
+--------------------
 
 + Fixed a few minor bugs with the CSS compressor
 + Changed packaging. The original Rhino library, which is used to build the
   YUI Compressor, is not part of the downloadable archive. Too many people
   put it in their classpath, generating a lot of invalid bugs.
 
-YUI Compressor 2.3.5, 2008-02-08
---------------------------------
+YUI Compressor 2.3.5
+--------------------
 
 + Added a warning when more than one 'var' statement is used in a single scope.
   Automatic coalescence is extremely complicated, and would be unsafe if not
   done properly.
 
-YUI Compressor 2.3.4, 2008-02-07
---------------------------------
+YUI Compressor 2.3.4
+--------------------
 
 + Expanded the list of reserved words used by isValidIdentifier()
 
-YUI Compressor 2.3.3, 2008-02-04
---------------------------------
+YUI Compressor 2.3.3
+--------------------
 
 + C-style comments starting with /*! are preserved. This is especially
   useful with comments containing copyright/license information.
 
-YUI Compressor 2.3.2, 2008-02-01
---------------------------------
+YUI Compressor 2.3.2
+--------------------
 
 + Compressing an empty JS file throws an error [SourceForge bug #1884207]
 + When a string is the first token in a function body, it was removed from
   the compressed file [SourceForge bug #1884314]
 
-YUI Compressor 2.3.1, 2008-01-30
---------------------------------
+YUI Compressor 2.3.1
+--------------------
 
 + Added test against list of reserved words in method isValidIdentifier.
 
-YUI Compressor 2.3, 2008-01-28
-------------------------------
+YUI Compressor 2.3
+------------------
 
 + Always output a ';' at the end of a minified JavaScript file. This allows
   the concatenating of several minified files without the fear of introducing
@@ -133,13 +133,13 @@ YUI Compressor 2.3, 2008-01-28
       width:300px;
     }
 
-YUI Compressor 2.2.5, 2007-10-09
---------------------------------
+YUI Compressor 2.2.5
+--------------------
 
 + Remove line terminator after escape in string literals.
 
-YUI Compressor 2.2.4, 2007-10-01
---------------------------------
+YUI Compressor 2.2.4
+--------------------
 
 + Fixed the way quote characters are counted in string literals
   [SourceForge bug #1804576]
@@ -148,8 +148,8 @@ YUI Compressor 2.2.4, 2007-10-01
   overflow exception gets thrown) Instead, use good old parsing...
 + Fix unnecessary quote escaping in string literals.
 
-YUI Compressor 2.2.3, 2007-09-28
---------------------------------
+YUI Compressor 2.2.3
+--------------------
 
 + Transform </script into <\/script instead of replacing all </ into <\/.
 + Fixed bug related to the shortening of hexadecimal color codes (the string
@@ -158,8 +158,8 @@ YUI Compressor 2.2.3, 2007-09-28
   should never be merged.
 + Do not convert \uXXXX and \xXX escape sequences to their unicode equivalent.
 
-YUI Compressor 2.2.2, 2007-09-27
---------------------------------
+YUI Compressor 2.2.2
+--------------------
 
 + Fixed regression related to the optimization of the amount of escaping
   in string literals and the concatenation of string literals.
@@ -176,8 +176,8 @@ YUI Compressor 2.2.2, 2007-09-27
   codes (and vice-versa) due to the high potential of introducing bugs
   (rolled back from 2.2.1)
 
-YUI Compressor 2.2.1, 2007-09-25
---------------------------------
+YUI Compressor 2.2.1
+--------------------
 
 + Optimize quote escaping in JavaScript string literals by using the best quote
   character (' or " depending on the occurrence of this character in the string)
@@ -187,8 +187,8 @@ YUI Compressor 2.2.1, 2007-09-25
 + In CSS files, change color names into their corresponding color codes
   (and vice-versa) if that change yields any savings.
 
-YUI Compressor 2.2, 2007-09-18
-------------------------------
+YUI Compressor 2.2
+------------------
 
 + Don't obfuscate function argument named $super if it is the first function
   argument listed. This is to support Prototype 1.6's heretic implementation.
@@ -203,20 +203,20 @@ YUI Compressor 2.2, 2007-09-18
   which get obfuscated) In any case, the use of Internet Explorer's conditional
   comment is to be avoided.
 
-YUI Compressor 2.1.2, 2007-08-31
---------------------------------
+YUI Compressor 2.1.2
+--------------------
 
 + Added --preserve-semi option
 + Modified --line-break option
 
-YUI Compressor 2.1.1, 2007-08-30
---------------------------------
+YUI Compressor 2.1.1
+--------------------
 
 + Fixed missing space in CSS background:url('foo.png')no-repeat
   causing a background not to appear on Internet Explorer.
 
-YUI Compressor 2.1, 2007-08-29
-------------------------------
+YUI Compressor 2.1
+------------------
 
 + Pass the --line-break option to the CSS compressor.
 + Allow the output file to overwrite the input file (with version 2.0,
@@ -231,8 +231,8 @@ YUI Compressor 2.1, 2007-08-29
   (as suggested by David Bernard for his integration  of the YUI Compressor
   as a maven plugin)
 
-YUI Compressor 2.0, 2007-08-27
-------------------------------
+YUI Compressor 2.0
+------------------
 
 + Switched from Rhino 1.6R6 to Rhino 1.6R7
 + Integrated Isaac Schlueter's CSS compressor.
@@ -242,8 +242,8 @@ YUI Compressor 2.0, 2007-08-27
 + Output a white-space character after 'break' and 'continue' when followed
   by a label.
 
-YUI Compressor 1.1, 2007-08-20
-------------------------------
+YUI Compressor 1.1
+------------------
 
 + Java source now in package com.yahoo.platform.yui.compressor
 + Added --line-break option that adds a line feed character after each
