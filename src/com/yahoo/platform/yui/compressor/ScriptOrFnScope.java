@@ -93,7 +93,7 @@ class ScriptOrFnScope {
         return varcount;
     }
 
-    void munge() {
+    void munge(JavaScriptWords words) {
 
         if (!markedForMunging) {
             // Stop right here if this scope was flagged as unsafe for munging.
@@ -107,16 +107,16 @@ class ScriptOrFnScope {
 
             ArrayList freeSymbols = new ArrayList();
 
-            freeSymbols.addAll(JavaScriptCompressor.ones);
+            freeSymbols.addAll(words.ones);
             freeSymbols.removeAll(getAllUsedSymbols());
             if (freeSymbols.size() == 0) {
                 pickFromSet = 2;
-                freeSymbols.addAll(JavaScriptCompressor.twos);
+                freeSymbols.addAll(words.twos);
                 freeSymbols.removeAll(getAllUsedSymbols());
             }
             if (freeSymbols.size() == 0) {
                 pickFromSet = 3;
-                freeSymbols.addAll(JavaScriptCompressor.threes);
+                freeSymbols.addAll(words.threes);
                 freeSymbols.removeAll(getAllUsedSymbols());
             }
             if (freeSymbols.size() == 0) {
@@ -128,9 +128,9 @@ class ScriptOrFnScope {
                 if (freeSymbols.size() == 0) {
                     pickFromSet++;
                     if (pickFromSet == 2) {
-                        freeSymbols.addAll(JavaScriptCompressor.twos);
+                        freeSymbols.addAll(words.twos);
                     } else if (pickFromSet == 3) {
-                        freeSymbols.addAll(JavaScriptCompressor.threes);
+                        freeSymbols.addAll(words.threes);
                     } else {
                         throw new IllegalStateException("The YUI Compressor ran out of symbols. Aborting...");
                     }
@@ -154,7 +154,7 @@ class ScriptOrFnScope {
 
         for (int i = 0; i < subScopes.size(); i++) {
             ScriptOrFnScope scope = (ScriptOrFnScope) subScopes.get(i);
-            scope.munge();
+            scope.munge(words);
         }
     }
 }
