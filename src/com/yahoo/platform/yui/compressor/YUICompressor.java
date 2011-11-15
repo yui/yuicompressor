@@ -94,7 +94,7 @@ public class YUICompressor {
 
             java.util.Iterator filenames = files.iterator();
             while(filenames.hasNext()) {
-                String inputFilename = (String)filenames.next();
+                final String inputFilename = (String)filenames.next();
 
                 try {
                     if (inputFilename.equals("-")) {
@@ -120,7 +120,7 @@ public class YUICompressor {
 
                     String outputFilename = output;
                     // if a substitution pattern was passed in
-                    if (pattern.length > 1 && files.size() > 1) {
+                    if (pattern.length > 1) {
                         outputFilename = inputFilename.replaceFirst(pattern[0], pattern[1]);
                     }
 
@@ -133,18 +133,18 @@ public class YUICompressor {
                                 public void warning(String message, String sourceName,
                                         int line, String lineSource, int lineOffset) {
                                     if (line < 0) {
-                                        System.err.println("\n[WARNING] " + message);
+                                        System.err.println("\n[WARNING] On file " + inputFilename + ": " + message);
                                     } else {
-                                        System.err.println("\n[WARNING] " + line + ':' + lineOffset + ':' + message);
+                                        System.err.println("\n[WARNING] On file " + inputFilename + ":" + line + '+' + lineOffset + ": " + message);
                                     }
                                 }
 
                                 public void error(String message, String sourceName,
                                         int line, String lineSource, int lineOffset) {
                                     if (line < 0) {
-                                        System.err.println("\n[ERROR] " + message);
+                                        System.err.println("\n[ERROR] On file " + inputFilename + ":" + message);
                                     } else {
-                                        System.err.println("\n[ERROR] " + line + ':' + lineOffset + ':' + message);
+                                        System.err.println("\n[ERROR] On file " + inputFilename + ":" + line + '+' + lineOffset + ": " + message);
                                     }
                                 }
 
