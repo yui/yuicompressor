@@ -243,7 +243,7 @@ public class CssCompressor {
         css = css.replaceAll(";+}", "}");
 
         // Replace 0(px,em,%) with 0.
-        css = css.replaceAll("(^|[^0-9])(?:0?\\.)?0(?:px|em|%|in|cm|mm|pc|pt|ex|deg|g?rad|m?s|k?hz)", "$1\\0");
+        css = css.replaceAll("(^|[^0-9])(?:0?\\.)?0(?:px|em|%|in|cm|mm|pc|pt|ex|deg|g?rad|m?s|k?hz)", "$10");
 
         // Replace 0 0 0 0; with 0.
         css = css.replaceAll(":0 0 0 0(;|})", ":0$1");
