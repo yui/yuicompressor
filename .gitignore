@@ -7,3 +7,5 @@ CVS/
 *~
 # Ignore Emacs auto saved files
 *#*#
+build/classes/
+build/jar/
