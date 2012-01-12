@@ -53,9 +53,6 @@ YAHOO.compressor._extractDataUrls = function (css, preservedTokens) {
 
     while ((m = pattern.exec(css)) !== null) {
 
-        // Lowercase url() as the pattern is case-insensitive.
-        m[0] = 'url' + m[0].slice(3);
-
         startIndex = m.index + 4;  // "url(".length()
         terminator = m[1];         // ', " or empty (not quoted)
 
