@@ -38,7 +38,7 @@ public class CssCompressor {
 
         StringBuffer sb = new StringBuffer();
 
-        Pattern p = Pattern.compile("url\\(\\s*([\"']?)data\\:");
+        Pattern p = Pattern.compile("(?i)url\\(\\s*([\"']?)data\\:");
         Matcher m = p.matcher(css);
 
         /*
@@ -223,18 +223,45 @@ public class CssCompressor {
         css = css.replaceAll("___YUICSSMIN_PSEUDOCLASSCOLON___", ":");
 
         // retain space for special IE6 cases
-        css = css.replaceAll(":first\\-(line|letter)(\\{|,)", ":first-$1 $2");
+        sb = new StringBuffer();
+        p = Pattern.compile("(?i):first\\-(line|letter)(\\{|,)");
+        m = p.matcher(css);
+        while (m.find()) {
+          m.appendReplacement(sb, ":first-" + m.group(1).toLowerCase() + " " + m.group(2));
+        }
+        m.appendTail(sb);
+        css = sb.toString();
 
         // no space after the end of a preserved comment
         css = css.replaceAll("\\*/ ", "*/");
 
-        // If there is a @charset, then only allow one, and push to the top of the file.
-        css = css.replaceAll("^(.*)(@charset \"[^\"]*\";)", "$2$1");
-        css = css.replaceAll("^(\\s*@charset [^;]+;\\s*)+", "$1");
+        // If there are multiple @charset directives, push them to the top of the file.
+        sb = new StringBuffer();
+        p = Pattern.compile("(?i)^(.*)(@charset)( \"[^\"]*\";)");
+        m = p.matcher(css);
+        while (m.find()) {
+          m.appendReplacement(sb, m.group(2).toLowerCase() + m.group(3) + m.group(1));
+        }
+        m.appendTail(sb);
+        css = sb.toString();
+
+        // When all @charset are at the top, remove the second and after (as they are completely ignored).
+        sb = new StringBuffer();
+        p = Pattern.compile("(?i)^((\\s*)(@charset)( [^;]+;\\s*))+");
+        m = p.matcher(css);
+        int j = 0;
+        while (m.find()) {
+          m.appendReplacement(sb, m.group(2) + m.group(3).toLowerCase() + m.group(4));
+        }
+        m.appendTail(sb);
+        css = sb.toString();
 
         // Put the space back in some cases, to support stuff like
         // @media screen and (-webkit-min-device-pixel-ratio:0){
-        css = css.replaceAll("\\band\\(", "and (");
+        css = css.replaceAll("(?i)\\band\\(", "and (");
+
+        // Lowercase any rgba() functions.
+        css = css.replaceAll("(?i)\\brgba\\s*\\(", "rgba(");
 
         // Remove the spaces after the things that should not have spaces after them.
         css = css.replaceAll("([!{}:;>+\\(\\[,])\\s+", "$1");
@@ -243,7 +270,7 @@ public class CssCompressor {
         css = css.replaceAll(";+}", "}");
 
         // Replace 0(px,em,%) with 0.
-        css = css.replaceAll("(^|[^0-9])(?:0?\\.)?0(?:px|em|%|in|cm|mm|pc|pt|ex|deg|g?rad|m?s|k?hz)", "$10");
+        css = css.replaceAll("(?i)(^|[^0-9])(?:0?\\.)?0(?:px|em|%|in|cm|mm|pc|pt|ex|deg|g?rad|m?s|k?hz)", "$10");
 
         // Replace 0 0 0 0; with 0.
         css = css.replaceAll(":0 0 0 0(;|})", ":0$1");

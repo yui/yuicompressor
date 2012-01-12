@@ -6,7 +6,7 @@ a {
   transition: opacity .0s;
   transition-delay: 0.0ms;
   transform: rotate3d(0grad, 0rad, 0deg);
-  pitch: 0khz;
+  pitch: 0KHZ;
   pitch:
 0hz; /* intentionally on next line */
 }

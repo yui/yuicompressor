@@ -43,7 +43,7 @@ YAHOO.compressor._extractDataUrls = function (css, preservedTokens) {
         m,
         preserver,
         token,
-        pattern = /url\(\s*(["']?)data\:/g;
+        pattern = /url\(\s*(["']?)data\:/gi;
 
     // Since we need to account for non-base64 data urls, we need to handle 
     // ' and ) being part of the data string. Hence switching to indexOf,
@@ -51,6 +51,9 @@ YAHOO.compressor._extractDataUrls = function (css, preservedTokens) {
     // handling sb appends directly, instead of using matcher.append* methods.
 
     while ((m = pattern.exec(css)) !== null) {
+
+        // Lowercase url() as the pattern is case-insensitive.
+        m[0] = 'url' + m[0].slice(3);
 
         startIndex = m.index + 4;  // "url(".length()
         terminator = m[1];         // ', " or empty (not quoted)
@@ -255,21 +258,29 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
     css = css.replace(/\s+([!{};:>+\(\)\],])/g, '$1');
     css = css.replace(/___YUICSSMIN_PSEUDOCLASSCOLON___/g, ":");
 
-    // retain space for special IE6 cases
-    css = css.replace(/:first-(line|letter)(\{|,)/g, ":first-$1 $2");
+    // retain space for special IE6 cases and lowercase
+    css = css.replace(/:first-(line|letter)(\{|,)/gi, function(all, $1, $2) {
+        return ":first-" + $1.toLowerCase() + " " + $2;
+    });
 
     // no space after the end of a preserved comment
     css = css.replace(/\*\/ /g, '*/');
 
 
-    // If there is a @charset, then only allow one, and push to the top of the file.
-    css = css.replace(/^(.*)(@charset "[^"]*";)/gi, '$2$1');
-    css = css.replace(/^(\s*@charset [^;]+;\s*)+/gi, '$1');
+    // If there is a @charset, then only allow one, and push to the top of the file (and make lowercase).
+    css = css.replace(/^(.*)(@charset)( "[^"]*";)/gi, function(all, $1, $2, $3) {
+        return $2.toLowerCase() + $3 + $1;
+    });
+    css = css.replace(/^((\s*)(@charset)( [^;]+;\s*))+/gi, function(all, $1, $2, $3, $4) {
+        return $2 + $3.toLowerCase() + $4;
+    });
 
     // Put the space back in some cases, to support stuff like
     // @media screen and (-webkit-min-device-pixel-ratio:0){
     css = css.replace(/\band\(/gi, "and (");
 
+    // Lowercase all rgba() statements.
+    css = css.replace(/\brgba\s*\(/gi, "rgba(");
 
     // Remove the spaces after the things that should not have spaces after them.
     css = css.replace(/([!{}:;>+\(\[,])\s+/g, '$1');
