@@ -249,9 +249,49 @@ public class CssCompressor {
         sb = new StringBuffer();
         p = Pattern.compile("(?i)^((\\s*)(@charset)( [^;]+;\\s*))+");
         m = p.matcher(css);
-        int j = 0;
         while (m.find()) {
           m.appendReplacement(sb, m.group(2) + m.group(3).toLowerCase() + m.group(4));
+        }
+        m.appendTail(sb);
+        css = sb.toString();
+
+        // lowercase some popular @directives (@charset is done right above)
+        sb = new StringBuffer();
+        p = Pattern.compile("(?i)@(font-face|import|(?:-(?:atsc|khtml|moz|ms|o|wap|webkit)-)?keyframe|media|page|namespace)");
+        m = p.matcher(css);
+        while (m.find()) {
+            m.appendReplacement(sb, '@' + m.group(1).toLowerCase());
+        }
+        m.appendTail(sb);
+        css = sb.toString();
+    
+        // lowercase some more common pseudo-elements
+        sb = new StringBuffer();
+        p = Pattern.compile("(?i):(active|after|before|checked|disabled|empty|enabled|first-(?:child|of-type)|focus|hover|last-(?:child|of-type)|link|only-(?:child|of-type)|root|:selection|target|visited)");
+        m = p.matcher(css);
+        while (m.find()) {
+            m.appendReplacement(sb, ':' + m.group(1).toLowerCase());
+        }
+        m.appendTail(sb);
+        css = sb.toString();
+    
+        // lowercase some more common functions
+        sb = new StringBuffer();
+        p = Pattern.compile("(?i):(lang|not|nth-child|nth-last-child|nth-last-of-type|nth-of-type|(?:-(?:moz|webkit)-)?any)\\(");
+        m = p.matcher(css);
+        while (m.find()) {
+            m.appendReplacement(sb, ':' + m.group(1).toLowerCase() + '(');
+        }
+        m.appendTail(sb);
+        css = sb.toString();
+    
+        // lower case some common function that can be values
+        // NOTE: rgb() isn't useful as we replace with #hex later, as well as and() is already done for us right after this
+        sb = new StringBuffer();
+        p = Pattern.compile("(?i)([:,\\( ]\\s*)(attr|color-stop|from|rgba|to|url|(?:-(?:atsc|khtml|moz|ms|o|wap|webkit)-)?(?:calc|max|min|(?:repeating-)?(?:linear|radial)-gradient)|-webkit-gradient)");
+        m = p.matcher(css);
+        while (m.find()) {
+            m.appendReplacement(sb, m.group(1) + m.group(2).toLowerCase());
         }
         m.appendTail(sb);
         css = sb.toString();
@@ -259,9 +299,6 @@ public class CssCompressor {
         // Put the space back in some cases, to support stuff like
         // @media screen and (-webkit-min-device-pixel-ratio:0){
         css = css.replaceAll("(?i)\\band\\(", "and (");
-
-        // Lowercase any rgba() functions.
-        css = css.replaceAll("(?i)\\brgba\\s*\\(", "rgba(");
 
         // Remove the spaces after the things that should not have spaces after them.
         css = css.replaceAll("([!{}:;>+\\(\\[,])\\s+", "$1");

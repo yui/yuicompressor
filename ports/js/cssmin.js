@@ -277,7 +277,7 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
     css = css.replace(/\band\(/gi, "and (");
 
     // lowercase some popular @directives (@charset is done right above)
-    css = css.replace(/@((?:font-face|import|(?:-(?:atsc|khtml|moz|ms|o|wap|webkit)-)?keyframe|media|page|namespace))/gi, function(all, $1) {
+    css = css.replace(/@(font-face|import|(?:-(?:atsc|khtml|moz|ms|o|wap|webkit)-)?keyframe|media|page|namespace)/gi, function(all, $1) {
         return '@' + $1.toLowerCase();
     });
 
