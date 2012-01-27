@@ -264,7 +264,6 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
     // no space after the end of a preserved comment
     css = css.replace(/\*\/ /g, '*/');
 
-
     // If there is a @charset, then only allow one, and push to the top of the file (and make lowercase).
     css = css.replace(/^(.*)(@charset)( "[^"]*";)/gi, function(all, $1, $2, $3) {
         return $2.toLowerCase() + $3 + $1;
@@ -277,8 +276,26 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
     // @media screen and (-webkit-min-device-pixel-ratio:0){
     css = css.replace(/\band\(/gi, "and (");
 
-    // Lowercase all rgba() statements.
-    css = css.replace(/\brgba\s*\(/gi, "rgba(");
+    // lowercase some popular @directives (@charset is done right above)
+    css = css.replace(/@((?:font-face|import|(?:-(?:atsc|khtml|moz|ms|o|wap|webkit)-)?keyframe|media|page|namespace))/gi, function(all, $1) {
+        return '@' + $1.toLowerCase();
+    });
+
+    // lowercase some more common pseudo-elements
+    css = css.replace(/:(active|after|before|checked|disabled|empty|enabled|first-(?:child|of-type)|focus|hover|last-(?:child|of-type)|link|only-(?:child|of-type)|root|:selection|target|visited)/gi, function(all, $1) {
+        return ':' + $1.toLowerCase();
+    });
+
+    // lowercase some more common functions
+    css = css.replace(/:(lang|not|nth-child|nth-last-child|nth-last-of-type|nth-of-type|(?:-(?:moz|webkit)-)?any)\(/gi, function(all, $1) {
+        return ':' + $1.toLowerCase() + '(';
+    });
+
+    // lower case some common function that can be values
+    // NOTE: rgb() isn't useful as we replace with #hex later, as well as and() is already done for us
+    css = css.replace(/([:,\( ]\s*)(attr|color-stop|from|rgba|to|url|(?:-(?:atsc|khtml|moz|ms|o|wap|webkit)-)?(?:calc|max|min|(?:repeating-)?(?:linear|radial)-gradient)|-webkit-gradient)/gi, function(all, $1, $2) {
+        return $1 + $2.toLowerCase();
+    });
 
     // Remove the spaces after the things that should not have spaces after them.
     css = css.replace(/([!{}:;>+\(\[,])\s+/g, '$1');
