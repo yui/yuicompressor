@@ -227,7 +227,7 @@ public class CssCompressor {
         p = Pattern.compile("(?i):first\\-(line|letter)(\\{|,)");
         m = p.matcher(css);
         while (m.find()) {
-          m.appendReplacement(sb, ":first-" + m.group(1).toLowerCase() + " " + m.group(2));
+            m.appendReplacement(sb, ":first-" + m.group(1).toLowerCase() + " " + m.group(2));
         }
         m.appendTail(sb);
         css = sb.toString();
@@ -240,7 +240,7 @@ public class CssCompressor {
         p = Pattern.compile("(?i)^(.*)(@charset)( \"[^\"]*\";)");
         m = p.matcher(css);
         while (m.find()) {
-          m.appendReplacement(sb, m.group(2).toLowerCase() + m.group(3) + m.group(1));
+            m.appendReplacement(sb, m.group(2).toLowerCase() + m.group(3) + m.group(1));
         }
         m.appendTail(sb);
         css = sb.toString();
@@ -250,7 +250,7 @@ public class CssCompressor {
         p = Pattern.compile("(?i)^((\\s*)(@charset)( [^;]+;\\s*))+");
         m = p.matcher(css);
         while (m.find()) {
-          m.appendReplacement(sb, m.group(2) + m.group(3).toLowerCase() + m.group(4));
+            m.appendReplacement(sb, m.group(2) + m.group(3).toLowerCase() + m.group(4));
         }
         m.appendTail(sb);
         css = sb.toString();
