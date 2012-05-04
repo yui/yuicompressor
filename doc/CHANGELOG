@@ -1,3 +1,7 @@
+YUI Compressor 2.4.9 
+--------------------
++ Ability to traverse directories
+
 YUI Compressor 2.4.7 
 --------------------
 + Handle data urls without blowing up Java memory (regex)

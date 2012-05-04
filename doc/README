@@ -18,6 +18,7 @@ SYNOPSIS
     -v, --verbose             Display informational messages and warnings
     -o <file>                 Place the output into <file> or a file pattern.
                               Defaults to stdout.
+    --notraversal             Disable directory traversal
 
   JavaScript Options
     --nomunge                 Minify only, do not obfuscate
@@ -71,6 +72,10 @@ GLOBAL OPTIONS
 
   -v, --verbose
       Display informational messages and warnings.
+      
+  --notraversal
+  	  Disables directory traversal for file minifying. This argument must be
+  	  used in conjunction with --type otherwise it will fail.
 
 JAVASCRIPT ONLY OPTIONS
 

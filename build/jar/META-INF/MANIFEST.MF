@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.8.0
+Created-By: 1.6.0_20-b20 (Sun Microsystems Inc.)
+Main-Class: org.mozilla.javascript.tools.shell.Main
+
