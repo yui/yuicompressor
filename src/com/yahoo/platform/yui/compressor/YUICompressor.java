@@ -272,6 +272,7 @@ public class YUICompressor {
     	for (int i = 0; i < files.size(); i++){
         	String fileName = files.get(i).toString();
         	if (fileName == "-") continue;
+        	//System.out.println(fileName);
     		File f = new File(fileName);
         	if (f.isDirectory()){
         		if (type == null){
