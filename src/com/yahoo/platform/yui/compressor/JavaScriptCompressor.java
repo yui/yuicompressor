@@ -8,15 +8,27 @@
  */
 package com.yahoo.platform.yui.compressor;
 
-import org.mozilla.javascript.*;
-
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.lang.ref.SoftReference;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.mozilla.javascript.CompilerEnvirons;
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.ErrorReporter;
+import org.mozilla.javascript.EvaluatorException;
+import org.mozilla.javascript.Parser;
+import org.mozilla.javascript.ScriptRuntime;
+import org.mozilla.javascript.Token;
 
 public class JavaScriptCompressor {
 
@@ -894,10 +906,13 @@ public class JavaScriptCompressor {
 
     private StringBuffer printSymbolTree(int linebreakpos, boolean preserveAllSemiColons)
             throws IOException {
-
+    	
         offset = 0;
         braceNesting = 0;
         scopes.clear();
+        
+    	if (tokens.isEmpty())
+    		return new StringBuffer();
 
         String symbol;
         JavaScriptToken token;
