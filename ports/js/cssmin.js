@@ -296,7 +296,7 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
 
     // Shorten colors from rgb(51,102,153) to #336699
     // This makes it more likely that it'll get further compressed in the next step.
-    css = css.replace(/rgb\s*\(\s*([0-9,\s]+)\s*\)/gi, function () {
+    css = css.replace(/rgb\s*\(\s*([0-9,\s]+)\s*\)(\d+%)?/gi, function () {
         var i, rgbcolors = arguments[1].split(',');
         for (i = 0; i < rgbcolors.length; i = i + 1) {
             rgbcolors[i] = parseInt(rgbcolors[i], 10).toString(16);
@@ -304,11 +304,34 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
                 rgbcolors[i] = '0' + rgbcolors[i];
             }
         }
+        if (arguments[2]) {
+            rgbcolors.push(' '+arguments[2]);
+        }
         return '#' + rgbcolors.join('');
     });
 
-    // Shorten colors from #AABBCC to #ABC.
-    css = this._compressHexColors(css);
+
+    // Shorten colors from #AABBCC to #ABC. Note that we want to make sure
+    // the color is not preceded by either ", " or =. Indeed, the property
+    //     filter: chroma(color="#FFFFFF");
+    // would become
+    //     filter: chroma(color="#FFF");
+    // which makes the filter break in IE.
+    css = css.replace(/([^"'=\s])(\s*)#([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])/gi, function () {
+        var group = arguments;
+        if (group[1] == '}') {
+            return group[0];
+        }
+        if (
+            group[3].toLowerCase() === group[4].toLowerCase() &&
+            group[5].toLowerCase() === group[6].toLowerCase() &&
+            group[7].toLowerCase() === group[8].toLowerCase()
+        ) {
+            return (group[1] + group[2] + '#' + group[3] + group[5] + group[7]).toLowerCase();
+        } else {
+            return group[0].toLowerCase();
+        }
+    });
 
     // border: none -> border:0
     css = css.replace(/(border|border-top|border-right|border-bottom|border-right|outline|background):none(;|\})/gi, function(all, prop, tail) {

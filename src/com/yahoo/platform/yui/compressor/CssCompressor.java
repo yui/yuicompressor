@@ -266,7 +266,7 @@ public class CssCompressor {
 
         // Shorten colors from rgb(51,102,153) to #336699
         // This makes it more likely that it'll get further compressed in the next step.
-        p = Pattern.compile("rgb\\s*\\(\\s*([0-9,\\s]+)\\s*\\)");
+        p = Pattern.compile("rgb\\s*\\(\\s*([0-9,\\s]+)\\s*\\)(\\s*\\d+%)?");
         m = p.matcher(css);
         sb = new StringBuffer();
         while (m.find()) {
@@ -279,7 +279,11 @@ public class CssCompressor {
                 }
                 hexcolor.append(Integer.toHexString(val));
             }
-            m.appendReplacement(sb, hexcolor.toString());
+            if (m.group(2) != null) {
+                m.appendReplacement(sb, hexcolor.toString()+" "+m.group(2));
+            } else {
+                m.appendReplacement(sb, hexcolor.toString());
+            }
         }
         m.appendTail(sb);
         css = sb.toString();
