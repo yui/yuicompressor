@@ -1,0 +1,91 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+    <head>
+        <link href="http://yui.yahooapis.com/3.4.0/build/cssreset/cssreset.css" type="text/css" rel="stylesheet">
+        <link href="http://yui.yahooapis.com/3.4.0/build/cssbase/cssbase.css" type="text/css" rel="stylesheet">
+    
+        <style>
+            body {
+                padding:10px;
+            }
+            
+            pre {
+                width:90%;
+                padding:10px;
+                overflow:auto;
+                background-color:#eee;
+            }
+            
+            #testFile {
+                margin:2em;
+            }
+            
+            #notsupportedmsg.hidden {
+                display:none;
+            }
+            
+            #notsupportedmsg {
+                color:red;
+            }
+        </style>
+
+        <script src="../ports/js/cssmin.js"></script>
+    </head>
+    <body>
+        <h1>Use This Page to Debug cssmin.js</h1>
+
+        <h1 id="notsupportedmsg" class="hidden">Your browser does not support the local file access apis used by this page.</h1>
+
+        <p>Select a css file to compress. You can then step through the cssmin.js implementation using your browser's script debugger.</p>
+        
+        <p><input type="file" id="testFile"></p>
+
+        <h2>Compressed</h2>
+        <pre id="out"></pre>
+
+        <h2>Original</h2>
+        <pre id="in"></pre>
+
+        <script>
+            (function() {
+                
+                var dumpContents = function(node, str) {
+                    node.innerHTML = "";
+                    node.appendChild(document.createTextNode(str));
+                },
+                testFile,
+                changeHandler;
+
+                if (window.File && window.FileReader) {
+
+                    testFile = document.getElementById('testFile');
+
+                    changeHandler = function(e) {
+                        var file = this.files[0],
+                            fr = new FileReader(),
+                            input = document.getElementById("in"),
+                            output = document.getElementById("out"),
+                            contents;
+
+                        fr.onload = function(e) {
+                            dumpContents(input, e.target.result); 
+                            var min = YAHOO.compressor.cssmin(e.target.result);
+                            dumpContents(output, min); 
+                        };
+        
+                        fr.readAsText(file, "utf-8");
+                    }
+
+                    if (testFile.addEventListener) {
+                        testFile.addEventListener('change', changeHandler, false);
+                    } else {
+                        testFile.attachEvent('onChange', changeHandler);
+                    }
+
+                } else {
+                    document.getElementById("notsupportedmsg").removeClass("hidden");
+                }
+            })();
+        </script>
+    </body>
+</html>
