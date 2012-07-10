@@ -1,0 +1,30 @@
+#!/usr/bin/env node
+
+/*
+Just a simple nodejs wrapper around the .jar file
+for easy CLI use
+*/
+
+var spawn = require('child_process').spawn,
+    fs = require('fs'),
+    path = require('path'),
+    args = process.argv.slice(2),
+    lists = fs.readdirSync(path.join(__dirname, '../build'));
+
+lists.some(function(item) {
+    if (path.extname(item) === '.jar') {
+        args.unshift(path.join(__dirname, '../build/', item));
+        return true;
+    }
+});
+
+args.unshift('-jar');
+
+var cmd = spawn('java', args);
+
+cmd.stdout.on('data',function(data) {
+    console.log(data.toString().trim());
+});
+cmd.stderr.on('data',function(data) {
+    console.error(data.toString().trim());
+});

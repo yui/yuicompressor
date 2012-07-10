@@ -1,0 +1,11 @@
+{
+    "name": "yuicompressor",
+    "description": "Simple install for YUICompressor CLI",
+    "version": "2.4.8pre",
+    "devDependencies": {
+        "yuitest": "*"
+    },
+    "bin": {
+        "yuicompressor": "./bin/yuicompressor"
+    }
+}
