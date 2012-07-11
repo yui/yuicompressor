@@ -23,8 +23,8 @@ args.unshift('-jar');
 var cmd = spawn('java', args);
 
 cmd.stdout.on('data',function(data) {
-    console.log(data.toString().trim());
+    process.stdout.write(data.toString());
 });
 cmd.stderr.on('data',function(data) {
-    console.error(data.toString().trim());
+    process.stderr.write(data.toString());
 });
