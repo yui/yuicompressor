@@ -14,6 +14,9 @@ import org.mozilla.javascript.EvaluatorException;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 public class YUICompressor {
 
@@ -24,6 +27,7 @@ public class YUICompressor {
         CmdLineParser.Option versionOpt = parser.addBooleanOption('V', "version");
         CmdLineParser.Option verboseOpt = parser.addBooleanOption('v', "verbose");
         CmdLineParser.Option nomungeOpt = parser.addBooleanOption("nomunge");
+        CmdLineParser.Option notravOpt = parser.addBooleanOption("traversal");
         CmdLineParser.Option linebreakOpt = parser.addStringOption("line-break");
         CmdLineParser.Option preserveSemiOpt = parser.addBooleanOption("preserve-semi");
         CmdLineParser.Option disableOptimizationsOpt = parser.addBooleanOption("disable-optimizations");
@@ -85,6 +89,8 @@ public class YUICompressor {
                 System.exit(1);
             }
 
+            boolean trav = parser.getOptionValue(notravOpt) == null;
+            
             String[] fileArgs = parser.getRemainingArgs();
             java.util.List files = java.util.Arrays.asList(fileArgs);
             if (files.isEmpty()) {
@@ -92,13 +98,20 @@ public class YUICompressor {
                     usage();
                     System.exit(1);
                 }
-                files = new java.util.ArrayList();
+                files = new ArrayList();
                 files.add("-"); // read from stdin
             }
 
             String output = (String) parser.getOptionValue(outputFilenameOpt);
             String pattern[] = output != null ? output.split(":") : new String[0];
-
+            
+            /**
+             * Create file name iterator here
+             * in the case that file is a directory
+             * and --traversal is not set
+             */            
+            if (!trav) files = mkList(files, type);
+            
             java.util.Iterator filenames = files.iterator();
             while(filenames.hasNext()) {
                 String inputFilename = (String)filenames.next();
@@ -252,6 +265,7 @@ public class YUICompressor {
                         + "  --line-break <column>     Insert a line break after the specified column number\n"
                         + "  -v, --verbose             Display informational messages and warnings\n"
                         + "  -o <file>                 Place the output into <file>. Defaults to stdout.\n"
+                        + "  --traversal               Enable directory traversal\n"
                         + "                            Multiple files can be processed using the following syntax:\n"
                         + "                            java -jar yuicompressor.jar -o '.css$:-min.css' *.css\n"
                         + "                            java -jar yuicompressor.jar -o '.js$:-min.js' *.js\n\n"
@@ -265,4 +279,26 @@ public class YUICompressor {
                         + "option is required. Otherwise, the 'type' option is required only if the input\n"
                         + "file extension is neither 'js' nor 'css'.");
     }
+    
+    private static List mkList(List files, String type){
+    	List _files = new ArrayList();
+    	for (int i = 0; i < files.size(); i++){
+        	String fileName = files.get(i).toString();
+        	if (fileName == "-") continue;
+        	//System.out.println(fileName);
+    		File f = new File(fileName);
+        	if (f.isDirectory()){
+        		if (type == null){
+        			usage();
+        			System.err.println("\n[ERROR]: Must supply --type when using directory traversal");
+                    System.exit(1);
+        		} else {
+        			_files.addAll(mkList(Arrays.asList(f.listFiles()), type));
+        		}
+        	} else {
+        		_files.add(fileName);       	
+        	}
+        }
+    	return _files;
+    }    
 }

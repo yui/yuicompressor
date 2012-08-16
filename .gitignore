@@ -1,3 +1,5 @@
+*.project
+*.class
 build_tmp/
 .DS_Store
 .*.swp
