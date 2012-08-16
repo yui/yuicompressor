@@ -1,0 +1,11 @@
+language: java
+jdk:
+    - openjdk6
+install:
+    - ant
+script:
+    - ./tests/suite.sh
+notifications:
+    email:
+        - davglass@gmail.com
+        - davglass@yahoo-inc.com
