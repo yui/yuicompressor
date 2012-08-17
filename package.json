@@ -21,6 +21,7 @@
     "scripts": {
         "test": "yuitest ./nodejs_tests/tests.js"
     },
+    "preferGlobal": true,
     "licenses":[
         {
             "type" : "BSD",
