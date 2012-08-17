@@ -115,24 +115,27 @@ function fn (arg1, arg2, arg3) {
     ...
 }
 ```
-    The hint itself disappears from the compressed file.
+The hint itself disappears from the compressed file.
 
-* C-style comments starting with /*! are preserved. This is useful with
+* C-style comments starting with `/*!` are preserved. This is useful with
     comments containing copyright/license information. For example:
+
 ```
-    /*!
-     * TERMS OF USE - EASING EQUATIONS
-     * Open source under the BSD License.
-     * Copyright 2001 Robert Penner All rights reserved.
-     */
+/*!
+ * TERMS OF USE - EASING EQUATIONS
+ * Open source under the BSD License.
+ * Copyright 2001 Robert Penner All rights reserved.
+ */
 ```
-    becomes:
+
+becomes:
+
 ```
-    /*
-     * TERMS OF USE - EASING EQUATIONS
-     * Open source under the BSD License.
-     * Copyright 2001 Robert Penner All rights reserved.
-     */
+/*
+ * TERMS OF USE - EASING EQUATIONS
+ * Open source under the BSD License.
+ * Copyright 2001 Robert Penner All rights reserved.
+ */
 ```
 
 Modified Rhino Files
