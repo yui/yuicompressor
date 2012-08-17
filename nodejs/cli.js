@@ -7,17 +7,10 @@ for easy CLI use
 
 var spawn = require('child_process').spawn,
     fs = require('fs'),
-    path = require('path'),
-    args = process.argv.slice(2),
-    lists = fs.readdirSync(path.join(__dirname, '../build'));
+    compressor = require('./index'),
+    args = process.argv.slice(2);
 
-lists.some(function(item) {
-    if (path.extname(item) === '.jar') {
-        args.unshift(path.join(__dirname, '../build/', item));
-        return true;
-    }
-});
-
+args.unshift(compressor.jar);
 args.unshift('-jar');
 
 var cmd = spawn('java', args);

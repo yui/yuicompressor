@@ -20,12 +20,45 @@ Testing
 
     ./tests/suite.sh
 
+
+Node.js Package
+---------------
+
+You can require compressor in a Node.js package and compress files and strings in async.
+_It still uses Java under the hood_
+
+    npm i yuicompressor
+
+```javascript
+
+var compressor = require('yuicompressor');
+
+compressor.compress('/path/to/file or String of JS', {
+    //Compressor Options:
+    charset: 'utf8',
+    type: 'js',
+    nomunge: true,
+    'line-break': 80
+}, function(err, data, extra) {
+    //err   If compressor encounters an error, it's stderr will be here
+    //data  The compressed string, you write it out where you want it
+    //extra The stderr (warnings are printed here in case you want to echo them
+});
+
+```
+
+Options:
+* `charset` // defaults to 'utf8'
+* `type` // defaults to 'js'
+* `line-break`
+* `nomunge`
+* `preserve-semi`
+* `disable-optimizations`
+
+
 TODO
 ----
 
-* Proper Unit Tests
-* Proper Node.js Module
-   * Wrapper for use in a Node.js process
 * Better Docs
 * Help Pages
 
