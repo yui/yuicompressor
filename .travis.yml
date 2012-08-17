@@ -6,7 +6,7 @@ install:
     - npm install
 script:
     - ./tests/suite.sh
-    = npm test
+    - npm test
 notifications:
     email:
         - davglass@gmail.com
