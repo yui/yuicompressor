@@ -19,7 +19,7 @@
         "nodejs"
     ],
     "scripts": {
-        "test": "./node_modules/.bin/yuitest ./nodejs_tests/tests.js"
+        "test": "yuitest ./nodejs_tests/tests.js"
     },
     "licenses":[
         {
