@@ -64,7 +64,7 @@ var compressString = function(str, options, callback) {
 
     var args = [
         '-jar',
-        jar
+        exports.jar
     ], buffer = '', errBuffer = '', child;
 
     Object.keys(options).forEach(function(key) {
