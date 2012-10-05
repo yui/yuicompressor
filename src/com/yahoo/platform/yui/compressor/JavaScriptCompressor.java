@@ -1289,6 +1289,13 @@ public class JavaScriptCompressor {
                     }
                     break;
 
+                case Token.COMMA:
+                    // No need to output a comma if the next character is a right-curly or a right-square bracket
+                    if (offset < length && getToken(0).getType() != Token.RC && getToken(0).getType() != Token.RB) {
+                        result.append(',');
+                    }
+                    break;
+
                 case Token.CONDCOMMENT:
                 case Token.KEEPCOMMENT:
                     if (result.length() > 0 && result.charAt(result.length() - 1) != '\n') {
