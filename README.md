@@ -183,6 +183,6 @@ of escaped quotes in string literals.
 Copyright And License
 ---------------------
 
-Copyright (c) 2011 Yahoo! Inc.  All rights reserved.
+Copyright (c) 2013 Yahoo! Inc.  All rights reserved.
 The copyrights embodied in the content of this file are licensed
 by Yahoo! Inc. under the BSD (revised) open source license.
