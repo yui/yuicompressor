@@ -330,7 +330,7 @@ public class CssCompressor {
 
         // border: none -> border:0
         sb = new StringBuffer();
-        p = Pattern.compile("(?i)(border|border-top|border-right|border-bottom|border-right|outline|background):none(;|})");
+        p = Pattern.compile("(?i)(border|border-top|border-right|border-bottom|border-left|outline|background):none(;|})");
         m = p.matcher(css);
         while (m.find()) {
             m.appendReplacement(sb, m.group(1).toLowerCase() + ":0" + m.group(2));
