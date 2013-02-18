@@ -311,7 +311,7 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
     css = this._compressHexColors(css);
 
     // border: none -> border:0
-    css = css.replace(/(border|border-top|border-right|border-bottom|border-right|outline|background):none(;|\})/gi, function(all, prop, tail) {
+    css = css.replace(/(border|border-top|border-right|border-bottom|border-left|outline|background):none(;|\})/gi, function(all, prop, tail) {
         return prop.toLowerCase() + ":0" + tail;
     });
 
