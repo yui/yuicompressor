@@ -2,7 +2,7 @@
 	(-o-min-device-pixel-ratio:  10/4),
 	(-o-max-device-pixel-ratio:  5/4),
 	(-o-device-pixel-ratio:  1/1)  {  
-		/* color: red; */
+		color: red;
  }
  
  .something {
