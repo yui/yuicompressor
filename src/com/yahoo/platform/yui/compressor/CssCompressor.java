@@ -237,8 +237,7 @@ public class CssCompressor {
 		
 		// Find a fraction that is used for Opera's -o-device-pixel-ratio query
 		// Add token to add the "\" back in later
-		//css = css.replaceAll("-o-([A-Za-z\\-]+?)-pixel-ratio: ([0-9]+)\\/([0-9]+)", "-o-$1-pixel-ratio: $2___YUI_OPERA_FRACTION_$3");
-		//css = css.replaceAll("-o-min-device-pixel-ratio: ", "-fixme-o-min-device-pixel-ratio: ");
+		css = css.replaceAll("-o-([A-Za-z\\-]+?)-pixel-ratio: ([0-9]+)\\/([0-9]+)", "-o-$1-pixel-ratio: $2___YUI_OPERA_FRACTION_$3");
 		
         // Remove the spaces after the things that should not have spaces after them.
         css = css.replaceAll("([!{}:;>+\\(\\[,])\\s+", "$1");
@@ -351,7 +350,7 @@ public class CssCompressor {
         css = css.replaceAll("[^\\}\\{/;]+\\{\\}", "");
         
         // Add "\" back to fix Opera -o-device-pixel-ratio query
-		//css = css.replaceAll("___YUI_OPERA_FRACTION_", "/");
+		css = css.replaceAll("___YUI_OPERA_FRACTION_", "/");
 
         // TODO: Should this be after we re-insert tokens. These could alter the break points. However then
         // we'd need to make sure we don't break in the middle of a string etc.
