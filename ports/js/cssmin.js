@@ -325,7 +325,7 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
     css = css.replace(/[^\};\{\/]+\{\}/g, "");
     
     // Add "\" back to fix Opera -o-device-pixel-ratio query
-	css = css.replace("___YUI_OPERA_FRACTION_", "/");
+	css = css.replace("___YUI_QUERY_FRACTION_", "/");
 
     if (linebreakpos >= 0) {
         // Some source control tools don't like it when files containing lines longer
