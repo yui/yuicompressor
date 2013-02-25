@@ -235,12 +235,14 @@ public class CssCompressor {
         // @media screen and (-webkit-min-device-pixel-ratio:0){
         css = css.replaceAll("\\band\\(", "and (");
 		
-		// Find a fraction that is used for Opera's -o-device-pixel-ratio query
-		// Add token to add the "\" back in later
-		css = css.replaceAll("-o-([A-Za-z\\-]+?)-pixel-ratio: ([0-9]+)\\/([0-9]+)", "-o-$1-pixel-ratio: $2___YUI_OPERA_FRACTION_$3");
 		
         // Remove the spaces after the things that should not have spaces after them.
         css = css.replaceAll("([!{}:;>+\\(\\[,])\\s+", "$1");
+        
+        // Find a fraction that is used for Opera's -o-device-pixel-ratio query
+		// Add token to add the "\" back in later
+		css = css.replaceAll("-o-([A-Za-z\\-]+?)-pixel-ratio:([0-9]+)\\/([0-9]+)", "-o-$1-pixel-ratio:$2___YUI_OPERA_FRACTION_$3");
+		
 
         // remove unnecessary semicolons
         css = css.replaceAll(";+}", "}");

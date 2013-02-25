@@ -270,15 +270,13 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
     // @media screen and (-webkit-min-device-pixel-ratio:0){
     css = css.replace(/\band\(/gi, "and (");
     
-    // Find a fraction that is used for Opera's -o-device-pixel-ratio query
-	// Add token to add the "\" back in later
-	css = css.replace(/-o-([A-Za-z\-]+?)-pixel-ratio: ([0-9]+)\/([0-9]+)/g, "-o-$1-pixel-ratio: $2___YUI_OPERA_FRACTION_$3");
-		
-    
-
     // Remove the spaces after the things that should not have spaces after them.
     css = css.replace(/([!{}:;>+\(\[,])\s+/g, '$1');
-
+    
+    // Find a fraction that is used for Opera's -o-device-pixel-ratio query
+	// Add token to add the "\" back in later
+	css = css.replace(/-o-([A-Za-z\-]+?)-pixel-ratio:([0-9]+)\/([0-9]+)/g, "-o-$1-pixel-ratio:$2___YUI_OPERA_FRACTION_$3");
+	
     // remove unnecessary semicolons
     css = css.replace(/;+\}/g, "}");
 
