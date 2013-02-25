@@ -241,7 +241,7 @@ public class CssCompressor {
         
         // Find a fraction that is used for Opera's -o-device-pixel-ratio query
 		// Add token to add the "\" back in later
-		css = css.replaceAll("-o-([A-Za-z\\-]+?)-pixel-ratio:([0-9]+)\\/([0-9]+)", "-o-$1-pixel-ratio:$2___YUI_OPERA_FRACTION_$3");
+		css = css.replaceAll("\\([\\-A-Za-z]+:([0-9]+)\\/([0-9]+)\\)", "($1:$2___YUI_QUERY_FRACTION_$3)");
 		
 
         // remove unnecessary semicolons

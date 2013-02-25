@@ -6,7 +6,6 @@
 	(device-pixel-ratio:1.5)  {  
 		/* some:prop; */
 		/* An empty property with a fraction in query would break previously */
-		not:empty;
  }
  
  .something {
