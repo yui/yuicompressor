@@ -320,6 +320,7 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
     css = css.replace(/(:|\s)(#c0c0c0)(;|})/g, "$1silver$3");
     css = css.replace(/(:|\s)(#008080)(;|})/g, "$1teal$3");
     css = css.replace(/(:|\s)(#ffa500)(;|})/g, "$1orange$3");
+    css = css.replace(/(:|\s)(#800000)(;|})/g, "$1maroon$3");
 
     // border: none -> border:0
     css = css.replace(/(border|border-top|border-right|border-bottom|border-left|outline|background):none(;|\})/gi, function(all, prop, tail) {
