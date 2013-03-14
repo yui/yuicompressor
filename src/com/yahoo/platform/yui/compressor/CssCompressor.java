@@ -340,6 +340,7 @@ public class CssCompressor {
         css = css.replaceAll("(:|\\s)(#c0c0c0)(;|})", "$1silver$3");
         css = css.replaceAll("(:|\\s)(#008080)(;|})", "$1teal$3");
         css = css.replaceAll("(:|\\s)(#ffa500)(;|})", "$1orange$3");
+        css = css.replaceAll("(:|\\s)(#800000)(;|})", "$1maroon$3");
 
         // border: none -> border:0
         sb = new StringBuffer();
