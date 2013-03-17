@@ -269,4 +269,3 @@ public class YUICompressor {
                         + "file extension is neither 'js' nor 'css'.");
     }
 }
-
