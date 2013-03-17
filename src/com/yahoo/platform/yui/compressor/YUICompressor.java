@@ -30,9 +30,11 @@ public class YUICompressor {
         CmdLineParser.Option helpOpt = parser.addBooleanOption('h', "help");
         CmdLineParser.Option charsetOpt = parser.addStringOption("charset");
         CmdLineParser.Option outputFilenameOpt = parser.addStringOption('o', "output");
+        CmdLineParser.Option mungemapFilenameOpt = parser.addStringOption('m', "mungemap");
 
         Reader in = null;
         Writer out = null;
+        Writer mungemap = null;
 
         try {
 
@@ -98,6 +100,16 @@ public class YUICompressor {
 
             String output = (String) parser.getOptionValue(outputFilenameOpt);
             String pattern[] = output != null ? output.split(":") : new String[0];
+
+            try {
+                String mungemapFilename = (String) parser.getOptionValue(mungemapFilenameOpt);
+                if (mungemapFilename != null) {
+                    mungemap = new OutputStreamWriter(new FileOutputStream(mungemapFilename), charset);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
 
             java.util.Iterator filenames = files.iterator();
             while(filenames.hasNext()) {
@@ -170,13 +182,16 @@ public class YUICompressor {
                                 out = new OutputStreamWriter(System.out, charset);
                             } else {
                                 out = new OutputStreamWriter(new FileOutputStream(outputFilename), charset);
+                                if (mungemap != null) {
+                                    mungemap.write("\n\nFile: "+outputFilename+"\n\n");
+                                }
                             }
 
                             boolean munge = parser.getOptionValue(nomungeOpt) == null;
                             boolean preserveAllSemiColons = parser.getOptionValue(preserveSemiOpt) != null;
                             boolean disableOptimizations = parser.getOptionValue(disableOptimizationsOpt) != null;
 
-                            compressor.compress(out, linebreakpos, munge, verbose,
+                            compressor.compress(out, mungemap, linebreakpos, munge, verbose,
                                     preserveAllSemiColons, disableOptimizations);
 
                         } catch (EvaluatorException e) {
@@ -232,6 +247,14 @@ public class YUICompressor {
 
             usage();
             System.exit(1);
+        } finally {
+            if (mungemap !=null) {
+                try {
+                    mungemap.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -252,6 +275,7 @@ public class YUICompressor {
                         + "  --line-break <column>     Insert a line break after the specified column number\n"
                         + "  -v, --verbose             Display informational messages and warnings\n"
                         + "  -o <file>                 Place the output into <file>. Defaults to stdout.\n"
+                        + "  -m <file>                 Place a mapping of munged identifiers to originals in this file\n\n"
                         + "                            Multiple files can be processed using the following syntax:\n"
                         + "                            java -jar yuicompressor.jar -o '.css$:-min.css' *.css\n"
                         + "                            java -jar yuicompressor.jar -o '.js$:-min.js' *.js\n\n"
