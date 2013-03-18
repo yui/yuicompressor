@@ -101,7 +101,7 @@ public class YUICompressor {
 
             java.util.Iterator filenames = files.iterator();
             while(filenames.hasNext()) {
-                String inputFilename = (String)filenames.next();
+                final String inputFilename = (String)filenames.next();
 
                 try {
                     if (inputFilename.equals("-")) {
@@ -132,7 +132,6 @@ public class YUICompressor {
                     }
 
                     if (type.equalsIgnoreCase("js")) {
-
                         try {
 
                             JavaScriptCompressor compressor = new JavaScriptCompressor(in, new ErrorReporter() {
@@ -140,19 +139,19 @@ public class YUICompressor {
                                 public void warning(String message, String sourceName,
                                         int line, String lineSource, int lineOffset) {
                                     if (line < 0) {
-                                        System.err.println("\n[WARNING] " + message);
+                                        System.err.println("\n[WARNING] " + inputFilename + " " + message);
                                     } else {
-                                        System.err.println("\n[WARNING] " + line + ':' + lineOffset + ':' + message);
+                                        System.err.println("\n[WARNING] " + inputFilename + " " + line + ':' + lineOffset + ':' + message);
                                     }
                                 }
 
                                 public void error(String message, String sourceName,
                                         int line, String lineSource, int lineOffset) {
-                                    if (line < 0) {
-                                        System.err.println("\n[ERROR] " + message);
-                                    } else {
-                                        System.err.println("\n[ERROR] " + line + ':' + lineOffset + ':' + message);
-                                    }
+                                        if (line < 0) {
+                                            System.err.println("\n[ERROR] " + inputFilename + " " + message);
+                                        } else {
+                                            System.err.println("\n[ERROR] " + inputFilename + " " + line + ':' + lineOffset + ':' + message);
+                                        }
                                 }
 
                                 public EvaluatorException runtimeError(String message, String sourceName,
