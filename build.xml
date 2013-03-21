@@ -10,17 +10,30 @@
     </target>
 
     <target name="-init" depends="-load.properties">
+        <delete dir="${build.dir}"/>
         <mkdir dir="${build.dir}"/>
     </target>
 
-    <target name="build.classes" depends="-init">
+    <target name="-updateversion" depends="-init">
+        <copy todir="${build.dir}/build_tmp">
+            <fileset dir="${src.dir}"/>
+            <filterchain>
+                <replacetokens>
+                    <token key="VERSION" value="${version.number}"/>
+                </replacetokens>
+            </filterchain>
+        </copy>
+    </target>
+
+    <target name="build.classes" depends="-init, -updateversion">
         <mkdir dir="${build.dir}/classes"/>
-        <javac srcdir="${src.dir}"
+        <javac srcdir="${build.dir}/build_tmp"
                destdir="${build.dir}/classes"
                includes="**/*.java"
                deprecation="off"
                debug="on"
-	       target="1.5"
+               includeantruntime="false"
+	           target="1.5"
                source="1.5">
             <classpath>
                 <pathelement location="${lib.dir}/jargs-1.0.jar"/>

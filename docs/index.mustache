@@ -1,0 +1,174 @@
+<p>
+  According to <a href="http://developer.yahoo.com/performance/">Yahoo!'s Exceptional Performance Team</a>,
+  40% to 60% of Yahoo!'s users have an empty cache experience and about 20% of all page views are done with an empty cache
+  (see <a href="http://yuiblog.com/blog/2007/01/04/performance-research-part-2/">this article by Tenni Theurer on the YUIBlog for more
+  information on browser cache usage</a>). This fact outlines the importance of keeping web pages as lightweight as possible.
+  Improving the engineering design of a page or a web application usually yields the biggest savings and that should always be a primary strategy. With the right design in place, there are many secondary strategies for improving performance such as minification of the code, <a href="http://en.wikipedia.org/wiki/Http_compression">HTTP compression</a>, using CSS sprites, etc.
+</p>
+<p>
+  In terms of code minification, the most widely used tools to minify JavaScript code are Douglas Crockford's
+  <a href="http://crockford.com/javascript/jsmin">JSMIN</a>,
+  <a href="http://dojotoolkit.org/docs/shrinksafe">the Dojo compressor</a> and Dean Edwards'
+  <a href="http://dean.edwards.name/packer/">Packer</a>. Each of these tools, however, has drawbacks.
+  JSMIN, for example, does not yield optimal savings (due to its simple algorithm, it must leave many line feed characters in
+  the code in order not to introduce any new bugs).</p>
+<p>
+  The goal of JavaScript and CSS minification is always to preserve the operational qualities of the code while reducing its overall byte footprint (both in raw terms and after gzipping, as most JavaScript and CSS served from production web servers is gzipped as part of the HTTP protocol).  The YUI Compressor is JavaScript minifier designed to be 100% safe and yield a higher compression ratio than most other tools.  Tests on the <a href="http://yuilibrary.com/">YUI Library</a> have shown savings of over 20% compared to JSMin (becoming 10% after HTTP compression).
+  The YUI Compressor is also able to compress CSS files by using a port of <a href="http://foohack.com/">Isaac Schlueter</a>'s regular-expression-based CSS minifier.
+</p>
+
+<h2>Quick Links</h2>
+<ul>
+  <li><a href="https://github.com/yui/yuicompressor/blob/master/README.md">Documentation</a>: Detailed description of the YUI Compressor and how to use it.</li>
+  <li><a href="https://github.com/yui/yuicompressor/blob/master/doc/CHANGELOG">Release Notes</a>: Detailed change log for the YUI Compressor.</li>
+  <li><a href="css.html">CSS minification</a>: Description of the CSS minification performed by the compressor.</li>
+  <li><strong>License:</strong> All code specific to YUI Compressor is issued under a <a href="/yui/license.html">BSD license</a>.  YUI Compressor extends and implements code from <a href="http://www.mozilla.org/rhino/">Mozilla's Rhino project</a>.  Rhino is issued under the <a href="http://www.mozilla.org/MPL/">Mozilla Public License (MPL)</a>, and MPL applies to the Rhino source and binaries that are distributed with YUI Compressor, including Rhino modifications made by YUI Compressor. YUI Compressor also makes use of and distributes a binary of <a href="http://jargs.sourceforge.net/">JArgs</a>; the JArgs BSD license applies to this binary.</li>
+  <li><a href="http://yuilibrary.com/downloads/#yuicompressor">Download</a>: Download the YUI Compressor.</li>
+</ul>
+
+<h2 class="first" id="video">Video: Yahoo engineer Julien Lecomte introduces the YUI Compressor</h2>
+
+<p><embed src='http://l.yimg.com/m/player/media/swf/FLVVideoSolo.swf' flashvars='id=4199776&emailUrl=http%3A%2F%2Fvideo.yahoo.com%2Futil%2Fmail%3Fei%3DUTF-8%26vid%3D1174737&imUrl=http%253A%252F%252Fvideo.yahoo.com%252Fvideo%252Fplay%253Fei%253DUTF-8%2526vid%253D1174737&imTitle=Julien%2BLecomte%253A%2B%2526quot%253BIntroducing%2Bthe%2BYUI%2BCompressor%2526quot%253B&searchUrl=http://video.yahoo.com/search/video?p=&profileUrl=http://video.yahoo.com/video/profile?yid=&creatorValue=ZXJpY21pcmFnbGlh&vid=1174737' type='application/x-shockwave-flash' width='425' height='350'></embed></p>
+
+<h2 class="first" id="work">How does the YUI Compressor work?</h2>
+
+<p>
+  The YUI Compressor is written in <a href="http://java.sun.com/">Java</a> (requires Java >= 1.4)
+  and relies on <a href="http://www.mozilla.org/rhino/">Rhino</a> to tokenize the source JavaScript file.
+  It starts by analyzing the source JavaScript file to understand how it is structured. It then prints out the token stream,
+  omitting as many white space characters as possible, and replacing all local symbols by a 1 (or 2, or 3) letter symbol
+  wherever such a substitution is appropriate (in the face of
+  <a href="http://www.jslint.com/lint.html">evil features</a> such as <code>eval</code> or
+  <code>with</code>, the YUI Compressor takes a defensive approach by not obfuscating any of the scopes containing the evil
+  statement) The CSS compression algorithm uses a set of finely tuned regular expressions to compress the source CSS file.
+  The YUI Compressor is open-source, so don't hesitate to look at the code to understand exactly how it works.
+</p>
+
+<h2 id="using">Using the YUI Compressor from the command line</h2>
+
+```terminal
+$ java -jar yuicompressor-x.y.z.jar
+Usage: java -jar yuicompressor-x.y.z.jar [options] [input file]
+
+  Global Options
+    -h, --help                Displays this information
+    --type &lt;js|css&gt;           Specifies the type of the input file
+    --charset &lt;charset&gt;       Read the input file using &lt;charset&gt;
+    --line-break &lt;column&gt;     Insert a line break after the specified column number
+    -v, --verbose             Display informational messages and warnings
+    -o &lt;file&gt;                 Place the output into <file> or a file pattern.
+                              Defaults to stdout.
+
+  JavaScript Options
+    --nomunge                 Minify only, do not obfuscate
+    --preserve-semi           Preserve all semicolons
+    --disable-optimizations   Disable all micro optimizations
+
+GLOBAL OPTIONS
+
+  -h, --help
+      Prints help on how to use the YUI Compressor
+
+  --line-break
+      Some source control tools don't like files containing lines longer than,
+      say 8000 characters. The linebreak option is used in that case to split
+      long lines after a specific column. It can also be used to make the code
+      more readable, easier to debug (especially with the MS Script Debugger)
+      Specify 0 to get a line break after each semi-colon in JavaScript, and
+      after each rule in CSS.
+
+  --type js|css
+      The type of compressor (JavaScript or CSS) is chosen based on the
+      extension of the input file name (.js or .css) This option is required
+      if no input file has been specified. Otherwise, this option is only
+      required if the input file extension is neither 'js' nor 'css'.
+
+  --charset character-set
+      If a supported character set is specified, the YUI Compressor will use it
+      to read the input file. Otherwise, it will assume that the platform's
+      default character set is being used. The output file is encoded using
+      the same character set.
+
+  -o outfile
+
+      Place output in file outfile. If not specified, the YUI Compressor will
+      default to the standard output, which you can redirect to a file.
+      Supports a filter syntax for expressing the output pattern when there are
+      multiple input files.  ex:
+          java -jar yuicompressor.jar -o '.css$:-min.css' *.css
+      ... will minify all .css files and save them as -min.css
+
+  -v, --verbose
+      Display informational messages and warnings.
+
+JAVASCRIPT ONLY OPTIONS
+
+  --nomunge
+      Minify only. Do not obfuscate local symbols.
+
+  --preserve-semi
+      Preserve unnecessary semicolons (such as right before a '}') This option
+      is useful when compressed code has to be run through JSLint (which is the
+      case of YUI for example)
+
+  --disable-optimizations
+      Disable all the built-in micro optimizations.
+```
+
+<p><strong>Note:</strong> If no input file is specified, it defaults to stdin.</p>
+
+<p>The following command line (x.y.z represents the version number):</p>
+
+```terminal
+$ java -jar yuicompressor-x.y.z.jar myfile.js -o myfile-min.js
+```
+
+<p>will minify the file `myfile.js` and output the file `myfile-min.js`.
+For more information on how to use the YUI Compressor, please refer to the documentation
+included in the archive.</p>
+
+<p>The charset parameter isn't always required, but the compressor may throw an error
+if the file's encoding is incompatible with the system's default encoding.  In particular,
+if your file is encoded in utf-8, you should supply the parameter.</p>
+
+```terminal
+$ java -jar yuicompressor-x.y.z.jar myfile.js -o myfile-min.js --charset utf-8
+```
+
+<h3 id="notes">Additional notes</h3>
+
+<ul>
+  <li>
+    Don't hesitate to use the <code>-v</code> option. Although not a replacement for
+    <a href="http://www.jslint.com/lint.html">JSLint</a>, it will output some helpful hints
+    when it senses that something might be wrong with your code.
+  </li>
+  <li>
+    If you wish to minify your files on the backend (also known as on-the-fly minification) instead of at build time,
+    you will want to cache the minified files in memory for optimal performance (instead of minifying the same files
+    over and over &amp; minification is a time consuming process) Note that the YUI Compressor can easily be instantiated
+    and used from a Java-based environment (Servlet).
+  </li>
+</ul>
+
+<h2 id="support">Support &amp; Community</h2>
+<p>The YUI Library and related topics are discussed on the on the <a href="http://yuilib.com/forum/">YUILibrary.com forums</a>.</p>
+
+<p>Also be sure to check out <a href="http://yuiblog.com">YUIBlog</a> for updates and articles about the YUI Library written by the library's developers.</p>
+
+<h2 id="filingbugs">Filing Bugs &amp; Feature Requests</h2>
+
+<p>YUICompressor uses <a href="https://github.com/yui/yuicompressor">Github Issues</a> to track issues.</p>
+	
+<h3>More Reading about JavaScript/CSS minification and the YUI Compressor</h3>
+<ul>
+  <li><a href="http://yuiblog.com/blog/2008/02/11/helping-the-yui-compressor">Helping the YUI Compressor</a>, by Nicholas Zakas</li>
+  <li><a href="http://www.coderjournal.com/2008/05/how-to-create-a-yui-compressor-msbuild-task/">How to create a YUI Compressor MSBuild Task</a>, by Nick Berardi
+  <li><a href="http://developer.yahoo.com/performance/rules.html#minify">Minify JavaScript</a>, by Yahoo!'s Exceptional Performance Team</li>
+  <li><a href="http://yuiblog.com/blog/2006/03/06/minification-v-obfuscation/">Minification v Obfuscation</a>, by Douglas Crockford</li>
+  <li><a href="http://www.julienlecomte.net/blog/2007/08/13/introducing-the-yui-compressor/">Introducing the YUI Compressor</a>, by YUI Compressor author Julien Lecomte</li>
+  <li><a href="http://www.crockford.com/javascript/jsmin.html">JSMIN</a>, by Douglas Crockford</li>
+  <li><a href="http://dojotoolkit.org/docs/shrinksafe">ShrinkSafe</a>, aka The Dojo Compressor</li>
+  <li><a href="http://dean.edwards.name/packer/">Packer</a>, by Dean Edwards</li>
+  <li><a href="http://compressorrater.thruhere.net/">CompressorRater</a>, by Arthur Blake</li>
+</ul>

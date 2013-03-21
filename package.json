@@ -1,0 +1,34 @@
+{
+    "name": "yuicompressor",
+    "description": "YUICompressor CLI and Node.js require",
+    "version": "2.4.8pre2",
+    "author": "Dav Glass <davglass@gmail.com>",
+    "bugs": { "url" : "http://yuilibrary.com/projects/yuicompressor/newticket" },
+    "devDependencies": {
+        "yuitest": "*"
+    },
+    "keywords": [
+        "yui", "compressor", "munger", "cssmin", "minify", "minification"
+    ],
+    "main": "./nodejs/index.js",
+    "bin": {
+        "yuicompressor": "./nodejs/cli.js"
+    },
+    "files": [
+        "build/*.jar",
+        "nodejs"
+    ],
+    "scripts": {
+        "test": "yuitest ./nodejs_tests/tests.js"
+    },
+    "licenses":[
+        {
+            "type" : "BSD",
+            "url" : "http://yuilibrary.com/license/"
+        }
+    ],
+    "repository": {
+        "type":"git",
+        "url":"https://github.com/yui/yuicompressor"
+    }
+}

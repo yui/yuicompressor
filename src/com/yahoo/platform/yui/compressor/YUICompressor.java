@@ -21,6 +21,7 @@ public class YUICompressor {
 
         CmdLineParser parser = new CmdLineParser();
         CmdLineParser.Option typeOpt = parser.addStringOption("type");
+        CmdLineParser.Option versionOpt = parser.addBooleanOption('V', "version");
         CmdLineParser.Option verboseOpt = parser.addBooleanOption('v', "verbose");
         CmdLineParser.Option nomungeOpt = parser.addBooleanOption("nomunge");
         CmdLineParser.Option linebreakOpt = parser.addStringOption("line-break");
@@ -40,6 +41,12 @@ public class YUICompressor {
             Boolean help = (Boolean) parser.getOptionValue(helpOpt);
             if (help != null && help.booleanValue()) {
                 usage();
+                System.exit(0);
+            }
+
+            Boolean version = (Boolean) parser.getOptionValue(versionOpt);
+            if (version != null && version.booleanValue()) {
+                version();
                 System.exit(0);
             }
 
@@ -228,11 +235,17 @@ public class YUICompressor {
         }
     }
 
+    private static void version() {
+        System.err.println("@VERSION@");
+    }
     private static void usage() {
         System.err.println(
-                "\nUsage: java -jar yuicompressor-2.4.6.jar [options] [input file]\n\n"
+                "YUICompressor Version: @VERSION@\n"
 
+                        + "\nUsage: java -jar yuicompressor-@VERSION@.jar [options] [input file]\n"
+                        + "\n"
                         + "Global Options\n"
+                        + "  -V, --version             Print version information\n"
                         + "  -h, --help                Displays this information\n"
                         + "  --type <js|css>           Specifies the type of the input file\n"
                         + "  --charset <charset>       Read the input file using <charset>\n"

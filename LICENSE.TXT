@@ -1,6 +1,6 @@
 YUI Compressor Copyright License Agreement (BSD License)
 
-Copyright (c) 2011, Yahoo! Inc.
+Copyright (c) 2013, Yahoo! Inc.
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -35,7 +35,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 This software also requires access to software from the following sources:
 
 The Jarg Library v 1.0 ( http://jargs.sourceforge.net/ ) is available
-under a BSD License – Copyright (c) 2001-2003 Steve Purcell,
+under a BSD License ï¿½ Copyright (c) 2001-2003 Steve Purcell,
 Copyright (c) 2002 Vidar Holen, Copyright (c) 2002 Michal Ceresna and
 Copyright (c) 2005 Ewan Mellor.
 
