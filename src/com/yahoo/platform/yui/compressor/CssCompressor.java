@@ -4,7 +4,8 @@
  * Author: Julien Lecomte -  http://www.julienlecomte.net/
  * Author: Isaac Schlueter - http://foohack.com/
  * Author: Stoyan Stefanov - http://phpied.com/
- * Copyright (c) 2011 Yahoo! Inc.  All rights reserved.
+ * Contributor: Dan Beam - http://danbeam.org/
+ * Copyright (c) 2013 Yahoo! Inc.  All rights reserved.
  * The copyrights embodied in the content of this file are licensed
  * by Yahoo! Inc. under the BSD (revised) open source license.
  */
@@ -32,16 +33,16 @@ public class CssCompressor {
     // Leave data urls alone to increase parse performance.
     protected String extractDataUrls(String css, ArrayList preservedTokens) {
 
-    	int maxIndex = css.length() - 1;
+        int maxIndex = css.length() - 1;
         int appendIndex = 0;
 
-    	StringBuffer sb = new StringBuffer();
+        StringBuffer sb = new StringBuffer();
 
-        Pattern p = Pattern.compile("url\\(\\s*([\"']?)data\\:");
+        Pattern p = Pattern.compile("(?i)url\\(\\s*([\"']?)data\\:");
         Matcher m = p.matcher(css);
-        
-        /* 
-         * Since we need to account for non-base64 data urls, we need to handle 
+
+        /*
+         * Since we need to account for non-base64 data urls, we need to handle
          * ' and ) being part of the data string. Hence switching to indexOf,
          * to determine whether or not we have matching string terminators and
          * handling sb appends directly, instead of using matcher.append* methods.
@@ -49,44 +50,44 @@ public class CssCompressor {
 
         while (m.find()) {
 
-        	int startIndex = m.start() + 4;  	// "url(".length()
-    		String terminator = m.group(1);     // ', " or empty (not quoted)
-    		
-    		if (terminator.length() == 0) {
-    		 	terminator = ")";
-    		}
+            int startIndex = m.start() + 4;      // "url(".length()
+            String terminator = m.group(1);     // ', " or empty (not quoted)
 
-    		boolean foundTerminator = false;
+            if (terminator.length() == 0) {
+                 terminator = ")";
+            }
 
-    		int endIndex = m.end() - 1;
-    		while(foundTerminator == false && endIndex+1 <= maxIndex) {
-    			endIndex = css.indexOf(terminator, endIndex+1);
+            boolean foundTerminator = false;
 
-    			if ((endIndex > 0) && (css.charAt(endIndex-1) != '\\')) {
-    				foundTerminator = true;
-    				if (!")".equals(terminator)) {
-    					endIndex = css.indexOf(")", endIndex); 
-    				}
-    			}
-    		}
+            int endIndex = m.end() - 1;
+            while(foundTerminator == false && endIndex+1 <= maxIndex) {
+                endIndex = css.indexOf(terminator, endIndex+1);
 
-    		// Enough searching, start moving stuff over to the buffer
-			sb.append(css.substring(appendIndex, m.start()));
+                if ((endIndex > 0) && (css.charAt(endIndex-1) != '\\')) {
+                    foundTerminator = true;
+                    if (!")".equals(terminator)) {
+                        endIndex = css.indexOf(")", endIndex);
+                    }
+                }
+            }
 
-    		if (foundTerminator) {
-    			String token = css.substring(startIndex, endIndex);
-    			token = token.replaceAll("\\s+", "");
-	    		preservedTokens.add(token);
+            // Enough searching, start moving stuff over to the buffer
+            sb.append(css.substring(appendIndex, m.start()));
 
-	    		String preserver = "url(___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___)";
-	    		sb.append(preserver);
+            if (foundTerminator) {
+                String token = css.substring(startIndex, endIndex);
+                token = token.replaceAll("\\s+", "");
+                preservedTokens.add(token);
 
-	    		appendIndex = endIndex + 1;
-    		} else {
-    			// No end terminator found, re-add the whole match. Should we throw/warn here?
-    			sb.append(css.substring(m.start(), m.end()));
-    			appendIndex = m.end();
-    		}
+                String preserver = "url(___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___)";
+                sb.append(preserver);
+
+                appendIndex = endIndex + 1;
+            } else {
+                // No end terminator found, re-add the whole match. Should we throw/warn here?
+                sb.append(css.substring(m.start(), m.end()));
+                appendIndex = m.end();
+            }
         }
 
         sb.append(css.substring(appendIndex));
@@ -222,18 +223,82 @@ public class CssCompressor {
         css = css.replaceAll("___YUICSSMIN_PSEUDOCLASSCOLON___", ":");
 
         // retain space for special IE6 cases
-        css = css.replaceAll(":first\\-(line|letter)(\\{|,)", ":first-$1 $2");
+        sb = new StringBuffer();
+        p = Pattern.compile("(?i):first\\-(line|letter)(\\{|,)");
+        m = p.matcher(css);
+        while (m.find()) {
+            m.appendReplacement(sb, ":first-" + m.group(1).toLowerCase() + " " + m.group(2));
+        }
+        m.appendTail(sb);
+        css = sb.toString();
 
         // no space after the end of a preserved comment
         css = css.replaceAll("\\*/ ", "*/");
 
-        // If there is a @charset, then only allow one, and push to the top of the file.
-        css = css.replaceAll("^(.*)(@charset \"[^\"]*\";)", "$2$1");
-        css = css.replaceAll("^(\\s*@charset [^;]+;\\s*)+", "$1");
+        // If there are multiple @charset directives, push them to the top of the file.
+        sb = new StringBuffer();
+        p = Pattern.compile("(?i)^(.*)(@charset)( \"[^\"]*\";)");
+        m = p.matcher(css);
+        while (m.find()) {
+            m.appendReplacement(sb, m.group(2).toLowerCase() + m.group(3) + m.group(1));
+        }
+        m.appendTail(sb);
+        css = sb.toString();
+
+        // When all @charset are at the top, remove the second and after (as they are completely ignored).
+        sb = new StringBuffer();
+        p = Pattern.compile("(?i)^((\\s*)(@charset)( [^;]+;\\s*))+");
+        m = p.matcher(css);
+        while (m.find()) {
+            m.appendReplacement(sb, m.group(2) + m.group(3).toLowerCase() + m.group(4));
+        }
+        m.appendTail(sb);
+        css = sb.toString();
+
+        // lowercase some popular @directives (@charset is done right above)
+        sb = new StringBuffer();
+        p = Pattern.compile("(?i)@(font-face|import|(?:-(?:atsc|khtml|moz|ms|o|wap|webkit)-)?keyframe|media|page|namespace)");
+        m = p.matcher(css);
+        while (m.find()) {
+            m.appendReplacement(sb, '@' + m.group(1).toLowerCase());
+        }
+        m.appendTail(sb);
+        css = sb.toString();
+    
+        // lowercase some more common pseudo-elements
+        sb = new StringBuffer();
+        p = Pattern.compile("(?i):(active|after|before|checked|disabled|empty|enabled|first-(?:child|of-type)|focus|hover|last-(?:child|of-type)|link|only-(?:child|of-type)|root|:selection|target|visited)");
+        m = p.matcher(css);
+        while (m.find()) {
+            m.appendReplacement(sb, ':' + m.group(1).toLowerCase());
+        }
+        m.appendTail(sb);
+        css = sb.toString();
+    
+        // lowercase some more common functions
+        sb = new StringBuffer();
+        p = Pattern.compile("(?i):(lang|not|nth-child|nth-last-child|nth-last-of-type|nth-of-type|(?:-(?:moz|webkit)-)?any)\\(");
+        m = p.matcher(css);
+        while (m.find()) {
+            m.appendReplacement(sb, ':' + m.group(1).toLowerCase() + '(');
+        }
+        m.appendTail(sb);
+        css = sb.toString();
+    
+        // lower case some common function that can be values
+        // NOTE: rgb() isn't useful as we replace with #hex later, as well as and() is already done for us right after this
+        sb = new StringBuffer();
+        p = Pattern.compile("(?i)([:,\\( ]\\s*)(attr|color-stop|from|rgba|to|url|(?:-(?:atsc|khtml|moz|ms|o|wap|webkit)-)?(?:calc|max|min|(?:repeating-)?(?:linear|radial)-gradient)|-webkit-gradient)");
+        m = p.matcher(css);
+        while (m.find()) {
+            m.appendReplacement(sb, m.group(1) + m.group(2).toLowerCase());
+        }
+        m.appendTail(sb);
+        css = sb.toString();
 
         // Put the space back in some cases, to support stuff like
         // @media screen and (-webkit-min-device-pixel-ratio:0){
-        css = css.replaceAll("\\band\\(", "and (");
+        css = css.replaceAll("(?i)\\band\\(", "and (");
 
         // Remove the spaces after the things that should not have spaces after them.
         css = css.replaceAll("([!{}:;>+\\(\\[,])\\s+", "$1");
@@ -242,7 +307,7 @@ public class CssCompressor {
         css = css.replaceAll(";+}", "}");
 
         // Replace 0(px,em,%) with 0.
-        css = css.replaceAll("([\\s:])(0)(px|em|%|in|cm|mm|pc|pt|ex)", "$1$2");
+        css = css.replaceAll("(?i)(^|[^0-9])(?:0?\\.)?0(?:px|em|%|in|cm|mm|pc|pt|ex|deg|g?rad|m?s|k?hz)", "$10");
 
         // Replace 0 0 0 0; with 0.
         css = css.replaceAll(":0 0 0 0(;|})", ":0$1");
@@ -300,29 +365,29 @@ public class CssCompressor {
 
         while (m.find(index)) {
 
-        	sb.append(css.substring(index, m.start()));
+            sb.append(css.substring(index, m.start()));
 
-        	boolean isFilter = (m.group(1) != null && !"".equals(m.group(1))); 
+            boolean isFilter = (m.group(1) != null && !"".equals(m.group(1))); 
 
-        	if (isFilter) {
-        		// Restore, as is. Compression will break filters
-        		sb.append(m.group(1) + "#" + m.group(2) + m.group(3) + m.group(4) + m.group(5) + m.group(6) + m.group(7));
-        	} else {
-        		if( m.group(2).equalsIgnoreCase(m.group(3)) &&
+            if (isFilter) {
+                // Restore, as is. Compression will break filters
+                sb.append(m.group(1) + "#" + m.group(2) + m.group(3) + m.group(4) + m.group(5) + m.group(6) + m.group(7));
+            } else {
+                if( m.group(2).equalsIgnoreCase(m.group(3)) &&
                     m.group(4).equalsIgnoreCase(m.group(5)) &&
                     m.group(6).equalsIgnoreCase(m.group(7))) {
 
-	        		// #AABBCC pattern
-	                sb.append("#" + (m.group(3) + m.group(5) + m.group(7)).toLowerCase());
+                    // #AABBCC pattern
+                    sb.append("#" + (m.group(3) + m.group(5) + m.group(7)).toLowerCase());
 
-        		} else {
+                } else {
 
-        			// Non-compressible color, restore, but lower case.
-        			sb.append("#" + (m.group(2) + m.group(3) + m.group(4) + m.group(5) + m.group(6) + m.group(7)).toLowerCase());
-        		}
+                    // Non-compressible color, restore, but lower case.
+                    sb.append("#" + (m.group(2) + m.group(3) + m.group(4) + m.group(5) + m.group(6) + m.group(7)).toLowerCase());
+                }
             }
 
-        	index = m.end(7);
+            index = m.end(7);
         }
 
         sb.append(css.substring(index));

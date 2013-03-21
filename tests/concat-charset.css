@@ -1,5 +1,5 @@
 /* This is invalid CSS, but frequently happens as a result of concatenation. */
-@charset "utf-8";
+@CHARSET "utf-8";
 #foo {
 	border-width:1px;
 }
