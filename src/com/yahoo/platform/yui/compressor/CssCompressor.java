@@ -5,7 +5,7 @@
  * Author: Isaac Schlueter - http://foohack.com/
  * Author: Stoyan Stefanov - http://phpied.com/
  * Contributor: Dan Beam - http://danbeam.org/
- * Copyright (c) 2012 Yahoo! Inc.  All rights reserved.
+ * Copyright (c) 2013 Yahoo! Inc.  All rights reserved.
  * The copyrights embodied in the content of this file are licensed
  * by Yahoo! Inc. under the BSD (revised) open source license.
  */
