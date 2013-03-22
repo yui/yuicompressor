@@ -310,6 +310,18 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
     // Shorten colors from #AABBCC to #ABC.
     css = this._compressHexColors(css);
 
+    // Shorten color from #f00 to red
+    css = css.replace(/(:|\s)(#f00)(;|})/g, "$1red$3");
+    // Other colors
+    css = css.replace(/(:|\s)(#000080)(;|})/g, "$1navy$3");
+    css = css.replace(/(:|\s)(#808080)(;|})/g, "$1gray$3");
+    css = css.replace(/(:|\s)(#808000)(;|})/g, "$1olive$3");
+    css = css.replace(/(:|\s)(#800080)(;|})/g, "$1purple$3");
+    css = css.replace(/(:|\s)(#c0c0c0)(;|})/g, "$1silver$3");
+    css = css.replace(/(:|\s)(#008080)(;|})/g, "$1teal$3");
+    css = css.replace(/(:|\s)(#ffa500)(;|})/g, "$1orange$3");
+    css = css.replace(/(:|\s)(#800000)(;|})/g, "$1maroon$3");
+
     // border: none -> border:0
     css = css.replace(/(border|border-top|border-right|border-bottom|border-left|outline|background):none(;|\})/gi, function(all, prop, tail) {
         return prop.toLowerCase() + ":0" + tail;
