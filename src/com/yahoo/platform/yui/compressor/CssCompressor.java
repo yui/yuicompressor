@@ -328,6 +328,18 @@ public class CssCompressor {
         sb.append(css.substring(index));
         css = sb.toString();
 
+        // Replace #f00 -> red
+        css = css.replaceAll("(:|\\s)(#f00)(;|})", "$1red$3");
+        // Replace other short color keywords
+        css = css.replaceAll("(:|\\s)(#000080)(;|})", "$1navy$3");
+        css = css.replaceAll("(:|\\s)(#808080)(;|})", "$1gray$3");
+        css = css.replaceAll("(:|\\s)(#808000)(;|})", "$1olive$3");
+        css = css.replaceAll("(:|\\s)(#800080)(;|})", "$1purple$3");
+        css = css.replaceAll("(:|\\s)(#c0c0c0)(;|})", "$1silver$3");
+        css = css.replaceAll("(:|\\s)(#008080)(;|})", "$1teal$3");
+        css = css.replaceAll("(:|\\s)(#ffa500)(;|})", "$1orange$3");
+        css = css.replaceAll("(:|\\s)(#800000)(;|})", "$1maroon$3");
+
         // border: none -> border:0
         sb = new StringBuffer();
         p = Pattern.compile("(?i)(border|border-top|border-right|border-bottom|border-left|outline|background):none(;|})");
