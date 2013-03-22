@@ -2447,14 +2447,14 @@ public class Parser
             break;
 
           case Token.CONDCOMMENT:
-            String s = ts.getString();
-            decompiler.addJScriptConditionalComment(s);
-            return nf.createString(s);
+            String condComment = ts.getString();
+            decompiler.addJScriptConditionalComment(condComment);
+            return nf.createString(condComment);
 
           case Token.KEEPCOMMENT:
-            String s = ts.getString();
-            decompiler.addPreservedComment(s);
-            return nf.createString(s);
+            String keepComment = ts.getString();
+            decompiler.addPreservedComment(keepComment);
+            return nf.createString(keepComment);
 
           default:
             reportError("msg.syntax");
