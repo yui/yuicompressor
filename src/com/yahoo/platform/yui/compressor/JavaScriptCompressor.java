@@ -9,6 +9,7 @@
 package com.yahoo.platform.yui.compressor;
 
 import org.mozilla.javascript.*;
+import org.mozilla.javascript.ast.*;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -312,8 +313,11 @@ public class JavaScriptCompressor {
         CompilerEnvirons env = new CompilerEnvirons();
         env.setLanguageVersion(Context.VERSION_1_7);
         Parser parser = new Parser(env, reporter);
-        parser.parse(in, null, 1);
-        String source = parser.getEncodedSource();
+        AstRoot ast = parser.parse(in, null, 1);
+        IRFactory irf = new IRFactory(env, reporter);
+        ScriptNode tree = irf.transformTree(ast);
+
+        String source = tree.getEncodedSource();
 
         int offset = 0;
         int length = source.length();
@@ -324,8 +328,7 @@ public class JavaScriptCompressor {
             int tt = source.charAt(offset++);
             switch (tt) {
 
-                case Token.CONDCOMMENT:
-                case Token.KEEPCOMMENT:
+                case Token.COMMENT:
                 case Token.NAME:
                 case Token.REGEXP:
                 case Token.STRING:
@@ -836,12 +839,14 @@ public class JavaScriptCompressor {
                     parensNesting--;
                     break;
 
-                case Token.CONDCOMMENT:
+                case Token.COMMENT:
+                  //if (token.commentType == Token.CommentType.JSDOC) {
                     if (mode == BUILDING_SYMBOL_TREE) {
                         protectScopeFromObfuscation(currentScope);
                         warn("Using JScript conditional comments is not recommended." + (munge ? " Moreover, using JScript conditional comments reduces the level of compression!" : ""), true);
                     }
                     break;
+		  //}
 
                 case Token.NAME:
                     symbol = token.getValue();
@@ -989,7 +994,7 @@ public class JavaScriptCompressor {
                     parseCatch();
                     break;
 
-                case Token.CONDCOMMENT:
+                case Token.COMMENT:
                     if (mode == BUILDING_SYMBOL_TREE) {
                         protectScopeFromObfuscation(scope);
                         warn("Using JScript conditional comments is not recommended." + (munge ? " Moreover, using JScript conditional comments reduces the level of compression." : ""), true);
@@ -1285,8 +1290,7 @@ public class JavaScriptCompressor {
                     }
                     break;
 
-                case Token.CONDCOMMENT:
-                case Token.KEEPCOMMENT:
+                case Token.COMMENT:
                     if (result.length() > 0 && result.charAt(result.length() - 1) != '\n') {
                         result.append("\n");
                     }
@@ -1312,8 +1316,7 @@ public class JavaScriptCompressor {
         // end of one file may very likely cause a syntax error)
         if (!preserveAllSemiColons &&
                 result.length() > 0 &&
-                getToken(-1).getType() != Token.CONDCOMMENT &&
-                getToken(-1).getType() != Token.KEEPCOMMENT) {
+                getToken(-1).getType() != Token.COMMENT) {
             if (result.charAt(result.length() - 1) == '\n') {
                 result.setCharAt(result.length() - 1, ';');
             } else {
