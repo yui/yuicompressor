@@ -269,11 +269,14 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
     // Put the space back in some cases, to support stuff like
     // @media screen and (-webkit-min-device-pixel-ratio:0){
     css = css.replace(/\band\(/gi, "and (");
-
-
+    
     // Remove the spaces after the things that should not have spaces after them.
     css = css.replace(/([!{}:;>+\(\[,])\s+/g, '$1');
-
+    
+    // Find a fraction that is used for Opera's -o-device-pixel-ratio query
+	// Add token to add the "\" back in later
+	css = css.replace(/\([\-A-Za-z]+:([0-9]+)\/([0-9]+)\)/g, "($1:$2___YUI_QUERY_FRACTION_$3)");
+	
     // remove unnecessary semicolons
     css = css.replace(/;+\}/g, "}");
 
@@ -332,6 +335,9 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
 
     // Remove empty rules.
     css = css.replace(/[^\};\{\/]+\{\}/g, "");
+    
+    // Add "\" back to fix Opera -o-device-pixel-ratio query
+	css = css.replace("___YUI_QUERY_FRACTION_", "/");
 
     if (linebreakpos >= 0) {
         // Some source control tools don't like it when files containing lines longer

@@ -234,9 +234,15 @@ public class CssCompressor {
         // Put the space back in some cases, to support stuff like
         // @media screen and (-webkit-min-device-pixel-ratio:0){
         css = css.replaceAll("\\band\\(", "and (");
-
+		
+		
         // Remove the spaces after the things that should not have spaces after them.
         css = css.replaceAll("([!{}:;>+\\(\\[,])\\s+", "$1");
+        
+        // Find a fraction that is used for Opera's -o-device-pixel-ratio query
+		// Add token to add the "\" back in later
+		css = css.replaceAll("\\(([\\-A-Za-z]+):([0-9]+)\\/([0-9]+)\\)", "($1:$2___YUI_QUERY_FRACTION_$3)");
+		
 
         // remove unnecessary semicolons
         css = css.replaceAll(";+}", "}");
@@ -263,7 +269,8 @@ public class CssCompressor {
 
         // Replace 0.6 to .6, but only when preceded by : or a white-space
         css = css.replaceAll("(:|\\s)0+\\.(\\d+)", "$1.$2");
-
+		
+		
         // Shorten colors from rgb(51,102,153) to #336699
         // This makes it more likely that it'll get further compressed in the next step.
         p = Pattern.compile("rgb\\s*\\(\\s*([0-9,\\s]+)\\s*\\)");
@@ -355,6 +362,9 @@ public class CssCompressor {
 
         // Remove empty rules.
         css = css.replaceAll("[^\\}\\{/;]+\\{\\}", "");
+        
+        // Add "\" back to fix Opera -o-device-pixel-ratio query
+		css = css.replaceAll("___YUI_QUERY_FRACTION_", "/");
 
         // TODO: Should this be after we re-insert tokens. These could alter the break points. However then
         // we'd need to make sure we don't break in the middle of a string etc.
@@ -384,7 +394,8 @@ public class CssCompressor {
         for(i = 0, max = preservedTokens.size(); i < max; i++) {
             css = css.replace("___YUICSSMIN_PRESERVED_TOKEN_" + i + "___", preservedTokens.get(i).toString());
         }
-
+		
+		
         // Trim the final string (for any leading or trailing white spaces)
         css = css.trim();
 
