@@ -218,6 +218,8 @@ public class CssCompressor {
         css = sb.toString();
         // Remove spaces before the things that should not have spaces before them.
         css = css.replaceAll("\\s+([!{};:>+\\(\\)\\],])", "$1");
+        // Restore spaces for !important
+        css = css.replaceAll("!important", " !important");
         // bring back the colon
         css = css.replaceAll("___YUICSSMIN_PSEUDOCLASSCOLON___", ":");
 
@@ -253,7 +255,7 @@ public class CssCompressor {
         // Replace background-position:0; with background-position:0 0;
         // same for transform-origin
         sb = new StringBuffer();
-        p = Pattern.compile("(?i)(background-position|transform-origin|webkit-transform-origin|moz-transform-origin|o-transform-origin|ms-transform-origin):0(;|})");
+        p = Pattern.compile("(?i)(background-position|webkit-mask-position|transform-origin|webkit-transform-origin|moz-transform-origin|o-transform-origin|ms-transform-origin):0(;|})");
         m = p.matcher(css);
         while (m.find()) {
             m.appendReplacement(sb, m.group(1).toLowerCase() + ":0 0" + m.group(2));
