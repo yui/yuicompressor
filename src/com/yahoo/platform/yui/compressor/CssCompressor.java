@@ -218,6 +218,8 @@ public class CssCompressor {
         css = sb.toString();
         // Remove spaces before the things that should not have spaces before them.
         css = css.replaceAll("\\s+([!{};:>+\\(\\)\\],])", "$1");
+        // Restore spaces for !important
+        css = css.replaceAll("!important", " !important");
         // bring back the colon
         css = css.replaceAll("___YUICSSMIN_PSEUDOCLASSCOLON___", ":");
 
