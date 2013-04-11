@@ -2244,6 +2244,9 @@ public class Parser
                     // length value just for destructuring assignment.
                     destructuringLen = elems.size() + 
                                        (after_lb_or_comma ? 1 : 0);
+                    if (after_lb_or_comma) {
+                        addWarning("msg.extra.trailing.comma", "");
+                    }
                     break;
                 } else if (skipCount == 0 && elems.size() == 1 &&
                            tt == Token.FOR)
@@ -2345,7 +2348,9 @@ public class Parser
                         break;
 
                       case Token.RC:
-                        // trailing comma is OK.
+                        // trailing comma is a warning as minimum.
+                        // use msgId that is not translated in order to catch inside YUICompressor
+                        addWarning("msg.extra.trailing.comma", "");
                         break commaloop;
                     default:
                         reportError("msg.bad.prop");

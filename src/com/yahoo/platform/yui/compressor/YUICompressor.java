@@ -9,13 +9,24 @@
 package com.yahoo.platform.yui.compressor;
 
 import jargs.gnu.CmdLineParser;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
+import java.nio.charset.Charset;
+
 import org.mozilla.javascript.ErrorReporter;
 import org.mozilla.javascript.EvaluatorException;
 
-import java.io.*;
-import java.nio.charset.Charset;
-
 public class YUICompressor {
+    private static class TrailingCommaException extends RuntimeException
+    {
+        private static final long serialVersionUID = -7662229702322699326L;
+    }
 
     public static void main(String args[]) {
 
@@ -23,6 +34,7 @@ public class YUICompressor {
         CmdLineParser.Option typeOpt = parser.addStringOption("type");
         CmdLineParser.Option versionOpt = parser.addBooleanOption('V', "version");
         CmdLineParser.Option verboseOpt = parser.addBooleanOption('v', "verbose");
+        CmdLineParser.Option trailingOpt = parser.addBooleanOption('t', "enabletrailing");
         CmdLineParser.Option nomungeOpt = parser.addBooleanOption("nomunge");
         CmdLineParser.Option linebreakOpt = parser.addStringOption("line-break");
         CmdLineParser.Option preserveSemiOpt = parser.addBooleanOption("preserve-semi");
@@ -30,7 +42,9 @@ public class YUICompressor {
         CmdLineParser.Option helpOpt = parser.addBooleanOption('h', "help");
         CmdLineParser.Option charsetOpt = parser.addStringOption("charset");
         CmdLineParser.Option outputFilenameOpt = parser.addStringOption('o', "output");
-
+        
+        
+        
         Reader in = null;
         Writer out = null;
 
@@ -51,6 +65,7 @@ public class YUICompressor {
             }
 
             boolean verbose = parser.getOptionValue(verboseOpt) != null;
+            final boolean enableTrailing = parser.getOptionValue(trailingOpt) != null;
 
             String charset = (String) parser.getOptionValue(charsetOpt);
             if (charset == null || !Charset.isSupported(charset)) {
@@ -132,13 +147,17 @@ public class YUICompressor {
                     }
 
                     if (type.equalsIgnoreCase("js")) {
-
                         try {
 
                             JavaScriptCompressor compressor = new JavaScriptCompressor(in, new ErrorReporter() {
 
                                 public void warning(String message, String sourceName,
                                         int line, String lineSource, int lineOffset) {
+                                    if (message != null && message.startsWith("Trailing comma is not legal") && !enableTrailing) {
+                                        //report error instead of warn
+                                        error(message, sourceName, line, lineSource, lineOffset);
+                                        throw new TrailingCommaException();
+                                    }
                                     if (line < 0) {
                                         System.err.println("\n[WARNING] " + message);
                                     } else {
