@@ -2222,12 +2222,14 @@ public class Parser
             int destructuringLen = 0;
             decompiler.addToken(Token.LB);
             boolean after_lb_or_comma = true;
+            boolean after_comma = false;
             for (;;) {
                 tt = peekToken();
 
                 if (tt == Token.COMMA) {
                     consumeToken();
                     decompiler.addToken(Token.COMMA);
+                    after_comma = true;
                     if (!after_lb_or_comma) {
                         after_lb_or_comma = true;
                     } else {
@@ -2244,7 +2246,7 @@ public class Parser
                     // length value just for destructuring assignment.
                     destructuringLen = elems.size() + 
                                        (after_lb_or_comma ? 1 : 0);
-                    if (after_lb_or_comma) {
+                    if (after_comma) {
                         addWarning("msg.extra.trailing.comma", "");
                     }
                     break;
@@ -2279,6 +2281,7 @@ public class Parser
                     }
                     elems.add(assignExpr(false));
                     after_lb_or_comma = false;
+                    after_comma = false;
                 }
             }
             return nf.createArrayLiteral(elems, skipCount, destructuringLen);

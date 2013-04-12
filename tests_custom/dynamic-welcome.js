@@ -100,7 +100,8 @@
          var obj = {
         		 x: "y"
          }
-         var arr = ["a",]
+         var arr = ["a"]
+         var empty = [];
       }
    });
 })();
