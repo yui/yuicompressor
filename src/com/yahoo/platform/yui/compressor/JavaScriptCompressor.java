@@ -1299,6 +1299,9 @@ public class JavaScriptCompressor {
                         result.append("\n");
                     }
                     result.append("/*");
+                    if (token.getType() == Token.KEEPCOMMENT) {
+                        result.append("!");
+                    }
                     result.append(symbol);
                     result.append("*/\n");
                     break;
