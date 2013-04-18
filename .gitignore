@@ -10,3 +10,4 @@ CVS/
 *#*#
 build/classes
 build/jar
+build/yuicompressor*.jar
