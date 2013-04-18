@@ -134,24 +134,27 @@ public class YUICompressor {
                     if (type.equalsIgnoreCase("js")) {
 
                         try {
+                            final String localFilename = inputFilename;
 
                             JavaScriptCompressor compressor = new JavaScriptCompressor(in, new ErrorReporter() {
 
                                 public void warning(String message, String sourceName,
                                         int line, String lineSource, int lineOffset) {
+                                    System.err.println("\n[WARNING] in " + localFilename);
                                     if (line < 0) {
-                                        System.err.println("\n[WARNING] " + message);
+                                        System.err.println("  " + message);
                                     } else {
-                                        System.err.println("\n[WARNING] " + line + ':' + lineOffset + ':' + message);
+                                        System.err.println("  " + line + ':' + lineOffset + ':' + message);
                                     }
                                 }
 
                                 public void error(String message, String sourceName,
                                         int line, String lineSource, int lineOffset) {
+                                    System.err.println("[ERROR] in " + localFilename);
                                     if (line < 0) {
-                                        System.err.println("\n[ERROR] " + message);
+                                        System.err.println("  " + message);
                                     } else {
-                                        System.err.println("\n[ERROR] " + line + ':' + lineOffset + ':' + message);
+                                        System.err.println("  " + line + ':' + lineOffset + ':' + message);
                                     }
                                 }
 
