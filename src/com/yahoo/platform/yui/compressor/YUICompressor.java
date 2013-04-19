@@ -85,6 +85,10 @@ public class YUICompressor {
                 System.exit(1);
             }
 
+            boolean munge = parser.getOptionValue(nomungeOpt) == null;
+            boolean preserveAllSemiColons = parser.getOptionValue(preserveSemiOpt) != null;
+            boolean disableOptimizations = parser.getOptionValue(disableOptimizationsOpt) != null;
+
             String[] fileArgs = parser.getRemainingArgs();
             java.util.List files = java.util.Arrays.asList(fileArgs);
             if (files.isEmpty()) {
@@ -174,10 +178,6 @@ public class YUICompressor {
                             } else {
                                 out = new OutputStreamWriter(new FileOutputStream(outputFilename), charset);
                             }
-
-                            boolean munge = parser.getOptionValue(nomungeOpt) == null;
-                            boolean preserveAllSemiColons = parser.getOptionValue(preserveSemiOpt) != null;
-                            boolean disableOptimizations = parser.getOptionValue(disableOptimizationsOpt) != null;
 
                             compressor.compress(out, linebreakpos, munge, verbose,
                                     preserveAllSemiColons, disableOptimizations);
