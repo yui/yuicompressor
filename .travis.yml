@@ -7,8 +7,3 @@ install:
 script:
     - ./tests/suite.sh
     - npm test
-notifications:
-    email:
-        - davglass@gmail.com
-        - davglass@yahoo-inc.com
-        - joeysmith@gmail.com
