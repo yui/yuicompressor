@@ -131,7 +131,7 @@ public class YUICompressor {
 
                     String outputFilename = output;
                     // if a substitution pattern was passed in
-                    if (pattern.length > 1 && files.size() > 1) {
+                    if (pattern.length > 1 && files.size() > 0) {
                         outputFilename = inputFilename.replaceFirst(pattern[0], pattern[1]);
                     }
 
