@@ -79,8 +79,8 @@ public class YUICompressor {
                 }
             }
 
-            String type = (String) parser.getOptionValue(typeOpt);
-            if (type != null && !type.equalsIgnoreCase("js") && !type.equalsIgnoreCase("css")) {
+            String typeOverride = (String) parser.getOptionValue(typeOpt);
+            if (typeOverride != null && !typeOverride.equalsIgnoreCase("js") && !typeOverride.equalsIgnoreCase("css")) {
                 usage();
                 System.exit(1);
             }
@@ -92,7 +92,7 @@ public class YUICompressor {
             String[] fileArgs = parser.getRemainingArgs();
             java.util.List files = java.util.Arrays.asList(fileArgs);
             if (files.isEmpty()) {
-                if (type == null) {
+                if (typeOverride == null) {
                     usage();
                     System.exit(1);
                 }
@@ -106,7 +106,7 @@ public class YUICompressor {
             java.util.Iterator filenames = files.iterator();
             while(filenames.hasNext()) {
                 String inputFilename = (String)filenames.next();
-
+                String type = null;
                 try {
                     if (inputFilename.equals("-")) {
 
@@ -114,7 +114,10 @@ public class YUICompressor {
 
                     } else {
 
-                        if (type == null) {
+                        if ( typeOverride != null ) {
+                            type = typeOverride;
+                        }
+                        else {
                             int idx = inputFilename.lastIndexOf('.');
                             if (idx >= 0 && idx < inputFilename.length() - 1) {
                                 type = inputFilename.substring(idx + 1);
