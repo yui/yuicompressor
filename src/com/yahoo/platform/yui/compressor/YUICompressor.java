@@ -111,6 +111,7 @@ public class YUICompressor {
                     if (inputFilename.equals("-")) {
 
                         in = new InputStreamReader(System.in, charset);
+                        type = typeOverride;
 
                     } else {
 
