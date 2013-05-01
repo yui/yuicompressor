@@ -1,6 +1,7 @@
 /**
  * cssmin.js
  * Author: Stoyan Stefanov - http://phpied.com/
+ * Contributor: Dan Beam - http://danbeam.org/
  * This is a JavaScript port of the CSS minification tool
  * distributed with YUICompressor, itself a port
  * of the cssmin utility by Isaac Schlueter - http://foohack.com/
@@ -12,7 +13,7 @@
 * YUI Compressor
 * http://developer.yahoo.com/yui/compressor/
 * Author: Julien Lecomte - http://www.julienlecomte.net/
-* Copyright (c) 2011 Yahoo! Inc. All rights reserved.
+* Copyright (c) 2013 Yahoo! Inc. All rights reserved.
 * The copyrights embodied in the content of this file are licensed
 * by Yahoo! Inc. under the BSD (revised) open source license.
 */
@@ -43,7 +44,7 @@ YAHOO.compressor._extractDataUrls = function (css, preservedTokens) {
         m,
         preserver,
         token,
-        pattern = /url\(\s*(["']?)data\:/g;
+        pattern = /url\(\s*(["']?)data\:/gi;
 
     // Since we need to account for non-base64 data urls, we need to handle 
     // ' and ) being part of the data string. Hence switching to indexOf,
@@ -255,21 +256,46 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
     css = css.replace(/\s+([!{};:>+\(\)\],])/g, '$1');
     css = css.replace(/___YUICSSMIN_PSEUDOCLASSCOLON___/g, ":");
 
-    // retain space for special IE6 cases
-    css = css.replace(/:first-(line|letter)(\{|,)/g, ":first-$1 $2");
+    // retain space for special IE6 cases and lowercase
+    css = css.replace(/:first-(line|letter)(\{|,)/gi, function(all, $1, $2) {
+        return ":first-" + $1.toLowerCase() + " " + $2;
+    });
 
     // no space after the end of a preserved comment
     css = css.replace(/\*\/ /g, '*/');
 
-
-    // If there is a @charset, then only allow one, and push to the top of the file.
-    css = css.replace(/^(.*)(@charset "[^"]*";)/gi, '$2$1');
-    css = css.replace(/^(\s*@charset [^;]+;\s*)+/gi, '$1');
+    // If there is a @charset, then only allow one, and push to the top of the file (and make lowercase).
+    css = css.replace(/^(.*)(@charset)( "[^"]*";)/gi, function(all, $1, $2, $3) {
+        return $2.toLowerCase() + $3 + $1;
+    });
+    css = css.replace(/^((\s*)(@charset)( [^;]+;\s*))+/gi, function(all, $1, $2, $3, $4) {
+        return $2 + $3.toLowerCase() + $4;
+    });
 
     // Put the space back in some cases, to support stuff like
     // @media screen and (-webkit-min-device-pixel-ratio:0){
     css = css.replace(/\band\(/gi, "and (");
 
+    // lowercase some popular @directives (@charset is done right above)
+    css = css.replace(/@(font-face|import|(?:-(?:atsc|khtml|moz|ms|o|wap|webkit)-)?keyframe|media|page|namespace)/gi, function(all, $1) {
+        return '@' + $1.toLowerCase();
+    });
+
+    // lowercase some more common pseudo-elements
+    css = css.replace(/:(active|after|before|checked|disabled|empty|enabled|first-(?:child|of-type)|focus|hover|last-(?:child|of-type)|link|only-(?:child|of-type)|root|:selection|target|visited)/gi, function(all, $1) {
+        return ':' + $1.toLowerCase();
+    });
+
+    // lowercase some more common functions
+    css = css.replace(/:(lang|not|nth-child|nth-last-child|nth-last-of-type|nth-of-type|(?:-(?:moz|webkit)-)?any)\(/gi, function(all, $1) {
+        return ':' + $1.toLowerCase() + '(';
+    });
+
+    // lower case some common function that can be values
+    // NOTE: rgb() isn't useful as we replace with #hex later, as well as and() is already done for us
+    css = css.replace(/([:,\( ]\s*)(attr|color-stop|from|rgba|to|url|(?:-(?:atsc|khtml|moz|ms|o|wap|webkit)-)?(?:calc|max|min|(?:repeating-)?(?:linear|radial)-gradient)|-webkit-gradient)/gi, function(all, $1, $2) {
+        return $1 + $2.toLowerCase();
+    });
 
     // Remove the spaces after the things that should not have spaces after them.
     css = css.replace(/([!{}:;>+\(\[,])\s+/g, '$1');
@@ -278,7 +304,7 @@ YAHOO.compressor.cssmin = function (css, linebreakpos) {
     css = css.replace(/;+\}/g, "}");
 
     // Replace 0(px,em,%) with 0.
-    css = css.replace(/([\s:])(0)(px|em|%|in|cm|mm|pc|pt|ex)/gi, "$1$2");
+    css = css.replace(/(^|[^0-9])(?:0?\.)?0(?:px|em|%|in|cm|mm|pc|pt|ex|deg|g?rad|m?s|k?hz)/gi, "$10");
 
     // Replace 0 0 0 0; with 0.
     css = css.replace(/:0 0 0 0(;|\})/g, ":0$1");
