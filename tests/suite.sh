@@ -44,7 +44,7 @@ runtest () {
 }
 
 
-ls *.FAIL | while read failtest; do
+ls *.FAIL 2>/dev/null | while read failtest; do
 	echo "Failing test: " $failtest > /dev/stderr
 	runtest $failtest && echo "Test passed, please remove the '.FAIL' from the filename"
 done
