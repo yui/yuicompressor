@@ -1,7 +1,7 @@
 {
     "name": "yuicompressor",
     "description": "YUICompressor CLI and Node.js require",
-    "version": "2.4.8pre2",
+    "version": "2.4.8",
     "author": "Dav Glass <davglass@gmail.com>",
     "bugs": { "url" : "http://yuilibrary.com/projects/yuicompressor/newticket" },
     "devDependencies": {
