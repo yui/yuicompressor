@@ -310,6 +310,7 @@ public class CssCompressor {
 
         // Replace 0(px,em,%) with 0.
         css = css.replaceAll("(?i)(^|[^0-9])(?:0?\\.)?0(?:px|em|%|in|cm|mm|pc|pt|ex|deg|g?rad|m?s|k?hz)", "$10");
+        css = css.replaceAll("(@keyframe.*?)0\\{", "$10%{");
 
         // Replace 0 0 0 0; with 0.
         css = css.replaceAll(":0 0 0 0(;|})", ":0$1");
@@ -343,12 +344,6 @@ public class CssCompressor {
                 int val = Integer.parseInt(rgbcolors[i]);
                 if (val < 16) {
                     hexcolor.append("0");
-                }
-
-                // If someone passes an RGB value that's too big to express in two characters, round down.
-                // Probably should throw out a warning here, but generating valid CSS is a bigger concern.
-                if (val > 255) {
-                    val = 255;
                 }
                 hexcolor.append(Integer.toHexString(val));
             }
