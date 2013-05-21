@@ -16,9 +16,9 @@ runtest () {
 		echo $testfile | egrep -o '(cs|j)s'
 	)"
 	
-	actual="$(
+    actual="$(
 	    java -jar $jar --type $filetype $testfile
-	)"
+    )"
 	
 	if [ "$expected" == "$actual" ]; then
 		echo "Passed: $testfile" > /dev/stderr
