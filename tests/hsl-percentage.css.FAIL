@@ -1,0 +1,11 @@
+.SB-messages .SB-message a {
+    color: rgb(185, 99, 117);
+    border-bottom: 1px dotted rgb(185, 99, 117;
+    text-shadow: 0 1px 0 hsla(0, 0%, 0%, 1);
+}
+
+.SB-messages .SB-message p {
+    color: rgb(185, 99, 117);
+    border-bottom: 1px dotted rgb(185, 99, 117;
+    text-shadow: 0 1px 0 hsl(0, 0%, 0%);
+}
