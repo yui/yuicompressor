@@ -1107,7 +1107,6 @@ public class JavaScriptCompressor {
             token = consumeToken();
             symbol = token.getValue();
             currentScope = getCurrentScope();
-
             switch (token.getType()) {
                 case Token.GET:
                 case Token.SET:
@@ -1139,9 +1138,20 @@ public class JavaScriptCompressor {
                     break;
 
                 case Token.REGEXP:
-                case Token.NUMBER:
                 case Token.STRING:
                     result.append(symbol);
+                    break;
+
+                case Token.NUMBER:
+                    if (getToken(0).getType() == Token.DOT) {
+                        // calling methods on int requires a leading dot so JS doesn't
+                        // treat the method as the decimal component of a float
+                        result.append('(');
+                        result.append(symbol);
+                        result.append(')');
+                    } else {
+                        result.append(symbol);
+                    }
                     break;
 
                 case Token.ADD:
