@@ -137,6 +137,16 @@ public class YUICompressor {
                             System.exit(1);
                         }
 
+                        String prefix = "*********";
+                        StringBuilder sb = new StringBuilder(prefix);
+                        for (int i = 0; i < inputFilename.length() + 2; ++i) {
+                            sb.append('*');
+                        }
+                        sb.append(prefix);
+                        System.err.println(sb.toString());
+                        System.err.println(prefix + " " + inputFilename + " " + prefix);
+                        System.err.println(sb.toString());
+                        
                         in = new InputStreamReader(new FileInputStream(inputFilename), charset);
                     }
 
