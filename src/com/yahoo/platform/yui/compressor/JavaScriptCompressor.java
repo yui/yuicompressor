@@ -536,7 +536,7 @@ public class JavaScriptCompressor {
         this.tokens = parse(in, reporter);
     }
 
-        public void compress(Writer out, Writer mungemap, int linebreak, boolean munge, boolean verbose,
+    public void compress(Writer out, Writer mungemap, int linebreak, boolean munge, boolean verbose,
             boolean preserveAllSemiColons, boolean disableOptimizations)
             throws IOException {
 
