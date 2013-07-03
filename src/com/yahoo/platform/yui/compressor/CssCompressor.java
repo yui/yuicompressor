@@ -94,6 +94,20 @@ public class CssCompressor {
 
         return sb.toString();
     }
+    
+    private String preserveOldIESpecificMatrixDefinition(String css, ArrayList preservedTokens) {
+        StringBuffer sb = new StringBuffer();
+        Pattern p = Pattern.compile("\\s*filter:\\s*progid:DXImageTransform.Microsoft.Matrix\\(([^\\)]+)\\);");
+        Matcher m = p.matcher(css);
+        while (m.find()) {
+            String token = m.group(1);
+            preservedTokens.add(token);
+            String preserver = "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___";
+            m.appendReplacement(sb, "filter:progid:DXImageTransform.Microsoft.Matrix(" + preserver + ");");
+        }
+        m.appendTail(sb);
+        return sb.toString();
+    }
 
     public void compress(Writer out, int linebreakpos)
             throws IOException {
@@ -202,6 +216,8 @@ public class CssCompressor {
 
         // Normalize all whitespace strings to single spaces. Easier to work with that way.
         css = css.replaceAll("\\s+", " ");
+
+        css = this.preserveOldIESpecificMatrixDefinition(css, preservedTokens);
 
         // Remove the spaces before the things that should not have spaces before them.
         // But, be careful not to turn "p :link {...}" into "p:link{...}"
@@ -461,7 +477,7 @@ public class CssCompressor {
         css = css.replaceAll(";;+", ";");
 
         // restore preserved comments and strings
-        for(i = 0, max = preservedTokens.size(); i < max; i++) {
+        for(i = preservedTokens.size() - 1; i >= 0 ; i--) {
             css = css.replace("___YUICSSMIN_PRESERVED_TOKEN_" + i + "___", preservedTokens.get(i).toString());
         }
 
