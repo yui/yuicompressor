@@ -30,72 +30,6 @@ public class CssCompressor {
         }
     }
 
-    /**
-     * @param css - full css string
-     * @param preservedToken - token to preserve
-     * @param tokenRegex - regex to find token
-     * @param removeWhiteSpace - remove any white space in the token
-     * @param preservedTokens - array of token values
-     * @return
-     */
-    protected String preserveToken(String css, String preservedToken,
-            String tokenRegex, boolean removeWhiteSpace, ArrayList preservedTokens) {
-
-        int maxIndex = css.length() - 1;
-        int appendIndex = 0;
-
-        StringBuffer sb = new StringBuffer();
-
-        Pattern p = Pattern.compile(tokenRegex);
-        Matcher m = p.matcher(css);
-
-        while (m.find()) {
-            int startIndex = m.start() + (preservedToken.length() + 1);
-            String terminator = m.group(1);
-
-            if (terminator.length() == 0) {
-                terminator = ")";
-            }
-
-            boolean foundTerminator = false;
-
-            int endIndex = m.end() - 1;
-            while(foundTerminator == false && endIndex+1 <= maxIndex) {
-                endIndex = css.indexOf(terminator, endIndex+1);
-
-                if ((endIndex > 0) && (css.charAt(endIndex-1) != '\\')) {
-                    foundTerminator = true;
-                    if (!")".equals(terminator)) {
-                        endIndex = css.indexOf(")", endIndex);
-                    }
-                }
-            }
-
-            // Enough searching, start moving stuff over to the buffer
-            sb.append(css.substring(appendIndex, m.start()));
-
-            if (foundTerminator) {
-                String token = css.substring(startIndex, endIndex);
-                if(removeWhiteSpace)
-                    token = token.replaceAll("\\s+", "");
-                preservedTokens.add(token);
-
-                String preserver = preservedToken + "(___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___)";
-                sb.append(preserver);
-
-                appendIndex = endIndex + 1;
-            } else {
-                // No end terminator found, re-add the whole match. Should we throw/warn here?
-                sb.append(css.substring(m.start(), m.end()));
-                appendIndex = m.end();
-            }
-        }
-
-        sb.append(css.substring(appendIndex));
-
-        return sb.toString();
-    }
-
     // Leave data urls alone to increase parse performance.
     protected String extractDataUrls(String css, ArrayList preservedTokens) {
 
@@ -160,7 +94,7 @@ public class CssCompressor {
 
         return sb.toString();
     }
-
+    
     private String preserveOldIESpecificMatrixDefinition(String css, ArrayList preservedTokens) {
         StringBuffer sb = new StringBuffer();
         Pattern p = Pattern.compile("\\s*filter:\\s*progid:DXImageTransform.Microsoft.Matrix\\(([^\\)]+)\\);");
@@ -193,8 +127,6 @@ public class CssCompressor {
         String placeholder;
 
         css = this.extractDataUrls(css, preservedTokens);
-        css = this.preserveToken(css, "calc",  "calc\\s*([\"']?)", false, preservedTokens);
-
 
         StringBuffer sb = new StringBuffer(css);
 
@@ -350,7 +282,7 @@ public class CssCompressor {
         }
         m.appendTail(sb);
         css = sb.toString();
-
+    
         // lowercase some more common pseudo-elements
         sb = new StringBuffer();
         p = Pattern.compile("(?i):(active|after|before|checked|disabled|empty|enabled|first-(?:child|of-type)|focus|hover|last-(?:child|of-type)|link|only-(?:child|of-type)|root|:selection|target|visited)");
@@ -360,7 +292,7 @@ public class CssCompressor {
         }
         m.appendTail(sb);
         css = sb.toString();
-
+    
         // lowercase some more common functions
         sb = new StringBuffer();
         p = Pattern.compile("(?i):(lang|not|nth-child|nth-last-child|nth-last-of-type|nth-of-type|(?:-(?:moz|webkit)-)?any)\\(");
@@ -370,7 +302,7 @@ public class CssCompressor {
         }
         m.appendTail(sb);
         css = sb.toString();
-
+    
         // lower case some common function that can be values
         // NOTE: rgb() isn't useful as we replace with #hex later, as well as and() is already done for us right after this
         sb = new StringBuffer();
@@ -459,7 +391,7 @@ public class CssCompressor {
 
             sb.append(css.substring(index, m.start()));
 
-            boolean isFilter = (m.group(1) != null && !"".equals(m.group(1)));
+            boolean isFilter = (m.group(1) != null && !"".equals(m.group(1))); 
 
             if (isFilter) {
                 // Restore, as is. Compression will break filters
@@ -545,7 +477,7 @@ public class CssCompressor {
         css = css.replaceAll(";;+", ";");
 
         // restore preserved comments and strings
-        for(i = 0, max = preservedTokens.size(); i < max; i++) {
+        for(i = preservedTokens.size() - 1; i >= 0 ; i--) {
             css = css.replace("___YUICSSMIN_PRESERVED_TOKEN_" + i + "___", preservedTokens.get(i).toString());
         }
 

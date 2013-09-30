@@ -1,0 +1,7 @@
+.issue-59 {
+    width:100%;
+    width: -webkit-calc(100% + 30px);
+    width: -moz-calc(100% + 30px);
+    width: calc(100% + 30px);
+    background-position: calc(65% - (100px - 350px * 0.65)) 0;
+}
