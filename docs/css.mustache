@@ -1,0 +1,460 @@
+<p>
+  This document describes how the CSS minification part of the YUICompressor works.
+</p>
+<h2 class="first" id="min">CSS minifications</h2>
+
+<p>
+This section describes the various ways that YUICompressor makes your CSS smaller.
+</p>
+        
+<h3>Stripping comments and white space</h3>
+<p>
+YUICompressor strips all the comments and white space that are not required
+for the CSS to work.
+</p>
+
+<p>Before the minification:</p>
+ 
+```
+/*****
+  Multi-line comment
+  before a new class name
+*****/
+.classname {
+    /* comment in declaration block */
+    font-weight: normal;
+}
+```
+<p>After the minification:</p>
+
+```
+.classname{font-weight:normal}
+```
+<h3>Special comments</h3>
+
+<p>
+Stripping comments is not always acceptable. 
+Sometimes you need to retain copyright information. 
+You can use ! at the beginning of the comment to mark the comment as special
+and it will be preserved.
+</p>
+
+<p>Before:</p>
+
+```
+/*!
+  (c) Very Important Comment
+*/
+.classname {
+    /* comment in declaration block */
+    font-weight: normal;
+}
+```
+<p>After:</p>
+
+```
+/*!
+  (c) Very Important Comment
+*/.classname{font-weight:normal}
+```
+
+ <p>
+   The ! character itself is also preserved. This way you can safely double-minify the same file (probably by mistake). 
+   That also allows when reviewing the code (manually or with tools) to see ! 
+   and conclude that this comment is there intentionally, not because you forgot to minify the CSS.
+ </p>
+        
+ <h3>Striping last semi-colon</h3>
+
+ <p>
+   The last semi-colon in a declaration block is not needed. 
+   You can keep it in your source for maintenance purposes and 
+   let the minifier take care of stripping it out before the site goes live.
+ </p>
+
+ <p>Before:</p>
+
+```
+.classname {
+    border-top: 1px;
+    border-bottom: 2px;
+}
+```
+
+<p>After:</p>
+
+```
+.classname{border-top:1px;border-bottom:2px}
+```
+
+
+<h3>Extra semi-colons</h3>
+
+<p>Only one semi-colon is required to separate rules, so the minifier will strip an accidentally added one.</p>
+
+<p>Before:</p>
+
+```
+.classname {
+    border-top: 1px; ;
+    border-bottom: 2px;;;
+}
+```
+
+<p>After:</p>
+         
+```
+.classname{border-top:1px;border-bottom:2px}
+```
+
+<h3>No empty declarations</h3>
+
+<p>
+  Empty declaration blocks don't contribute to the way the stylesheets work,
+  so they can safely be removed.
+</p>
+
+<p>Before:</p>
+
+```
+.empty { ;}
+.nonempty {border: 0;}
+```
+
+        <p>After:</p>
+        
+```
+.nonempty{border:0}
+```
+
+<h3>Zero values</h3>
+
+<p>
+  When using zero values, the units of measure are not required, so the YUICompressor will strip them.
+  Additionally, when you have two, three of four zeros in margins and paddings, they can be reduced to one.
+</p>
+
+<p>Before:</p>
+```
+a {
+    margin: 0px 0pt 0em 0%;
+    background-position: 0 0ex;
+    padding: 0in 0cm 0mm 0pc
+}
+```
+
+<p>After:</p>
+
+
+```
+a{margin:0;background-position:0 0;padding:0}
+```
+
+<h3>Floats</h3>
+
+<p>
+  When a value is using a floating point number smaller than 1, the leading 0 is not required.
+</p>
+
+<p>Before:</p>
+
+```
+.classname {
+    margin: 0.6px 0.333pt 1.2em 8.8cm;
+}
+```
+
+<p>After:</p>
+
+```
+.classname{margin:.6px .333pt 1.2em 8.8cm}
+```
+
+<h3>Colors values</h3>
+
+<p>
+  RGB color values are easier to read, but the hex values are shorter, so YUICompressor will use the 
+  more concise form.
+  
+  Addiotionally, colors that follow the pattern #AABBCC can be reduced to #ABC, except when used 
+  in IE filter values.
+
+<p>Before:</p>
+
+```
+.color-me {
+    color: rgb(123, 123, 123);
+    border-color: #ffeedd;
+    background: none repeat scroll 0 0 rgb(255, 0,0);
+}
+```
+
+<p>After:</p>
+
+```
+.color-me{color:#7b7b7b;border-color:#fed;background:none repeat scroll 0 0 #f00}
+```
+
+<p>Before:</p>
+
+```
+.cantouch {
+    color: rgba(1, 2, 3, 4);
+    filter: chroma(color="#FFFFFF");
+}
+```
+
+<p>After (no color minification):</p>
+
+```
+.cantouch{color:rgba(1,2,3,4);filter:chroma(color="#FFFFFF")}
+```
+
+<h3>Single charsets</h3>
+
+<p>
+  Only one charset declaration is allowed per stylesheet, but sometimes when automatically merging 
+  stylesheets into one to <a href="http://developer.yahoo.com/performance/">reduce HTTP requests</a>, 
+  you may end up with more than one charset.
+  YUICompressor will keep only the first.
+</p>
+
+<p>Before:</p>
+
+```
+@charset "utf-8";
+#foo {
+    border-width: 1px;
+}
+ 
+/* second css, merged */
+@charset "another one";
+#bar {
+    border-width: 10px;
+}
+```
+
+<p>After:</p>
+ 
+```
+@charset "utf-8";#foo{border-width:1px}#bar{border-width:10px}
+```       
+
+
+<h3>Alpha opacity</h3>
+
+<p>
+  The opacity filter in IE has a verbose syntax,
+  which can be shortened using the IE4 syntax
+</p>
+
+<p>Before:</p>
+
+```
+.classname {
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=80)"; /* IE 8 */
+    filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=80);       /* IE < 8 */
+}
+```
+<p>After:</p>
+
+```
+.classname{-ms-filter:"alpha(opacity=80)";filter:alpha(opacity=80)}
+```
+
+<h3>Shorter `none` values</h3>
+
+<p>
+  For some properties `none` and `0` 
+  have the same meaning. Instances of "none" are converted to 0 where
+  applicable and safe to do so.
+</p>
+
+<p>Before:</p>
+
+```
+.classname {
+    border: none;
+    background: none;
+    outline: none;
+}
+```
+
+<p>After:</p>
+
+```
+.classname{border:0;background:0;outline:0}
+```
+
+<h2 class="first" id="hacks">CSS hacks tolerance</h2>
+
+<p>
+  When stripping comments and performing other minification tasks,
+  the YUICompressor keeps an eye on preserving common CSS hacks.
+  CSS hacks often use parsing glitches in browsers to provide some extra declarations
+  (or hide some) from specific browser versions.
+</p>
+
+<p>
+  This section describes the hacks that are tolerated by the YUICompressor.
+</p>
+
+
+<h3>Underscore/star hack</h3>
+
+<p>
+  Using _ and * to prefix CSS properties is a simple way to target IE6 and IE7.
+</p>
+
+<p>
+  Since YUICompressor uses a regular expression based CSS minifier and doesn't validate CSS properties, 
+  it can accept pretty much any property. Therefore this hack is preserved.
+</p>
+
+<p>Before:</p>
+
+```
+#element {
+    width: 1px;
+    *width: 2px;
+    _width: 3px;
+}
+```
+
+<p>After:</p>
+
+```
+#element{width:1px;*width:3pt;_width:2em}
+```
+
+<h3>Child selector hack</h3>
+
+<p>The child selector hack allows developers to hide declarations from IE7 and below using an empty comment.</p>
+
+<p>
+  YUICompressor strips comments but will make an exception and retain empty comments that 
+  immediately follow the `&gt;` character.
+</p>
+
+<p>Before:</p>
+
+```
+html >/**/ body p {
+    color: blue;
+}
+```
+
+<p>After:</p>
+
+```
+html>/**/body p{color:blue}
+```
+
+<h3>IE5/Mac hack</h3>
+
+<p>
+  There is a hack that targets IE5/Mac using a bug when parsing comments. 
+</p>
+
+<p>
+  YUICompressor retains comments that look like they are using this hack, but it minifies the comments needed by the hack.
+</p>
+
+<p>Before:</p>
+
+```
+/* Ignore the next rule in IE mac \*/
+.selector {
+    color: khaki;
+}
+/* Stop ignoring in IE mac */
+```
+
+<p>After:</p>
+
+```
+/*\*/.selector{color:khaki}/**/
+```
+
+<h3>Box model hack</h3>
+
+<p>This hack uses valid CSS and there's no special use of comments so it's retained.</p>
+
+<p>Before:</p>
+
+```
+#elem {
+    width: 100px; /* IE */
+    voice-family: "\"}\"";
+    voice-family:inherit;
+    width: 200px; /* others */
+}
+html>body #elem {
+    width: 200px; /* others */
+}
+```
+
+<p>After:</p>
+
+```
+#elem{width:100px;voice-family:"\"}\"";voice-family:inherit;width:200px}html>body #elem{width:200px}
+```
+
+
+<h2 class="first" id="tests">Running and contributing tests</h2>
+
+<p>
+  When reporting bugs, it's greatly appreciated if you can provide a test case.
+  In order to create a test you can use your version of the compressor or build it from source.
+</p>
+
+<ol>
+  <li>
+    Checkout or download the code from <a href="http://github.com/yui/yuicompressor/">http://github.com/yui/yuicompressor/</a>.
+    You need the code even if you don't intend to build the tool yourself, because that's where the tests
+    and the test runner are.
+  </li>
+  <li>Navigate to the root `yuicompressor/` directory</li>
+  <li>Type `ant` and hit enter</li>
+</ol>
+<p>
+  In order for this to work you need a recent Java SDK installed (at least 1.4) and 
+  also <a href="http://ant.apache.org/">Ant</a> running. 
+  (On the Mac, you can simply do `port install apache-ant` to get Ant)</p>
+
+<p>
+  There are a number of tests in the `tests/` directory, 
+  you can run them with the suite script:</p>
+
+```terminal
+cd tests/
+./suite.sh
+```
+        
+<p>
+  This command will also run the tests using the JavaScript port of the minifier. 
+  Since the compressor is using Mozilla's <a href="http://www.mozilla.org/rhino/">Rhino</a> (slightly modified), 
+  Rhino is <a href="http://github.com/yui/yuicompressor/blob/master/lib/rhino-1.6R7.jar">part of the code</a>. 
+  So it can be used as a JavaScript interpreter to run the JavaScript port.</p>
+
+<p>The procedure to write new tests is as follows:</p>
+<ol>
+  <li>Create source CSS file in the `tests/` directory, e.g. `new-test.css`</li>
+  <li>Create a new file with the expected result and name it with a `.min` extension, e.g. `new-test.css.min`</li>
+</ol>
+
+<h2 class="first" id="ports">JavaScript port</h2>
+
+<p>
+  The YUICompressor is written in Java, however there's a JavaScript port of the CSS minification part,
+  which is available separately.
+</p>
+
+<p>
+  There is a <a href="https://github.com/jbleuzen/node-cssmin">Node.js module</a> for cssmin using the JavaScript port of our minifier.
+  It can be installed with:
+</p>
+
+```terminal
+$ npm install cssmin
+```

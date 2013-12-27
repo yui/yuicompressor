@@ -1,5 +1,6 @@
 .color {
   me: rgb(123, 123, 123);
+  test-overflow: rgb(1000, 500, 300);
   impressed: #FfEedD;
   again: #ABCDEF;
   andagain:#aa66cc;
@@ -7,6 +8,7 @@
   filter: chroma(color="#FFFFFF");
   background: none repeat scroll 0 0 rgb(255, 0,0);
   alpha: rgba(1, 2, 3, 4);
+  border-color: RGBA(1,2,3,4); /* tests uppercase RGBA() */
   color:#1122aa
 }
 

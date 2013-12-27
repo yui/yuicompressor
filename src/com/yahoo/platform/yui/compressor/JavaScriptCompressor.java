@@ -358,7 +358,7 @@ public class JavaScriptCompressor {
     	return words;
     }
 
-    public void compress(Writer out, int linebreak, boolean munge, boolean verbose,
+    public void compress(Writer out, Writer mungemap, int linebreak, boolean munge, boolean verbose,
             boolean preserveAllSemiColons, boolean disableOptimizations)
             throws IOException {
 
@@ -378,6 +378,10 @@ public class JavaScriptCompressor {
         StringBuffer sb = printSymbolTree(linebreak, preserveAllSemiColons);
 
         out.write(sb.toString());
+
+        if (mungemap != null) {
+            printMungeMapping(mungemap);
+        }
     }
 
     private ScriptOrFnScope getCurrentScope() {
@@ -932,7 +936,6 @@ public class JavaScriptCompressor {
             token = consumeToken();
             symbol = token.getValue();
             currentScope = getCurrentScope();
-
             switch (token.getType()) {
                 case Token.GET:
                 case Token.SET:
@@ -964,9 +967,20 @@ public class JavaScriptCompressor {
                     break;
 
                 case Token.REGEXP:
-                case Token.NUMBER:
                 case Token.STRING:
                     result.append(symbol);
+                    break;
+
+                case Token.NUMBER:
+                    if (getToken(0).getType() == Token.DOT) {
+                        // calling methods on int requires a leading dot so JS doesn't
+                        // treat the method as the decimal component of a float
+                        result.append('(');
+                        result.append(symbol);
+                        result.append(')');
+                    } else {
+                        result.append(symbol);
+                    }
                     break;
 
                 case Token.ADD:
@@ -995,6 +1009,7 @@ public class JavaScriptCompressor {
                     if (lastToken.getType() != Token.GET && lastToken.getType() != Token.SET) {
                         result.append("function");
                     }
+                    lastToken = token;
                     token = consumeToken();
                     if (token.getType() == Token.NAME) {
                         result.append(' ');
@@ -1110,12 +1125,22 @@ public class JavaScriptCompressor {
                     }
                     break;
 
+                case Token.COMMA:
+                    // No need to output a comma if the next character is a right-curly or a right-square bracket
+                    if (offset < length && getToken(0).getType() != Token.RC && getToken(0).getType() != Token.RB) {
+                        result.append(',');
+                    }
+                    break;
+
                 case Token.CONDCOMMENT:
                 case Token.KEEPCOMMENT:
                     if (result.length() > 0 && result.charAt(result.length() - 1) != '\n') {
                         result.append("\n");
                     }
                     result.append("/*");
+                    if (token.getType() == Token.KEEPCOMMENT) {
+                        result.append("!");
+                    }
                     result.append(symbol);
                     result.append("*/\n");
                     break;
@@ -1147,5 +1172,11 @@ public class JavaScriptCompressor {
         }
 
         return result;
+    }
+
+    private void printMungeMapping(Writer map) throws IOException {
+        StringBuffer sb = new StringBuffer();
+        globalScope.getFullMapping(sb, "");
+        map.write(sb.toString());
     }
 }

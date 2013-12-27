@@ -1,0 +1,46 @@
+{
+    "name": "yuicompressor",
+    "description": "YUICompressor CLI and Node.js require",
+    "version": "2.4.8",
+    "author": "Julien Lecomte <julien.lecomte@gmail.com>",
+    "contributors": [ 
+        {
+            "name" : "Dav Glass",
+            "email" : "davglass@gmail.com"
+        }, {
+            "name" : "Joey Smith",
+            "email" : "joeysmith@gmail.com"
+        }, {
+            "name" : "Stoyan Stefanov",
+            "email" : "assttoo@ymail.com"
+        }
+    ],
+    "bugs": { "url" : "http://yuilibrary.com/projects/yuicompressor/newticket" },
+    "devDependencies": {
+        "yuitest": "*"
+    },
+    "keywords": [
+        "yui", "compressor", "munger", "cssmin", "minify", "minification"
+    ],
+    "main": "./nodejs/index.js",
+    "bin": {
+        "yuicompressor": "./nodejs/cli.js"
+    },
+    "files": [
+        "build/*.jar",
+        "nodejs"
+    ],
+    "scripts": {
+        "test": "yuitest ./nodejs_tests/tests.js"
+    },
+    "licenses":[
+        {
+            "type" : "BSD",
+            "url" : "http://yuilibrary.com/license/"
+        }
+    ],
+    "repository": {
+        "type":"git",
+        "url":"https://github.com/yui/yuicompressor"
+    }
+}

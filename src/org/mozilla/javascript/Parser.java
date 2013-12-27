@@ -2461,6 +2461,16 @@ public class Parser
             reportError("msg.unexpected.eof");
             break;
 
+          case Token.CONDCOMMENT:
+            String condComment = ts.getString();
+            decompiler.addJScriptConditionalComment(condComment);
+            return nf.createString(condComment);
+
+          case Token.KEEPCOMMENT:
+            String keepComment = ts.getString();
+            decompiler.addPreservedComment(keepComment);
+            return nf.createString(keepComment);
+
           default:
             reportError("msg.syntax");
             break;

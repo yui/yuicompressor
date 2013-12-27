@@ -16,16 +16,9 @@ runtest () {
 		echo $testfile | egrep -o '(cs|j)s'
 	)"
 	
-	if [ "$2" == "cssminjs" ]; then 
-	    actual="$(
-		    java -jar ../lib/rhino-1.7R2.jar suite.rhino $testfile
-	    )"
-         
-    else
-	    actual="$(
-		    java -jar $jar --type $filetype $testfile
-	    )"
-    fi
+	actual="$(
+	    java -jar $jar --type $filetype $testfile
+	)"
 	
 	if [ "$expected" == "$actual" ]; then
 		echo "Passed: $testfile" > /dev/stderr
@@ -44,19 +37,13 @@ runtest () {
 }
 
 
-ls *.FAIL | while read failtest; do
+ls *.FAIL 2>/dev/null | while read failtest; do
 	echo "Failing test: " $failtest > /dev/stderr
 	runtest $failtest && echo "Test passed, please remove the '.FAIL' from the filename"
 done
 
 ls *.{css,js} | while read testfile; do
 	runtest $testfile || exit 1
-done
-
-echo 
-echo "now testing the JS port of CSSMIN..."
-ls *.css | while read testfile; do
-	runtest $testfile "cssminjs" || exit 1
 done
 
 exit 0

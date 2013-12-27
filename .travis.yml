@@ -1,0 +1,9 @@
+language: java
+jdk:
+    - openjdk6
+install:
+    - ant
+    - npm install
+script:
+    - ./tests/suite.sh
+    - npm test

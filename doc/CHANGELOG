@@ -1,3 +1,16 @@
+YUI Compressor 2.4.8
+--------------------
++ Fix "important" and conditional comment processing
++ Fix a bug in the support for JS 1.7 style getters/setters
++ Better compliance and results in CSS compression (@danbeam,
+  @faisalman, @killsaw, @ademey)
++ Now minifies "border-left" in CSS (@sbertrang)
++ Include filename in warning and error output (@danielbeardsley)
++ Many improvements to parameter parsing and batch modes (@bmouw,
+  @bandesz, @ryansully)
++ Include jQuery as part of our test suite (@apm)
++ Trim trailing commas where possible (@nlalevee)
+
 YUI Compressor 2.4.7 
 --------------------
 + Handle data urls without blowing up Java memory (regex)
