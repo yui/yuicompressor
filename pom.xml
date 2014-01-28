@@ -1,0 +1,44 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <name>Maven Default Project</name>
+
+  <groupId>com.github.yui</groupId>
+  <artifactId>yuicompressor</artifactId>
+  <version>2.4.9-SNAPSHOT</version>
+
+  <build>
+    <sourceDirectory>src</sourceDirectory>
+  </build>
+  <dependencies>
+  	<!--
+  		<dependency>
+			<groupId>org.mozilla</groupId>
+			<artifactId>rhino</artifactId>
+			<version>1.7R4</version>
+		</dependency>
+-->		
+		<dependency>
+			<groupId>rhino</groupId>
+			<artifactId>js</artifactId>
+			<version>1.7R2</version>
+		</dependency>
+      	<dependency>
+        	<groupId>net.sf</groupId>
+        	<artifactId>jargs</artifactId>
+        	<version>1.0</version>
+      	</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.17</version>
+		</dependency>
+  </dependencies>
+
+  <repositories>
+      <repository>
+        <id>thirdparty-releases</id>
+        <name>JBoss Thirdparty Releases</name>
+        <url>https://repository.jboss.org/nexus/content/repositories/thirdparty-releases</url>
+      </repository>
+  </repositories> 	
+</project>  
