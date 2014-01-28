@@ -8,15 +8,21 @@
 
   <build>
     <sourceDirectory>src</sourceDirectory>
-  </build>
+	<plugins>
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-jar-plugin</artifactId>
+			<configuration>
+				<archive>
+					<manifest>
+						<mainClass>com.yahoo.platform.yui.compressor.Bootstrap</mainClass>
+					</manifest>
+				</archive>
+			</configuration>
+		</plugin>
+	</plugins>
+  </build>  
   <dependencies>
-  	<!--
-  		<dependency>
-			<groupId>org.mozilla</groupId>
-			<artifactId>rhino</artifactId>
-			<version>1.7R4</version>
-		</dependency>
--->		
 		<dependency>
 			<groupId>rhino</groupId>
 			<artifactId>js</artifactId>
