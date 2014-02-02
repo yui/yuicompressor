@@ -52,14 +52,6 @@ public class JavaScriptCompressor {
                 twos.add(one + Character.toString(c));
         }
 
-        // Remove two-letter JavaScript reserved words and built-in globals...
-        twos.remove("as");
-        twos.remove("is");
-        twos.remove("do");
-        twos.remove("if");
-        twos.remove("in");
-        twos.removeAll(builtin);
-
         threes = new ArrayList();
         for (int i = 0; i < twos.size(); i++) {
             String two = (String) twos.get(i);
@@ -70,7 +62,15 @@ public class JavaScriptCompressor {
             for (char c = '0'; c <= '9'; c++)
                 threes.add(two + Character.toString(c));
         }
-
+        
+        // Remove two-letter JavaScript reserved words and built-in globals...
+        twos.remove("as");
+        twos.remove("is");
+        twos.remove("do");
+        twos.remove("if");
+        twos.remove("in");
+        twos.removeAll(builtin);
+        
         // Remove three-letter JavaScript reserved words and built-in globals...
         threes.remove("for");
         threes.remove("int");
