@@ -14,3 +14,20 @@
     0% { opacity: 0; }
   100% { opacity: 1; }
 }
+
+@keyframes anim-multikey {
+    0%,50%,70% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@-webkit-keyframes anim-multikey {
+    0%,50%,70% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@-moz-keyframes anim-multikey {
+    0%,50%,70% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@-o-keyframes anim-multikey {
+    0%,50%,70% { opacity: 0; }
+  100% { opacity: 1; }
+}

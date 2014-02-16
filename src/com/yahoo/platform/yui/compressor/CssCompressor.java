@@ -326,7 +326,7 @@ public class CssCompressor {
 
         // Replace 0(px,em,%) with 0.
         css = css.replaceAll("(?i)(^|[^0-9])(?:0?\\.)?0(?:px|em|%|in|cm|mm|pc|pt|ex|deg|g?rad|m?s|k?hz)", "$10");
-        css = css.replaceAll("(@(?:-.+?)?keyframes.*?)0\\{", "$10%{");
+        css = css.replaceAll("(@(?:-.+?)?keyframes.*?)0(\\{|,)", "$10%$2");
 
         // Replace 0 0 0 0; with 0.
         css = css.replaceAll(":0 0 0 0(;|})", ":0$1");
