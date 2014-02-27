@@ -94,7 +94,7 @@ public class CssCompressor {
 
         return sb.toString();
     }
-    
+
     private String preserveOldIESpecificMatrixDefinition(String css, ArrayList preservedTokens) {
         StringBuffer sb = new StringBuffer();
         Pattern p = Pattern.compile("\\s*filter:\\s*progid:DXImageTransform.Microsoft.Matrix\\(([^\\)]+)\\);");
@@ -282,7 +282,7 @@ public class CssCompressor {
         }
         m.appendTail(sb);
         css = sb.toString();
-    
+
         // lowercase some more common pseudo-elements
         sb = new StringBuffer();
         p = Pattern.compile("(?i):(active|after|before|checked|disabled|empty|enabled|first-(?:child|of-type)|focus|hover|last-(?:child|of-type)|link|only-(?:child|of-type)|root|:selection|target|visited)");
@@ -292,7 +292,7 @@ public class CssCompressor {
         }
         m.appendTail(sb);
         css = sb.toString();
-    
+
         // lowercase some more common functions
         sb = new StringBuffer();
         p = Pattern.compile("(?i):(lang|not|nth-child|nth-last-child|nth-last-of-type|nth-of-type|(?:-(?:moz|webkit)-)?any)\\(");
@@ -302,7 +302,7 @@ public class CssCompressor {
         }
         m.appendTail(sb);
         css = sb.toString();
-    
+
         // lower case some common function that can be values
         // NOTE: rgb() isn't useful as we replace with #hex later, as well as and() is already done for us right after this
         sb = new StringBuffer();
@@ -326,6 +326,7 @@ public class CssCompressor {
 
         // Replace 0(px,em,%) with 0.
         css = css.replaceAll("(?i)(^|[^0-9])(?:0?\\.)?0(?:px|em|%|in|cm|mm|pc|pt|ex|deg|g?rad|m?s|k?hz)", "$10");
+        css = css.replaceAll("(@(?:-.+?)?keyframes.*?)0(\\{|,)", "$10%$2");
 
         // Replace 0 0 0 0; with 0.
         css = css.replaceAll(":0 0 0 0(;|})", ":0$1");
@@ -391,7 +392,7 @@ public class CssCompressor {
 
             sb.append(css.substring(index, m.start()));
 
-            boolean isFilter = (m.group(1) != null && !"".equals(m.group(1))); 
+            boolean isFilter = (m.group(1) != null && !"".equals(m.group(1)));
 
             if (isFilter) {
                 // Restore, as is. Compression will break filters
