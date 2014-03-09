@@ -151,7 +151,8 @@ function fn (arg1, arg2, arg3) {
 The hint itself disappears from the compressed file.
 
 * C-style comments starting with `/*!` are preserved. This is useful with
-    comments containing copyright/license information. For example:
+    comments containing copyright/license information. As of 2.4.8, the '!'
+    is no longer dropped by YUICompressor. For example:
 
 ```
 /*!
@@ -161,15 +162,7 @@ The hint itself disappears from the compressed file.
  */
 ```
 
-becomes:
-
-```
-/*
- * TERMS OF USE - EASING EQUATIONS
- * Open source under the BSD License.
- * Copyright 2001 Robert Penner All rights reserved.
- */
-```
+remains in the output, untouched by YUICompressor.
 
 Modified Rhino Files
 --------------------
