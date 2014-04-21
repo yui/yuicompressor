@@ -579,7 +579,11 @@ public class JavaScriptCompressor {
     }
 
     private JavaScriptToken getToken(int delta) {
-        return (JavaScriptToken) tokens.get(offset + delta);
+        try {
+            return (JavaScriptToken) tokens.get(offset + delta);
+        } catch(IndexOutOfBoundsException ex) {
+            return null;
+        }
     }
 
     /*
