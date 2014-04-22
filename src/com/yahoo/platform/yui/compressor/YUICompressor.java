@@ -103,8 +103,15 @@ public class YUICompressor {
             }
 
             String output = (String) parser.getOptionValue(outputFilenameOpt);
-            String pattern[] = output != null ? output.split(":") : new String[0];
-
+            String pattern[];
+            if(output == null) {
+                pattern = new String[0];
+            } else if (output.matches("(?i)^[a-z]\\:\\\\.*")){ // if output is with something like c:\ dont split it
+                pattern = new String[]{output};
+            } else {
+                pattern = output.split(":");
+            }
+            
             try {
                 String mungemapFilename = (String) parser.getOptionValue(mungemapFilenameOpt);
                 if (mungemapFilename != null) {
