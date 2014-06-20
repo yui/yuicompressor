@@ -16,6 +16,9 @@
         }
     ],
     "bugs": { "url" : "http://yuilibrary.com/projects/yuicompressor/newticket" },
+    "dependencies": {
+        "kexec": "~0.2.0"
+    },
     "devDependencies": {
         "yuitest": "*"
     },
