@@ -24,7 +24,7 @@ public class JavaScriptCompressor {
     static final ArrayList threes;
 
     static final Set builtin = new HashSet();
-    static final Map literals = new Hashtable();
+    static final Map literals = new HashMap();
     static final Set reserved = new HashSet();
 
     static {
