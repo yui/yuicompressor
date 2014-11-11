@@ -30,31 +30,31 @@ public class CssCompressor {
         }
     }
 
-    // Leave data urls alone to increase parse performance.
-    protected String extractDataUrls(String css, ArrayList preservedTokens) {
+    /**
+     * @param css - full css string
+     * @param preservedToken - token to preserve
+     * @param tokenRegex - regex to find token
+     * @param removeWhiteSpace - remove any white space in the token
+     * @param preservedTokens - array of token values
+     * @return
+     */
+    protected String preserveToken(String css, String preservedToken,
+            String tokenRegex, boolean removeWhiteSpace, ArrayList preservedTokens) {
 
         int maxIndex = css.length() - 1;
         int appendIndex = 0;
 
         StringBuffer sb = new StringBuffer();
 
-        Pattern p = Pattern.compile("(?i)url\\(\\s*([\"']?)data\\:");
+        Pattern p = Pattern.compile(tokenRegex);
         Matcher m = p.matcher(css);
 
-        /*
-         * Since we need to account for non-base64 data urls, we need to handle
-         * ' and ) being part of the data string. Hence switching to indexOf,
-         * to determine whether or not we have matching string terminators and
-         * handling sb appends directly, instead of using matcher.append* methods.
-         */
-
         while (m.find()) {
-
-            int startIndex = m.start() + 4;      // "url(".length()
-            String terminator = m.group(1);     // ', " or empty (not quoted)
+            int startIndex = m.start() + (preservedToken.length() + 1);
+            String terminator = m.group(1);
 
             if (terminator.length() == 0) {
-                 terminator = ")";
+                terminator = ")";
             }
 
             boolean foundTerminator = false;
@@ -76,10 +76,11 @@ public class CssCompressor {
 
             if (foundTerminator) {
                 String token = css.substring(startIndex, endIndex);
-                token = token.replaceAll("\\s+", "");
+                if(removeWhiteSpace)
+                    token = token.replaceAll("\\s+", "");
                 preservedTokens.add(token);
 
-                String preserver = "url(___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___)";
+                String preserver = preservedToken + "(___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___)";
                 sb.append(preserver);
 
                 appendIndex = endIndex + 1;
@@ -92,20 +93,6 @@ public class CssCompressor {
 
         sb.append(css.substring(appendIndex));
 
-        return sb.toString();
-    }
-    
-    private String preserveOldIESpecificMatrixDefinition(String css, ArrayList preservedTokens) {
-        StringBuffer sb = new StringBuffer();
-        Pattern p = Pattern.compile("\\s*filter:\\s*progid:DXImageTransform.Microsoft.Matrix\\(([^\\)]+)\\);");
-        Matcher m = p.matcher(css);
-        while (m.find()) {
-            String token = m.group(1);
-            preservedTokens.add(token);
-            String preserver = "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___";
-            m.appendReplacement(sb, "filter:progid:DXImageTransform.Microsoft.Matrix(" + preserver + ");");
-        }
-        m.appendTail(sb);
         return sb.toString();
     }
 
@@ -126,7 +113,10 @@ public class CssCompressor {
         int totallen = css.length();
         String placeholder;
 
-        css = this.extractDataUrls(css, preservedTokens);
+        css = this.preserveToken(css, "url", "(?i)url\\(\\s*([\"']?)data\\:", true, preservedTokens);
+        css = this.preserveToken(css, "calc",  "(?i)calc\\s*([\"']?)", false, preservedTokens);
+        css = this.preserveToken(css, "progid:DXImageTransform.Microsoft.Matrix",  "(?i)progid:DXImageTransform.Microsoft.Matrix\\s*([\"']?)", false, preservedTokens);
+
 
         StringBuffer sb = new StringBuffer(css);
 
@@ -217,8 +207,6 @@ public class CssCompressor {
         // Normalize all whitespace strings to single spaces. Easier to work with that way.
         css = css.replaceAll("\\s+", " ");
 
-        css = this.preserveOldIESpecificMatrixDefinition(css, preservedTokens);
-
         // Remove the spaces before the things that should not have spaces before them.
         // But, be careful not to turn "p :link {...}" into "p:link{...}"
         // Swap out any pseudo-class colons with the token, and then swap back.
@@ -282,7 +270,7 @@ public class CssCompressor {
         }
         m.appendTail(sb);
         css = sb.toString();
-    
+
         // lowercase some more common pseudo-elements
         sb = new StringBuffer();
         p = Pattern.compile("(?i):(active|after|before|checked|disabled|empty|enabled|first-(?:child|of-type)|focus|hover|last-(?:child|of-type)|link|only-(?:child|of-type)|root|:selection|target|visited)");
@@ -292,7 +280,7 @@ public class CssCompressor {
         }
         m.appendTail(sb);
         css = sb.toString();
-    
+
         // lowercase some more common functions
         sb = new StringBuffer();
         p = Pattern.compile("(?i):(lang|not|nth-child|nth-last-child|nth-last-of-type|nth-of-type|(?:-(?:moz|webkit)-)?any)\\(");
@@ -302,7 +290,7 @@ public class CssCompressor {
         }
         m.appendTail(sb);
         css = sb.toString();
-    
+
         // lower case some common function that can be values
         // NOTE: rgb() isn't useful as we replace with #hex later, as well as and() is already done for us right after this
         sb = new StringBuffer();
@@ -393,7 +381,7 @@ public class CssCompressor {
 
             sb.append(css.substring(index, m.start()));
 
-            boolean isFilter = (m.group(1) != null && !"".equals(m.group(1))); 
+            boolean isFilter = (m.group(1) != null && !"".equals(m.group(1)));
 
             if (isFilter) {
                 // Restore, as is. Compression will break filters
@@ -479,7 +467,7 @@ public class CssCompressor {
         css = css.replaceAll(";;+", ";");
 
         // restore preserved comments and strings
-        for(i = preservedTokens.size() - 1; i >= 0 ; i--) {
+        for(i = 0, max = preservedTokens.size(); i < max; i++) {
             css = css.replace("___YUICSSMIN_PRESERVED_TOKEN_" + i + "___", preservedTokens.get(i).toString());
         }
 
