@@ -51,7 +51,7 @@
             <zipfileset src="${lib.dir}/rhino-1.7R2.jar"
                         excludes="**/Decompiler.class,**/Parser.class,**/Token.class,**/TokenStream.class"/>
             <zipfileset src="${lib.dir}/jargs-1.0.jar"/>
-            <rule pattern="org.mozilla.**" result="com.yahoo.platform.yui.compressor.@1"/>
+            <rule pattern="org.mozilla.**" result="com.yahoo.platform.yui.compressor.rhino.@1"/>
             <manifest>
                 <attribute name="Main-Class" value="com.yahoo.platform.yui.compressor.Bootstrap"/>
             </manifest>
