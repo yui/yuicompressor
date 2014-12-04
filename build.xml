@@ -44,18 +44,18 @@
 
     <target name="build.jar" depends="build.classes">
         <mkdir dir="${build.dir}/jar"/>
-        <!-- The order is important here. Rhino MUST be unjarred first!
-             (some of our own classes will override the Rhino classes) -->
-        <unjar src="${lib.dir}/jargs-1.0.jar" dest="${build.dir}/jar"/>
-        <unjar src="${lib.dir}/rhino-1.7R2.jar" dest="${build.dir}/jar"/>
-        <copy todir="${build.dir}/jar">
-            <fileset dir="${build.dir}/classes" includes="**/*.class"/>
-        </copy>
-        <jar destfile="${build.dir}/${jar.name}" basedir="${build.dir}/jar">
+        <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask"
+                 classpath="${lib.dir}/jarjar-1.4.jar"/>
+        <jarjar jarfile="${build.dir}/${jar.name}">
+            <fileset dir="${build.dir}/classes" />
+            <zipfileset src="${lib.dir}/rhino-1.7R2.jar"
+                        excludes="**/Decompiler.class,**/Parser.class,**/Token.class,**/TokenStream.class"/>
+            <zipfileset src="${lib.dir}/jargs-1.0.jar"/>
+            <rule pattern="org.mozilla.**" result="com.yahoo.platform.yui.compressor.@1"/>
             <manifest>
                 <attribute name="Main-Class" value="com.yahoo.platform.yui.compressor.Bootstrap"/>
             </manifest>
-        </jar>
+        </jarjar>
     </target>
 
     <target name="build.dist.package" depends="build.jar">
