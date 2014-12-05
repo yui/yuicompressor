@@ -1,13 +1,8 @@
-build_tmp/
-node_modules
-.DS_Store
-.*.swp
-.svn
-CVS/
-# Ignore all backup files
-*~
-# Ignore Emacs auto saved files
-*#*#
-build/classes
-build/jar
-build/yuicompressor*.jar
+*.iml
+*.ipr
+*.iws
+.classpath
+.project
+target/
+build/
+.idea/
