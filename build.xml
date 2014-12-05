@@ -52,9 +52,6 @@
                         excludes="**/Decompiler.class,**/Parser.class,**/Token.class,**/TokenStream.class"/>
             <zipfileset src="${lib.dir}/jargs-1.0.jar"/>
             <rule pattern="org.mozilla.**" result="com.yahoo.platform.yui.compressor.rhino.@1"/>
-            <manifest>
-                <attribute name="Main-Class" value="com.yahoo.platform.yui.compressor.Bootstrap"/>
-            </manifest>
         </jarjar>
     </target>
 
@@ -92,6 +89,9 @@
         </copy>
         <jar destfile="${build.dir}/${jar.name}">
             <fileset dir="${build.dir}/unpolluted/"/>
+            <manifest>
+                <attribute name="Main-Class" value="com.yahoo.platform.yui.compressor.Bootstrap"/>
+            </manifest>
         </jar>
     </target>
 </project>
