@@ -78,7 +78,7 @@
     </target>
 
     <!--
-    Workaround to remove empty packages. won't need this code one [1] will be resolved
+    Workaround to remove empty packages. won't need this code once [1] will be resolved
     https://code.google.com/p/jarjar/issues/detail?q=empty&id=32
     -->
     <target name="-removeemptypackages" depends="-shade">
