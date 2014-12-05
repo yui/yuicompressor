@@ -42,7 +42,7 @@
         </javac>
     </target>
 
-    <target name="build.jar" depends="build.classes">
+    <target name="-shade" depends="build.classes">
         <mkdir dir="${build.dir}/jar"/>
         <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask"
                  classpath="${lib.dir}/jarjar-1.4.jar"/>
@@ -57,6 +57,9 @@
             </manifest>
         </jarjar>
     </target>
+
+    <target name="build.jar" depends="-removeemptypackages"/>
+
 
     <target name="build.dist.package" depends="build.jar">
         <mkdir dir="${build.dir}/${dist.package.name}"/>
@@ -77,4 +80,18 @@
              includes="${dist.package.name}/**/*"/>
     </target>
 
+    <!--
+    Workaround to remove empty packages. won't need this code one [1] will be resolved
+    https://code.google.com/p/jarjar/issues/detail?q=empty&id=32
+    -->
+    <target name="-removeemptypackages" depends="-shade">
+        <mkdir dir="${build.dir}/exploded"/>
+        <unzip src="${build.dir}/${jar.name}" dest="${build.dir}/exploded/"/>
+        <copy includeemptydirs="false" todir="${build.dir}/unpolluted/">
+            <fileset dir="${build.dir}/exploded/"/>
+        </copy>
+        <jar destfile="${build.dir}/${jar.name}">
+            <fileset dir="${build.dir}/unpolluted/"/>
+        </jar>
+    </target>
 </project>
