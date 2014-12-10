@@ -53,6 +53,11 @@ public class CssCompressor {
             int startIndex = m.start() + (preservedToken.length() + 1);
             String terminator = m.group(1);
 
+            // skip this, if CSS was already copied to "sb" upto this position
+            if (m.start() < appendIndex) {
+                continue;
+            }
+
             if (terminator.length() == 0) {
                 terminator = ")";
             }
@@ -63,7 +68,9 @@ public class CssCompressor {
             while(foundTerminator == false && endIndex+1 <= maxIndex) {
                 endIndex = css.indexOf(terminator, endIndex+1);
 
-                if ((endIndex > 0) && (css.charAt(endIndex-1) != '\\')) {
+                if (endIndex <= 0) {
+                    break;
+                } else if ((endIndex > 0) && (css.charAt(endIndex-1) != '\\')) {
                     foundTerminator = true;
                     if (!")".equals(terminator)) {
                         endIndex = css.indexOf(")", endIndex);
@@ -113,10 +120,6 @@ public class CssCompressor {
         int totallen = css.length();
         String placeholder;
 
-        css = this.preserveToken(css, "url", "(?i)url\\(\\s*([\"']?)data\\:", true, preservedTokens);
-        css = this.preserveToken(css, "calc",  "(?i)calc\\s*([\"']?)", false, preservedTokens);
-        css = this.preserveToken(css, "progid:DXImageTransform.Microsoft.Matrix",  "(?i)progid:DXImageTransform.Microsoft.Matrix\\s*([\"']?)", false, preservedTokens);
-
 
         StringBuffer sb = new StringBuffer(css);
 
@@ -133,6 +136,12 @@ public class CssCompressor {
             startIndex += 2;
         }
         css = sb.toString();
+
+
+        css = this.preserveToken(css, "url", "(?i)url\\(\\s*([\"']?)data\\:", true, preservedTokens);
+        css = this.preserveToken(css, "calc",  "(?i)calc\\s*([\"']?)", false, preservedTokens);
+        css = this.preserveToken(css, "progid:DXImageTransform.Microsoft.Matrix",  "(?i)progid:DXImageTransform.Microsoft.Matrix\\s*([\"']?)", false, preservedTokens);
+
 
         // preserve strings so their content doesn't get accidentally minified
         sb = new StringBuffer();
