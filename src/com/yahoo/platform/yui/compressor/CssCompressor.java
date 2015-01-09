@@ -212,7 +212,13 @@ public class CssCompressor {
             css = css.replace("/*" + placeholder + "*/", "");
         }
 
-
+        // preserve \9 IE hack
+        final String backslash9 = "\\9"; 
+        while (css.indexOf(backslash9) > -1) {
+            preservedTokens.add(backslash9);
+            css = css.replace(backslash9,  "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___");
+     	}
+        
         // Normalize all whitespace strings to single spaces. Easier to work with that way.
         css = css.replaceAll("\\s+", " ");
 
