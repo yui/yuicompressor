@@ -139,7 +139,7 @@ public class CssCompressor {
 
 
         css = this.preserveToken(css, "url", "(?i)url\\(\\s*([\"']?)data\\:", true, preservedTokens);
-        css = this.preserveToken(css, "calc",  "(?i)calc\\s*([\"']?)", false, preservedTokens);
+        css = this.preserveToken(css, "calc",  "(?i)calc\\(\\s*([\"']?)", false, preservedTokens);
         css = this.preserveToken(css, "progid:DXImageTransform.Microsoft.Matrix",  "(?i)progid:DXImageTransform.Microsoft.Matrix\\s*([\"']?)", false, preservedTokens);
 
 
