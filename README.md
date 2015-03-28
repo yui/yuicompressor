@@ -65,7 +65,7 @@ TODO
 Build Status
 ------------
 
-[![Build Status](https://secure.travis-ci.org/yui/yuicompressor.png?branch=master)](http://travis-ci.org/yui/yuicompressor)
+[![Build Status](https://secure.travis-ci.org/yui/yuicompressor.svg?branch=master)](http://travis-ci.org/yui/yuicompressor)
 
 
 Global Options
