@@ -42,21 +42,21 @@
         </javac>
     </target>
 
-    <target name="build.jar" depends="build.classes">
+    <target name="-shade" depends="build.classes">
         <mkdir dir="${build.dir}/jar"/>
-        <!-- The order is important here. Rhino MUST be unjarred first!
-             (some of our own classes will override the Rhino classes) -->
-        <unjar src="${lib.dir}/jargs-1.0.jar" dest="${build.dir}/jar"/>
-        <unjar src="${lib.dir}/rhino-1.7R2.jar" dest="${build.dir}/jar"/>
-        <copy todir="${build.dir}/jar">
-            <fileset dir="${build.dir}/classes" includes="**/*.class"/>
-        </copy>
-        <jar destfile="${build.dir}/${jar.name}" basedir="${build.dir}/jar">
-            <manifest>
-                <attribute name="Main-Class" value="com.yahoo.platform.yui.compressor.Bootstrap"/>
-            </manifest>
-        </jar>
+        <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask"
+                 classpath="${lib.dir}/jarjar-1.4.jar"/>
+        <jarjar jarfile="${build.dir}/${jar.name}">
+            <fileset dir="${build.dir}/classes" />
+            <zipfileset src="${lib.dir}/rhino-1.7R2.jar"
+                        excludes="**/Decompiler.class,**/Parser.class,**/Token.class,**/TokenStream.class"/>
+            <zipfileset src="${lib.dir}/jargs-1.0.jar"/>
+            <rule pattern="org.mozilla.**" result="com.yahoo.platform.yui.compressor.rhino.@1"/>
+        </jarjar>
     </target>
+
+    <target name="build.jar" depends="-removeemptypackages"/>
+
 
     <target name="build.dist.package" depends="build.jar">
         <mkdir dir="${build.dir}/${dist.package.name}"/>
@@ -77,4 +77,21 @@
              includes="${dist.package.name}/**/*"/>
     </target>
 
+    <!--
+    Workaround to remove empty packages. won't need this code once [1] will be resolved
+    https://code.google.com/p/jarjar/issues/detail?q=empty&id=32
+    -->
+    <target name="-removeemptypackages" depends="-shade">
+        <mkdir dir="${build.dir}/exploded"/>
+        <unzip src="${build.dir}/${jar.name}" dest="${build.dir}/exploded/"/>
+        <copy includeemptydirs="false" todir="${build.dir}/unpolluted/">
+            <fileset dir="${build.dir}/exploded/"/>
+        </copy>
+        <jar destfile="${build.dir}/${jar.name}">
+            <fileset dir="${build.dir}/unpolluted/"/>
+            <manifest>
+                <attribute name="Main-Class" value="com.yahoo.platform.yui.compressor.Bootstrap"/>
+            </manifest>
+        </jar>
+    </target>
 </project>

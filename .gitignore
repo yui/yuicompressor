@@ -8,6 +8,6 @@ CVS/
 *~
 # Ignore Emacs auto saved files
 *#*#
-build/classes
-build/jar
-build/yuicompressor*.jar
+build/
+.idea/
+*.iml
