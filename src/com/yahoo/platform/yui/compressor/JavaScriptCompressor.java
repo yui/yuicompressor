@@ -316,7 +316,7 @@ public class JavaScriptCompressor {
         String source = parser.getEncodedSource();
 
         int offset = 0;
-        int length = source.length();
+        int length = (source != null) ? source.length() : 0;
         ArrayList tokens = new ArrayList();
         StringBuffer sb = new StringBuffer();
 

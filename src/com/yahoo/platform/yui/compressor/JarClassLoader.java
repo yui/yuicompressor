@@ -134,14 +134,19 @@ public class JarClassLoader extends ClassLoader {
 
         // Read the Jar File entry and define the class...
         Class c = null;
+        InputStream is = null;
         try {
-            InputStream is = jarFile.getInputStream(jarEntry);
+            is = jarFile.getInputStream(jarEntry);
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             copy(is, os);
             byte[] bytes = os.toByteArray();
             c = defineClass(className, bytes, 0, bytes.length);
         } catch (IOException ioe) {
             /* ignore */
+        } finally {
+          if (is != null) {
+            try { is.close(); } catch(Exception e) {}
+          }
         }
 
         return c;
