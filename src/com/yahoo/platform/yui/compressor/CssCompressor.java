@@ -261,7 +261,8 @@ public class CssCompressor {
         p = Pattern.compile("(?i)^(.*)(@charset)( \"[^\"]*\";)");
         m = p.matcher(css);
         while (m.find()) {
-            m.appendReplacement(sb, m.group(2).toLowerCase() + m.group(3) + m.group(1));
+            String s = m.group(1).replaceAll("\\\\", "\\\\\\\\").replaceAll("\\$", "\\\\\\$");
+            m.appendReplacement(sb, m.group(2).toLowerCase() + m.group(3) + s);
         }
         m.appendTail(sb);
         css = sb.toString();
