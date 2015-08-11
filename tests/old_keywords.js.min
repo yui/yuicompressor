@@ -1,0 +1,1 @@
+var is={boolean:function(a){return"boolean"==typeof a},int:function(a){return"number"==typeof a},byte:function(a){return"number"==typeof a},short:function(a){return"number"==typeof a},long:function(a){return"number"==typeof a},double:function(a){return"number"==typeof a},char:function(a){return"number"==typeof a}};
