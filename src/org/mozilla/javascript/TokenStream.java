@@ -179,24 +179,24 @@ class TokenStream
                 break L;
             case 3: switch (s.charAt(0)) {
                 case 'f': if (s.charAt(2)=='r' && s.charAt(1)=='o') {id=Id_for; break L0;} break L;
-                case 'i': if (s.charAt(2)=='t' && s.charAt(1)=='n') {id=Id_int; break L0;} break L;
+//                case 'i': if (s.charAt(2)=='t' && s.charAt(1)=='n') {id=Id_int; break L0;} break L;
                 case 'l': if (s.charAt(2)=='t' && s.charAt(1)=='e') {id=Id_let; break L0;} break L;
                 case 'n': if (s.charAt(2)=='w' && s.charAt(1)=='e') {id=Id_new; break L0;} break L;
                 case 't': if (s.charAt(2)=='y' && s.charAt(1)=='r') {id=Id_try; break L0;} break L;
                 case 'v': if (s.charAt(2)=='r' && s.charAt(1)=='a') {id=Id_var; break L0;} break L;
                 } break L;
             case 4: switch (s.charAt(0)) {
-                case 'b': X="byte";id=Id_byte; break L;
+//                case 'b': X="byte";id=Id_byte; break L;
                 case 'c': c=s.charAt(3);
                     if (c=='e') { if (s.charAt(2)=='s' && s.charAt(1)=='a') {id=Id_case; break L0;} }
-                    else if (c=='r') { if (s.charAt(2)=='a' && s.charAt(1)=='h') {id=Id_char; break L0;} }
+//                    else if (c=='r') { if (s.charAt(2)=='a' && s.charAt(1)=='h') {id=Id_char; break L0;} }
                     break L;
                 case 'e': c=s.charAt(3);
                     if (c=='e') { if (s.charAt(2)=='s' && s.charAt(1)=='l') {id=Id_else; break L0;} }
                     else if (c=='m') { if (s.charAt(2)=='u' && s.charAt(1)=='n') {id=Id_enum; break L0;} }
                     break L;
                 case 'g': X="goto";id=Id_goto; break L;
-                case 'l': X="long";id=Id_long; break L;
+//                case 'l': X="long";id=Id_long; break L;
                 case 'n': X="null";id=Id_null; break L;
                 case 't': c=s.charAt(3);
                     if (c=='e') { if (s.charAt(2)=='u' && s.charAt(1)=='r') {id=Id_true; break L0;} }
@@ -218,8 +218,8 @@ class TokenStream
                     else if (c=='f') { X="final";id=Id_final; }
                     break L;
                 case 'o': c=s.charAt(0);
-                    if (c=='f') { X="float";id=Id_float; }
-                    else if (c=='s') { X="short";id=Id_short; }
+//                    if (c=='f') { X="float";id=Id_float; }
+//                    else if (c=='s') { X="short";id=Id_short; }
                     break L;
                 case 'p': X="super";id=Id_super; break L;
                 case 'r': X="throw";id=Id_throw; break L;
@@ -233,7 +233,7 @@ class TokenStream
                     break L;
                 case 'h': X="throws";id=Id_throws; break L;
                 case 'm': X="import";id=Id_import; break L;
-                case 'o': X="double";id=Id_double; break L;
+//                case 'o': X="double";id=Id_double; break L;
                 case 't': X="static";id=Id_static; break L;
                 case 'u': X="public";id=Id_public; break L;
                 case 'w': X="switch";id=Id_switch; break L;
@@ -244,7 +244,7 @@ class TokenStream
                 case 'a': X="package";id=Id_package; break L;
                 case 'e': X="default";id=Id_default; break L;
                 case 'i': X="finally";id=Id_finally; break L;
-                case 'o': X="boolean";id=Id_boolean; break L;
+//                case 'o': X="boolean";id=Id_boolean; break L;
                 case 'r': X="private";id=Id_private; break L;
                 case 'x': X="extends";id=Id_extends; break L;
                 } break L;
