@@ -41,7 +41,7 @@
 
 /* same value for multiple steps */
 @keyframes test4 {
-    from, 50%, to {
+    50%, 0%, to {
         opacity: 0;
     }
     25%, 75% {
