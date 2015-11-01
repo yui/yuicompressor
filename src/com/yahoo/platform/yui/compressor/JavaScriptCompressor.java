@@ -62,7 +62,7 @@ public class JavaScriptCompressor {
             for (char c = '0'; c <= '9'; c++)
                 threes.add(two + Character.toString(c));
         }
-        
+
         // Remove two-letter JavaScript reserved words and built-in globals...
         twos.remove("as");
         twos.remove("is");
@@ -70,7 +70,7 @@ public class JavaScriptCompressor {
         twos.remove("if");
         twos.remove("in");
         twos.removeAll(builtin);
-        
+
         // Remove three-letter JavaScript reserved words and built-in globals...
         threes.remove("for");
         threes.remove("int");
@@ -535,7 +535,10 @@ public class JavaScriptCompressor {
         this.logger = reporter;
         this.tokens = parse(in, reporter);
     }
-
+    public void compress(Writer out, int linebreak, boolean munge, boolean verbose,
+            boolean preserveAllSemiColons, boolean disableOptimizations) {
+        compress(out, null, linebreak, munge, verbose, preserveAllSemiColons, disableOptimizations);
+    }
     public void compress(Writer out, Writer mungemap, int linebreak, boolean munge, boolean verbose,
             boolean preserveAllSemiColons, boolean disableOptimizations)
             throws IOException {
