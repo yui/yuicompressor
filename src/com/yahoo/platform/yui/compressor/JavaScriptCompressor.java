@@ -542,7 +542,8 @@ public class JavaScriptCompressor {
     public void compress(Writer out, int linebreak, boolean munge, boolean verbose,
             boolean preserveAllSemiColons, boolean disableOptimizations) 
             throws IOException {
-        compress(out, null, linebreak, munge, verbose, preserveAllSemiColons, disableOptimizations);
+        compress(out, null, linebreak, munge, verbose, preserveAllSemiColons, 
+            disableOptimizations, false);
     }
     public void compress(Writer out, Writer mungemap, int linebreak, boolean munge, boolean verbose,
             boolean preserveAllSemiColons, boolean disableOptimizations, boolean preserveUnknownHints)
