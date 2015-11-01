@@ -361,31 +361,34 @@ public class JavaScriptCompressor {
         if (merge) {
 
             // Concatenate string literals that are being appended wherever
-            // it is safe to do so. Note that we take care of the case:
+            // it is safe to do so. Note that we take care of the cases:
             //     "a" + "b".toUpperCase()
+            //     "a" + "bcd"[i]
 
-            for (i = 0; i < length; i++) {
+            for (i = 1; i < length - 1; i++) {
                 token = (JavaScriptToken) tokens.get(i);
-                switch (token.getType()) {
-
-                    case Token.ADD:
-                        if (i > 0 && i < length) {
-                            prevToken = (JavaScriptToken) tokens.get(i - 1);
-                            nextToken = (JavaScriptToken) tokens.get(i + 1);
-                            if (prevToken.getType() == Token.STRING && nextToken.getType() == Token.STRING &&
-                                    (i == length - 1 || ((JavaScriptToken) tokens.get(i + 2)).getType() != Token.DOT)) {
-                                tokens.set(i - 1, new JavaScriptToken(Token.STRING,
-                                        prevToken.getValue() + nextToken.getValue()));
-                                tokens.remove(i + 1);
-                                tokens.remove(i);
-                                i = i - 1;
-                                length = length - 2;
-                                break;
+                if (token.getType() == Token.ADD) {
+                    prevToken = (JavaScriptToken) tokens.get(i - 1);
+                    nextToken = (JavaScriptToken) tokens.get(i + 1);
+                    if (prevToken.getType() == Token.STRING &&
+                        nextToken.getType() == Token.STRING ) {
+                        if (i < length - 2) {
+                            JavaScriptToken nextNextToken = (JavaScriptToken) tokens.get(i + 2);
+                            if (nextNextToken.getType() == Token.DOT ||
+                                nextNextToken.getType() == Token.LB) {
+                                i += 3;
+                                continue;
                             }
                         }
+                        tokens.set(i - 1, new JavaScriptToken(Token.STRING,
+                            prevToken.getValue() + nextToken.getValue()));
+                        tokens.remove(i + 1);
+                        tokens.remove(i);
+                        i--;
+                        length -= 2;
+                    }
                 }
             }
-
         }
 
         // Second pass...
