@@ -31,6 +31,7 @@ public class YUICompressor {
         CmdLineParser.Option charsetOpt = parser.addStringOption("charset");
         CmdLineParser.Option outputFilenameOpt = parser.addStringOption('o', "output");
         CmdLineParser.Option mungemapFilenameOpt = parser.addStringOption('m', "mungemap");
+        CmdLineParser.Option preserveUnknownHintsOpt = parser.addBooleanOption('p', "preservehints");
 
         Reader in = null;
         Writer out = null;
@@ -90,6 +91,7 @@ public class YUICompressor {
             boolean munge = parser.getOptionValue(nomungeOpt) == null;
             boolean preserveAllSemiColons = parser.getOptionValue(preserveSemiOpt) != null;
             boolean disableOptimizations = parser.getOptionValue(disableOptimizationsOpt) != null;
+            boolean preserveUnknownHints = parser.getOptionValue(preserveUnknownHintsOpt) != null;
 
             String[] fileArgs = parser.getRemainingArgs();
             java.util.List files = java.util.Arrays.asList(fileArgs);
@@ -206,7 +208,7 @@ public class YUICompressor {
                             }
 
                             compressor.compress(out, mungemap, linebreakpos, munge, verbose,
-                                    preserveAllSemiColons, disableOptimizations);
+                                    preserveAllSemiColons, disableOptimizations, preserveUnknownHints);
 
                         } catch (EvaluatorException e) {
 
@@ -288,6 +290,7 @@ public class YUICompressor {
                         + "  --charset <charset>       Read the input file using <charset>\n"
                         + "  --line-break <column>     Insert a line break after the specified column number\n"
                         + "  -v, --verbose             Display informational messages and warnings\n"
+                        + "  -p, --preservehints       Don't elide unrecognized compiler hints (e.g. \"use strict\", \"use asm\")\n"
                         + "  -m <file>                 Place a mapping of munged identifiers to originals in this file\n\n"
                         + "  -o <file>                 Place the output into <file>. Defaults to stdout.\n"
                         + "                            Multiple files can be processed using the following syntax:\n"

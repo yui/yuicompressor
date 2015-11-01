@@ -520,6 +520,7 @@ public class JavaScriptCompressor {
 
     private boolean munge;
     private boolean verbose;
+    private boolean preserveUnknownHints;
 
     private static final int BUILDING_SYMBOL_TREE = 1;
     private static final int CHECKING_SYMBOL_TREE = 2;
@@ -541,14 +542,16 @@ public class JavaScriptCompressor {
     public void compress(Writer out, int linebreak, boolean munge, boolean verbose,
             boolean preserveAllSemiColons, boolean disableOptimizations) 
             throws IOException {
-        compress(out, null, linebreak, munge, verbose, preserveAllSemiColons, disableOptimizations);
+        compress(out, null, linebreak, munge, verbose, preserveAllSemiColons, 
+            disableOptimizations, false);
     }
     public void compress(Writer out, Writer mungemap, int linebreak, boolean munge, boolean verbose,
-            boolean preserveAllSemiColons, boolean disableOptimizations)
+            boolean preserveAllSemiColons, boolean disableOptimizations, boolean preserveUnknownHints)
             throws IOException {
 
         this.munge = munge;
         this.verbose = verbose;
+        this.preserveUnknownHints = preserveUnknownHints;
 
         processStringLiterals(this.tokens, !disableOptimizations);
 
@@ -730,9 +733,9 @@ public class JavaScriptCompressor {
                 String hint = st1.nextToken();
                 int idx = hint.indexOf(':');
                 if (idx <= 0 || idx >= hint.length() - 1) {
-                    if (mode == BUILDING_SYMBOL_TREE) {
+                    if (mode == BUILDING_SYMBOL_TREE && (! preserveUnknownHints)) {
                         // No need to report the error twice, hence the test...
-                        warn("Invalid hint syntax: " + hint, true);
+                        warn("Not a YUICompressor hint: " + hint, true);
                     }
                     break;
                 }
@@ -1239,9 +1242,11 @@ public class JavaScriptCompressor {
                     token = getToken(0);
                     if (token.getType() == Token.STRING &&
                             getToken(1).getType() == Token.SEMI) {
-                        // This is a hint. Skip it!
-                        consumeToken();
-                        consumeToken();
+                        if (! preserveUnknownHints) {
+                            // This is an unknown hint. Skip it!
+                            consumeToken();
+                            consumeToken();
+                        }
                     }
                     break;
 
