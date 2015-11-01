@@ -62,7 +62,7 @@ public class JavaScriptCompressor {
             for (char c = '0'; c <= '9'; c++)
                 threes.add(two + Character.toString(c));
         }
-        
+
         // Remove two-letter JavaScript reserved words and built-in globals...
         twos.remove("as");
         twos.remove("is");
@@ -70,7 +70,7 @@ public class JavaScriptCompressor {
         twos.remove("if");
         twos.remove("in");
         twos.removeAll(builtin);
-        
+
         // Remove three-letter JavaScript reserved words and built-in globals...
         threes.remove("for");
         threes.remove("int");
@@ -316,7 +316,7 @@ public class JavaScriptCompressor {
         String source = parser.getEncodedSource();
 
         int offset = 0;
-        int length = source.length();
+        int length = (source != null) ? source.length() : 0;
         ArrayList tokens = new ArrayList();
         StringBuffer sb = new StringBuffer();
 
@@ -361,31 +361,34 @@ public class JavaScriptCompressor {
         if (merge) {
 
             // Concatenate string literals that are being appended wherever
-            // it is safe to do so. Note that we take care of the case:
+            // it is safe to do so. Note that we take care of the cases:
             //     "a" + "b".toUpperCase()
+            //     "a" + "bcd"[i]
 
-            for (i = 0; i < length; i++) {
+            for (i = 1; i < length - 1; i++) {
                 token = (JavaScriptToken) tokens.get(i);
-                switch (token.getType()) {
-
-                    case Token.ADD:
-                        if (i > 0 && i < length) {
-                            prevToken = (JavaScriptToken) tokens.get(i - 1);
-                            nextToken = (JavaScriptToken) tokens.get(i + 1);
-                            if (prevToken.getType() == Token.STRING && nextToken.getType() == Token.STRING &&
-                                    (i == length - 1 || ((JavaScriptToken) tokens.get(i + 2)).getType() != Token.DOT)) {
-                                tokens.set(i - 1, new JavaScriptToken(Token.STRING,
-                                        prevToken.getValue() + nextToken.getValue()));
-                                tokens.remove(i + 1);
-                                tokens.remove(i);
-                                i = i - 1;
-                                length = length - 2;
-                                break;
+                if (token.getType() == Token.ADD) {
+                    prevToken = (JavaScriptToken) tokens.get(i - 1);
+                    nextToken = (JavaScriptToken) tokens.get(i + 1);
+                    if (prevToken.getType() == Token.STRING &&
+                        nextToken.getType() == Token.STRING ) {
+                        if (i < length - 2) {
+                            JavaScriptToken nextNextToken = (JavaScriptToken) tokens.get(i + 2);
+                            if (nextNextToken.getType() == Token.DOT ||
+                                nextNextToken.getType() == Token.LB) {
+                                i += 3;
+                                continue;
                             }
                         }
+                        tokens.set(i - 1, new JavaScriptToken(Token.STRING,
+                            prevToken.getValue() + nextToken.getValue()));
+                        tokens.remove(i + 1);
+                        tokens.remove(i);
+                        i--;
+                        length -= 2;
+                    }
                 }
             }
-
         }
 
         // Second pass...
@@ -536,7 +539,11 @@ public class JavaScriptCompressor {
         this.logger = reporter;
         this.tokens = parse(in, reporter);
     }
-
+    public void compress(Writer out, int linebreak, boolean munge, boolean verbose,
+            boolean preserveAllSemiColons, boolean disableOptimizations) 
+            throws IOException {
+        compress(out, null, linebreak, munge, verbose, preserveAllSemiColons, disableOptimizations);
+    }
     public void compress(Writer out, Writer mungemap, int linebreak, boolean munge, boolean verbose,
             boolean preserveAllSemiColons, boolean disableOptimizations, boolean preserveUnknownHints)
             throws IOException {

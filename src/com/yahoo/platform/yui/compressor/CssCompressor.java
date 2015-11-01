@@ -139,7 +139,7 @@ public class CssCompressor {
 
 
         css = this.preserveToken(css, "url", "(?i)url\\(\\s*([\"']?)data\\:", true, preservedTokens);
-        css = this.preserveToken(css, "calc",  "(?i)calc\\s*([\"']?)", false, preservedTokens);
+        css = this.preserveToken(css, "calc",  "(?i)calc\\(\\s*([\"']?)", false, preservedTokens);
         css = this.preserveToken(css, "progid:DXImageTransform.Microsoft.Matrix",  "(?i)progid:DXImageTransform.Microsoft.Matrix\\s*([\"']?)", false, preservedTokens);
 
 
@@ -212,7 +212,13 @@ public class CssCompressor {
             css = css.replace("/*" + placeholder + "*/", "");
         }
 
-
+        // preserve \9 IE hack
+        final String backslash9 = "\\9"; 
+        while (css.indexOf(backslash9) > -1) {
+            preservedTokens.add(backslash9);
+            css = css.replace(backslash9,  "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___");
+     	}
+        
         // Normalize all whitespace strings to single spaces. Easier to work with that way.
         css = css.replaceAll("\\s+", " ");
 
@@ -255,7 +261,8 @@ public class CssCompressor {
         p = Pattern.compile("(?i)^(.*)(@charset)( \"[^\"]*\";)");
         m = p.matcher(css);
         while (m.find()) {
-            m.appendReplacement(sb, m.group(2).toLowerCase() + m.group(3) + m.group(1));
+            String s = m.group(1).replaceAll("\\\\", "\\\\\\\\").replaceAll("\\$", "\\\\\\$");
+            m.appendReplacement(sb, m.group(2).toLowerCase() + m.group(3) + s);
         }
         m.appendTail(sb);
         css = sb.toString();
