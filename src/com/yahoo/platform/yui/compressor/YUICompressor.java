@@ -13,6 +13,7 @@ import org.mozilla.javascript.ErrorReporter;
 import org.mozilla.javascript.EvaluatorException;
 
 import java.io.*;
+import java.net.*;
 import java.nio.charset.Charset;
 
 public class YUICompressor {
@@ -128,6 +129,17 @@ public class YUICompressor {
             while(filenames.hasNext()) {
                 String inputFilename = (String)filenames.next();
                 String type = null;
+				InputStream inputFileStream = null;
+				if ( inputFilename.substring(0, 4).equalsIgnoreCase("http") )
+				{
+					try {
+					inputFileStream = new URL(inputFilename).openStream();
+					}catch (IOException e) 
+					{
+						e.printStackTrace();
+						System.exit(1);
+					}
+				}
                 try {
                     if (inputFilename.equals("-")) {
 
@@ -151,7 +163,12 @@ public class YUICompressor {
                             System.exit(1);
                         }
 
-                        in = new InputStreamReader(new FileInputStream(inputFilename), charset);
+						if ( inputFilename.substring(0, 4).equalsIgnoreCase("http") )
+						{ 
+							in = new InputStreamReader(inputFileStream, charset);
+						}else{
+							in = new InputStreamReader(new FileInputStream(inputFilename), charset);
+						}
                     }
 
                     String outputFilename = output;
