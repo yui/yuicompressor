@@ -329,7 +329,22 @@ public class CssCompressor {
         css = css.replaceAll(";+}", "}");
 
         // Replace 0(px,em,%) with 0.
-        css = css.replaceAll("(?i)(^|: ?)((?:[0-9a-z-]+ )*)?(?:0?\\.)?0(?:px|em|%|in|cm|mm|pc|pt|ex|deg|g?rad|m?s|k?hz)", "$1$20");
+        String oldCss;
+        p = Pattern.compile("(?i)(^|: ?)((?:[0-9a-z-.]+ )*?)?(?:0?\\.)?0(?:px|em|%|in|cm|mm|pc|pt|ex|deg|g?rad|m?s|k?hz)");
+        do {
+          oldCss = css;
+          m = p.matcher(css);
+          css = m.replaceAll("$1$20");
+        } while (!(css.equals(oldCss)));
+
+        // Replace 0(px,em,%) with 0 inside groups (e.g. -MOZ-RADIAL-GRADIENT(CENTER 45DEG, CIRCLE CLOSEST-SIDE, ORANGE 0%, RED 100%))
+        p = Pattern.compile("(?i)\\( ?((?:[0-9a-z-.]+[ ,])*)?(?:0?\\.)?0(?:px|em|%|in|cm|mm|pc|pt|ex|deg|g?rad|m?s|k?hz)");
+        do {
+          oldCss = css;
+          m = p.matcher(css);
+          css = m.replaceAll("($10");
+        } while (!(css.equals(oldCss)));
+
         // Replace x.0(px,em,%) with x(px,em,%).
         css = css.replaceAll("([0-9])\\.0(px|em|%|in|cm|mm|pc|pt|ex|deg|g?rad|m?s|k?hz| |;)", "$1$2");
 
