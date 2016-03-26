@@ -486,6 +486,24 @@ public class CssCompressor {
         for(i = 0, max = preservedTokens.size(); i < max; i++) {
             css = css.replace("___YUICSSMIN_PRESERVED_TOKEN_" + i + "___", preservedTokens.get(i).toString());
         }
+        
+        // Add spaces back in between operators for css calc function
+        // https://developer.mozilla.org/en-US/docs/Web/CSS/calc
+        // Added by Eric Arnol-Martin (earnolmartin@gmail.com)
+        sb = new StringBuffer();
+        p = Pattern.compile("calc\\([^\\)]*\\)");
+        m = p.matcher(css);
+        while (m.find()) {
+            String s = m.group();
+            
+            s = s.replaceAll("(?<=[%|px|em|rem|vw]+)\\+", " + ");
+            s = s.replaceAll("(?<=[%|px|em|rem|vw]+)\\-", " - ");
+            s = s.replaceAll("(?<=[%|px|em|rem|vw]+)\\*", " * ");
+            s = s.replaceAll("(?<=[%|px|em|rem|vw]+)\\/", " / ");
+            m.appendReplacement(sb, s);
+        }
+        m.appendTail(sb);
+        css = sb.toString(); 
 
         // Trim the final string (for any leading or trailing white spaces)
         css = css.trim();
