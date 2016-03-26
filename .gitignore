@@ -10,6 +10,6 @@ CVS/
 *#*#
 build/classes
 build/jar
-build/yuicompressor*.jar
+build/build_tmp
 .project
 .classpath
