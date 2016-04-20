@@ -1,3 +1,0 @@
-#!/bin/sh
-
-java -jar /home/y/bin/yuicompressor.jar $*
