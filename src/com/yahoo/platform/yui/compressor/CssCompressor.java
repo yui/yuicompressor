@@ -328,14 +328,27 @@ public class CssCompressor {
         // remove unnecessary semicolons
         css = css.replaceAll(";+}", "}");
 
-        // Replace zero values with 0
-        // e.g. 0px, 0em, 0%, 0.0px, 0.0em, 0%
-        // WARN: keep animation step units!
-        css = css.replaceAll("(?i)(^|[^.0-9{])(?:0?\\.)?0(?:px|em|%|in|cm|mm|pc|pt|ex|deg|g?rad|m?s|k?hz)", "$10");
+        // Replace 0(px,em,%) with 0.
+        String oldCss;
+        p = Pattern.compile("(?i)(^|: ?)((?:[0-9a-z-.]+ )*?)?(?:0?\\.)?0(?:px|em|%|in|cm|mm|pc|pt|ex|deg|g?rad|m?s|k?hz)");
+        do {
+          oldCss = css;
+          m = p.matcher(css);
+          css = m.replaceAll("$1$20");
+        } while (!(css.equals(oldCss)));
+
+        // Replace 0(px,em,%) with 0 inside groups (e.g. -MOZ-RADIAL-GRADIENT(CENTER 45DEG, CIRCLE CLOSEST-SIDE, ORANGE 0%, RED 100%))
+        p = Pattern.compile("(?i)\\( ?((?:[0-9a-z-.]+[ ,])*)?(?:0?\\.)?0(?:px|em|%|in|cm|mm|pc|pt|ex|deg|g?rad|m?s|k?hz)");
+        do {
+          oldCss = css;
+          m = p.matcher(css);
+          css = m.replaceAll("($10");
+        } while (!(css.equals(oldCss)));
+
         // Replace x.0(px,em,%) with x(px,em,%).
         css = css.replaceAll("([0-9])\\.0(px|em|%|in|cm|mm|pc|pt|ex|deg|g?rad|m?s|k?hz| |;)", "$1$2");
 
-        // Replace 0 0 0 0; with 0
+        // Replace 0 0 0 0; with 0.
         css = css.replaceAll(":0 0 0 0(;|})", ":0$1");
         css = css.replaceAll(":0 0 0(;|})", ":0$1");
         css = css.replaceAll(":0 0(;|})", ":0$1");

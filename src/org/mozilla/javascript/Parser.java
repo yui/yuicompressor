@@ -1970,7 +1970,18 @@ public class Parser
 
                     tt = nextToken();
                     switch (tt) {
-                    
+                      // handle promise.catch()
+                      case Token.CATCH:
+                        decompiler.addName("catch");
+                        pn = propertyName(pn, "catch", memberTypeFlags);
+                        break;
+
+                      // handle promise.finally()
+                      case Token.FINALLY:
+                    	decompiler.addName("finally");
+                    	pn = propertyName(pn, "finally", memberTypeFlags);
+                    	break;
+
                       // needed for generator.throw();
                       case Token.THROW:
                         decompiler.addName("throw");
