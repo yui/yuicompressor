@@ -353,6 +353,12 @@ public class CssCompressor {
         css = css.replaceAll(":0 0 0(;|})", ":0$1");
         css = css.replaceAll(":0 0(;|})", ":0$1");
 
+        // Replace "from" with "0%" in keyframes
+        css = css.replaceAll("([{},])from([{,])", "$10%$2");
+
+        // Replace "100%" with "to" in keyframes
+        css = css.replaceAll("([{},])100%([{,])", "$1to$2");
+
 
         // Replace background-position:0; with background-position:0 0;
         // same for transform-origin

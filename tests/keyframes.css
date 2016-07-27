@@ -7,12 +7,20 @@
  */
 
 /* steps defined by strings */
-@keyframes test1 {
+@keyframes test1-1 {
     from {
         opacity: 1;
     }
     to {
         opacity: 0;
+    }
+}
+@keyframes test1-2 {
+    to {
+        opacity: 0;
+    }
+    from {
+        opacity: 1;
     }
 }
 
@@ -40,8 +48,16 @@
 }
 
 /* same value for multiple steps */
-@keyframes test4 {
+@keyframes test4-1 {
     50%, 0%, to {
+        opacity: 0;
+    }
+    25%, 75% {
+        opacity: 1;
+    }
+}
+@keyframes test4-2 {
+    50%, from, to {
         opacity: 0;
     }
     25%, 75% {
