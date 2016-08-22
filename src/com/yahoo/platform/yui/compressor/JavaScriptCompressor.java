@@ -313,8 +313,20 @@ public class JavaScriptCompressor {
         env.setLanguageVersion(Context.VERSION_1_7);
         Parser parser = new Parser(env, reporter);
         parser.parse(in, null, 1);
-        String source = parser.getEncodedSource();
+        return getTokensFromEncodedSource(parser.getEncodedSource());
+    }
 
+    private static ArrayList parse(String in, ErrorReporter reporter)
+            throws IOException, EvaluatorException {
+
+        CompilerEnvirons env = new CompilerEnvirons();
+        env.setLanguageVersion(Context.VERSION_1_7);
+        Parser parser = new Parser(env, reporter);
+        parser.parse(in, null, 1);
+        return getTokensFromEncodedSource(parser.getEncodedSource());
+    }
+
+    private static ArrayList getTokensFromEncodedSource (String source) {
         int offset = 0;
         int length = (source != null) ? source.length() : 0;
         ArrayList tokens = new ArrayList();
@@ -539,6 +551,12 @@ public class JavaScriptCompressor {
         this.logger = reporter;
         this.tokens = parse(in, reporter);
     }
+    public JavaScriptCompressor(String in, ErrorReporter reporter)
+            throws IOException, EvaluatorException {
+
+        this.logger = reporter;
+        this.tokens = parse(in, reporter);
+    }
     public void compress(Writer out, int linebreak, boolean munge, boolean verbose,
             boolean preserveAllSemiColons, boolean disableOptimizations) 
             throws IOException {
@@ -546,6 +564,17 @@ public class JavaScriptCompressor {
             disableOptimizations, false);
     }
     public void compress(Writer out, Writer mungemap, int linebreak, boolean munge, boolean verbose,
+            boolean preserveAllSemiColons, boolean disableOptimizations, boolean preserveUnknownHints)
+            throws IOException {
+
+        out.write(getCompressedCode(mungemap, linebreak, munge, verbose, preserveAllSemiColons, disableOptimizations, preserveUnknownHints));
+
+        if (mungemap != null) {
+            printMungeMapping(mungemap);
+        }
+    }
+
+    public String getCompressedCode (Writer mungemap, int linebreak, boolean munge, boolean verbose,
             boolean preserveAllSemiColons, boolean disableOptimizations, boolean preserveUnknownHints)
             throws IOException {
 
@@ -565,12 +594,8 @@ public class JavaScriptCompressor {
         mungeSymboltree();
         StringBuffer sb = printSymbolTree(linebreak, preserveAllSemiColons);
 
-        out.write(sb.toString());
-
-        if (mungemap != null) {
-            printMungeMapping(mungemap);
-        }
-    }
+		return sb.toString();
+	}
 
     private ScriptOrFnScope getCurrentScope() {
         return (ScriptOrFnScope) scopes.peek();
