@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <project name="YUI Compressor bundle for Maven Central" default="maven-central-bundle" basedir=".">
-    <property name="yui.version">2.4.8</property>
+    <property name="yui.version">2.4.9</property>
     <property name="rhino.version">1.7R2</property>
 
     <target name="clean">

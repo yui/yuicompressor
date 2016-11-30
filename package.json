@@ -1,7 +1,7 @@
 {
     "name": "yuicompressor",
     "description": "YUICompressor CLI and Node.js require",
-    "version": "2.4.8",
+    "version": "2.4.9",
     "author": "Julien Lecomte <julien.lecomte@gmail.com>",
     "contributors": [ 
         {
@@ -13,6 +13,9 @@
         }, {
             "name" : "Stoyan Stefanov",
             "email" : "assttoo@ymail.com"
+        }, {
+            "name" : "Eric Arnol-Martin",
+            "email" : "earnolmartin@gmail.com"
         }
     ],
     "bugs": { "url" : "http://yuilibrary.com/projects/yuicompressor/newticket" },
