@@ -1988,6 +1988,12 @@ public class Parser
                         pn = propertyName(pn, "throw", memberTypeFlags);
                         break;
 
+                      // Handle default as field name
+                      case Token.DEFAULT:
+                        decompiler.addName("default");
+                        pn = propertyName(pn, "default", memberTypeFlags);
+                        break;
+
                       // handles: name, ns::name, ns::*, ns::[expr]
                       case Token.NAME:
                         s = ts.getString();
