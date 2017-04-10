@@ -14,3 +14,4 @@ build/build_tmp
 build/yuicompressor*.jar
 .project
 .classpath
+.idea/
