@@ -311,6 +311,7 @@ public class JavaScriptCompressor {
 
         CompilerEnvirons env = new CompilerEnvirons();
         env.setLanguageVersion(Context.VERSION_1_7);
+        env.setReservedKeywordAsIdentifier(true);
         Parser parser = new Parser(env, reporter);
         parser.parse(in, null, 1);
         String source = parser.getEncodedSource();
