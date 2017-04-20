@@ -231,7 +231,6 @@ class TokenStream
                     if (c=='d') { X="delete";id=Id_delete; }
                     else if (c=='r') { X="return";id=Id_return; }
                     break L;
-                case 'h': X="throws";id=Id_throws; break L;
                 case 'm': X="import";id=Id_import; break L;
                 case 'o': X="double";id=Id_double; break L;
                 case 't': X="static";id=Id_static; break L;

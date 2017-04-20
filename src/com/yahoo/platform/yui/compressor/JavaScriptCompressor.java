@@ -230,7 +230,6 @@ public class JavaScriptCompressor {
         reserved.add("static");
         reserved.add("super");
         reserved.add("synchronized");
-        reserved.add("throws");
         reserved.add("transient");
         reserved.add("volatile");
         // These are not reserved, but should be taken into account
