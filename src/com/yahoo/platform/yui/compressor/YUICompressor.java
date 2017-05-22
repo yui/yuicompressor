@@ -146,12 +146,12 @@ public class YUICompressor {
                             }
                         }
 
-                        if (type == null || !type.equalsIgnoreCase("js") && !type.equalsIgnoreCase("css")) {
-                            usage();
-                            System.exit(1);
-                        }
-
                         in = new InputStreamReader(new FileInputStream(inputFilename), charset);
+                    }
+
+                    if (type == null || !type.equalsIgnoreCase("js") && !type.equalsIgnoreCase("css")) {
+                        usage();
+                        System.exit(1);
                     }
 
                     String outputFilename = output;
