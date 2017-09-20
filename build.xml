@@ -33,7 +33,7 @@
                deprecation="off"
                debug="on"
                includeantruntime="false"
-	             target="1.6"
+               target="1.6"
                source="1.6">
             <classpath>
                 <pathelement location="${lib.dir}/jargs-1.0.jar"/>
@@ -42,8 +42,8 @@
         </javac>
     </target>
 
-    <target name="build.jar" depends="build.classes">	
-	    <mkdir dir="${build.dir}/jar"/>
+    <target name="build.jar" depends="build.classes">
+        <mkdir dir="${build.dir}/jar"/>
         <!-- The order is important here. Rhino MUST be unjarred first!
              (some of our own classes will override the Rhino classes) -->
         <unjar src="${lib.dir}/jargs-1.0.jar" dest="${build.dir}/jar"/>
@@ -51,11 +51,11 @@
         <copy todir="${build.dir}/jar">
             <fileset dir="${build.dir}/classes" includes="**/*.class"/>
         </copy>
-		
+
         <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask"
                 classpath="${lib.dir}/jarjar-1.4.1.jar"/>
-		<jarjar jarfile="${build.dir}/${jar.name}" duplicate="fail">
-		    <fileset dir="${build.dir}/jar"/>
+        <jarjar jarfile="${build.dir}/${jar.name}" duplicate="fail">
+            <fileset dir="${build.dir}/jar"/>
             <rule pattern="org.mozilla.**" result="org.mozilla_yui.@1"/>
             <manifest>
                 <attribute name="Main-Class" value="com.yahoo.platform.yui.compressor.Bootstrap"/>
