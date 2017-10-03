@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<project name="YUI Compressor bundle for Maven Central" default="maven-central-bundle" basedir=".">
+    <property name="yui.version">2.4.9</property>
+    <property name="rhino.version">1.7R2</property>
+
+    <target name="clean">
+        <delete dir="build"/>
+        <delete dir="javadoc"/>
+        <delete dir="work"/>
+    </target>
+
+    <target name="maven-central-bundle">
+        <mkdir dir="work"/>
+        <copy file="template/pom.xml.template" tofile="work/yuicompressor-${yui.version}.pom">
+            <filterset>
+                <filter token="YUI_VERSION" value="${yui.version}"/>
+                <filter token="RHINO_VERSION" value="${rhino.version}"/>
+            </filterset>
+        </copy>
+        <copy file="../build/yuicompressor-${yui.version}.jar" todir="work"/>
+
+        <jar destfile="work/yuicompressor-${yui.version}-sources.jar" basedir="../src"/>
+
+        <mkdir dir="javadoc"/>
+        <javadoc sourcepath="../src" destdir="javadoc"/>
+        <jar destfile="work/yuicompressor-${yui.version}-javadoc.jar" basedir="javadoc"/>
+
+        <exec executable="gpg" dir="work">
+            <arg value="-ab"/>
+            <arg value="yuicompressor-${yui.version}.pom"/>
+        </exec>
+
+        <exec executable="gpg" dir="work">
+            <arg value="-ab"/>
+            <arg value="yuicompressor-${yui.version}.jar"/>
+        </exec>
+
+        <exec executable="gpg" dir="work">
+            <arg value="-ab"/>
+            <arg value="yuicompressor-${yui.version}-sources.jar"/>
+        </exec>
+
+        <exec executable="gpg" dir="work">
+            <arg value="-ab"/>
+            <arg value="yuicompressor-${yui.version}-javadoc.jar"/>
+        </exec>
+
+        <mkdir dir="build"/>
+        <jar destfile="build/yuicompressor-${yui.version}-bundle.jar" basedir="work"/>
+        <echo>Done. Upload the bundle in build/ to https://oss.sonatype.org</echo>
+    </target>
+</project>

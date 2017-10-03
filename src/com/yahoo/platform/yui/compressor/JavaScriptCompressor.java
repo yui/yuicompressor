@@ -24,7 +24,7 @@ public class JavaScriptCompressor {
     static final ArrayList threes;
 
     static final Set builtin = new HashSet();
-    static final Map literals = new Hashtable();
+    static final Map literals = new HashMap();
     static final Set reserved = new HashSet();
 
     static {
@@ -52,14 +52,6 @@ public class JavaScriptCompressor {
                 twos.add(one + Character.toString(c));
         }
 
-        // Remove two-letter JavaScript reserved words and built-in globals...
-        twos.remove("as");
-        twos.remove("is");
-        twos.remove("do");
-        twos.remove("if");
-        twos.remove("in");
-        twos.removeAll(builtin);
-
         threes = new ArrayList();
         for (int i = 0; i < twos.size(); i++) {
             String two = (String) twos.get(i);
@@ -70,6 +62,14 @@ public class JavaScriptCompressor {
             for (char c = '0'; c <= '9'; c++)
                 threes.add(two + Character.toString(c));
         }
+
+        // Remove two-letter JavaScript reserved words and built-in globals...
+        twos.remove("as");
+        twos.remove("is");
+        twos.remove("do");
+        twos.remove("if");
+        twos.remove("in");
+        twos.removeAll(builtin);
 
         // Remove three-letter JavaScript reserved words and built-in globals...
         threes.remove("for");
@@ -316,7 +316,7 @@ public class JavaScriptCompressor {
         String source = parser.getEncodedSource();
 
         int offset = 0;
-        int length = source.length();
+        int length = (source != null) ? source.length() : 0;
         ArrayList tokens = new ArrayList();
         StringBuffer sb = new StringBuffer();
 
@@ -361,31 +361,34 @@ public class JavaScriptCompressor {
         if (merge) {
 
             // Concatenate string literals that are being appended wherever
-            // it is safe to do so. Note that we take care of the case:
+            // it is safe to do so. Note that we take care of the cases:
             //     "a" + "b".toUpperCase()
+            //     "a" + "bcd"[i]
 
-            for (i = 0; i < length; i++) {
+            for (i = 1; i < length - 1; i++) {
                 token = (JavaScriptToken) tokens.get(i);
-                switch (token.getType()) {
-
-                    case Token.ADD:
-                        if (i > 0 && i < length) {
-                            prevToken = (JavaScriptToken) tokens.get(i - 1);
-                            nextToken = (JavaScriptToken) tokens.get(i + 1);
-                            if (prevToken.getType() == Token.STRING && nextToken.getType() == Token.STRING &&
-                                    (i == length - 1 || ((JavaScriptToken) tokens.get(i + 2)).getType() != Token.DOT)) {
-                                tokens.set(i - 1, new JavaScriptToken(Token.STRING,
-                                        prevToken.getValue() + nextToken.getValue()));
-                                tokens.remove(i + 1);
-                                tokens.remove(i);
-                                i = i - 1;
-                                length = length - 2;
-                                break;
+                if (token.getType() == Token.ADD) {
+                    prevToken = (JavaScriptToken) tokens.get(i - 1);
+                    nextToken = (JavaScriptToken) tokens.get(i + 1);
+                    if (prevToken.getType() == Token.STRING &&
+                        nextToken.getType() == Token.STRING ) {
+                        if (i < length - 2) {
+                            JavaScriptToken nextNextToken = (JavaScriptToken) tokens.get(i + 2);
+                            if (nextNextToken.getType() == Token.DOT ||
+                                nextNextToken.getType() == Token.LB) {
+                                i += 3;
+                                continue;
                             }
                         }
+                        tokens.set(i - 1, new JavaScriptToken(Token.STRING,
+                            prevToken.getValue() + nextToken.getValue()));
+                        tokens.remove(i + 1);
+                        tokens.remove(i);
+                        i--;
+                        length -= 2;
+                    }
                 }
             }
-
         }
 
         // Second pass...
@@ -517,6 +520,7 @@ public class JavaScriptCompressor {
 
     private boolean munge;
     private boolean verbose;
+    private boolean preserveUnknownHints;
 
     private static final int BUILDING_SYMBOL_TREE = 1;
     private static final int CHECKING_SYMBOL_TREE = 2;
@@ -535,13 +539,19 @@ public class JavaScriptCompressor {
         this.logger = reporter;
         this.tokens = parse(in, reporter);
     }
-
+    public void compress(Writer out, int linebreak, boolean munge, boolean verbose,
+            boolean preserveAllSemiColons, boolean disableOptimizations) 
+            throws IOException {
+        compress(out, null, linebreak, munge, verbose, preserveAllSemiColons, 
+            disableOptimizations, false);
+    }
     public void compress(Writer out, Writer mungemap, int linebreak, boolean munge, boolean verbose,
-            boolean preserveAllSemiColons, boolean disableOptimizations)
+            boolean preserveAllSemiColons, boolean disableOptimizations, boolean preserveUnknownHints)
             throws IOException {
 
         this.munge = munge;
         this.verbose = verbose;
+        this.preserveUnknownHints = preserveUnknownHints;
 
         processStringLiterals(this.tokens, !disableOptimizations);
 
@@ -579,7 +589,11 @@ public class JavaScriptCompressor {
     }
 
     private JavaScriptToken getToken(int delta) {
-        return (JavaScriptToken) tokens.get(offset + delta);
+        try {
+            return (JavaScriptToken) tokens.get(offset + delta);
+        } catch(IndexOutOfBoundsException ex) {
+            return null;
+        }
     }
 
     /*
@@ -719,9 +733,9 @@ public class JavaScriptCompressor {
                 String hint = st1.nextToken();
                 int idx = hint.indexOf(':');
                 if (idx <= 0 || idx >= hint.length() - 1) {
-                    if (mode == BUILDING_SYMBOL_TREE) {
+                    if (mode == BUILDING_SYMBOL_TREE && (! preserveUnknownHints)) {
                         // No need to report the error twice, hence the test...
-                        warn("Invalid hint syntax: " + hint, true);
+                        warn("Not a YUICompressor hint: " + hint, true);
                     }
                     break;
                 }
@@ -1228,9 +1242,11 @@ public class JavaScriptCompressor {
                     token = getToken(0);
                     if (token.getType() == Token.STRING &&
                             getToken(1).getType() == Token.SEMI) {
-                        // This is a hint. Skip it!
-                        consumeToken();
-                        consumeToken();
+                        if (! preserveUnknownHints) {
+                            // This is an unknown hint. Skip it!
+                            consumeToken();
+                            consumeToken();
+                        }
                     }
                     break;
 

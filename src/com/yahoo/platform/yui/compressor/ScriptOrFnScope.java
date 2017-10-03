@@ -8,9 +8,7 @@
  */
 package com.yahoo.platform.yui.compressor;
 
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.*;
 
 class ScriptOrFnScope {
 
@@ -124,7 +122,7 @@ class ScriptOrFnScope {
         // Do not munge symbols in the global scope!
         if (parentScope != null) {
 
-            ArrayList freeSymbols = new ArrayList();
+            LinkedHashSet freeSymbols = new LinkedHashSet();
 
             freeSymbols.addAll(JavaScriptCompressor.ones);
             freeSymbols.removeAll(getAllUsedSymbols());
@@ -163,7 +161,9 @@ class ScriptOrFnScope {
                 String mungedValue;
                 JavaScriptIdentifier identifier = (JavaScriptIdentifier) elements.nextElement();
                 if (identifier.isMarkedForMunging()) {
-                    mungedValue = (String) freeSymbols.remove(0);
+                    Iterator freeSymIt = freeSymbols.iterator();
+                    mungedValue = (String) freeSymIt.next();
+                    freeSymIt.remove();
                 } else {
                     mungedValue = identifier.getValue();
                 }

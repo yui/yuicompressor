@@ -1,0 +1,16 @@
+html {
+  /*...  calculation ... */
+  font-size: 16px;
+}
+body {
+  /*...  calculation ... */
+      font-size: 10px;
+}
+@media all and (min-width: 768px) {
+  /**
+     *    Needs to be calculated together with margins.
+     */
+  .columns-triple .column {
+      font-size: 10px;
+  }
+}

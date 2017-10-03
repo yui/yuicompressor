@@ -4,7 +4,7 @@ YUI Compressor - The Yahoo! JavaScript and CSS Compressor
 The YUI Compressor is a JavaScript compressor which, in addition to removing
 comments and white-spaces, obfuscates local variables using the smallest
 possible variable name. This obfuscation is safe, even when using constructs
-such as 'eval' or 'with' (although the compression is not optimal is those
+such as 'eval' or 'with' (although the compression is not optimal in those
 cases) Compared to jsmin, the average savings is around 20%.
 
 The YUI Compressor is also able to safely compress CSS files. The decision
@@ -65,7 +65,7 @@ TODO
 Build Status
 ------------
 
-[![Build Status](https://secure.travis-ci.org/yui/yuicompressor.png?branch=master)](http://travis-ci.org/yui/yuicompressor)
+[![Build Status](https://secure.travis-ci.org/yui/yuicompressor.svg?branch=master)](http://travis-ci.org/yui/yuicompressor)
 
 
 Global Options
@@ -151,7 +151,8 @@ function fn (arg1, arg2, arg3) {
 The hint itself disappears from the compressed file.
 
 * C-style comments starting with `/*!` are preserved. This is useful with
-    comments containing copyright/license information. For example:
+    comments containing copyright/license information. As of 2.4.8, the '!'
+    is no longer dropped by YUICompressor. For example:
 
 ```
 /*!
@@ -161,15 +162,7 @@ The hint itself disappears from the compressed file.
  */
 ```
 
-becomes:
-
-```
-/*
- * TERMS OF USE - EASING EQUATIONS
- * Open source under the BSD License.
- * Copyright 2001 Robert Penner All rights reserved.
- */
-```
+remains in the output, untouched by YUICompressor.
 
 Modified Rhino Files
 --------------------

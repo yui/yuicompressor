@@ -30,31 +30,36 @@ public class CssCompressor {
         }
     }
 
-    // Leave data urls alone to increase parse performance.
-    protected String extractDataUrls(String css, ArrayList preservedTokens) {
+    /**
+     * @param css - full css string
+     * @param preservedToken - token to preserve
+     * @param tokenRegex - regex to find token
+     * @param removeWhiteSpace - remove any white space in the token
+     * @param preservedTokens - array of token values
+     * @return
+     */
+    protected String preserveToken(String css, String preservedToken,
+            String tokenRegex, boolean removeWhiteSpace, ArrayList preservedTokens) {
 
         int maxIndex = css.length() - 1;
         int appendIndex = 0;
 
         StringBuffer sb = new StringBuffer();
 
-        Pattern p = Pattern.compile("(?i)url\\(\\s*([\"']?)data\\:");
+        Pattern p = Pattern.compile(tokenRegex);
         Matcher m = p.matcher(css);
 
-        /*
-         * Since we need to account for non-base64 data urls, we need to handle
-         * ' and ) being part of the data string. Hence switching to indexOf,
-         * to determine whether or not we have matching string terminators and
-         * handling sb appends directly, instead of using matcher.append* methods.
-         */
-
         while (m.find()) {
+            int startIndex = m.start() + (preservedToken.length() + 1);
+            String terminator = m.group(1);
 
-            int startIndex = m.start() + 4;      // "url(".length()
-            String terminator = m.group(1);     // ', " or empty (not quoted)
+            // skip this, if CSS was already copied to "sb" upto this position
+            if (m.start() < appendIndex) {
+                continue;
+            }
 
             if (terminator.length() == 0) {
-                 terminator = ")";
+                terminator = ")";
             }
 
             boolean foundTerminator = false;
@@ -63,7 +68,9 @@ public class CssCompressor {
             while(foundTerminator == false && endIndex+1 <= maxIndex) {
                 endIndex = css.indexOf(terminator, endIndex+1);
 
-                if ((endIndex > 0) && (css.charAt(endIndex-1) != '\\')) {
+                if (endIndex <= 0) {
+                    break;
+                } else if ((endIndex > 0) && (css.charAt(endIndex-1) != '\\')) {
                     foundTerminator = true;
                     if (!")".equals(terminator)) {
                         endIndex = css.indexOf(")", endIndex);
@@ -76,10 +83,11 @@ public class CssCompressor {
 
             if (foundTerminator) {
                 String token = css.substring(startIndex, endIndex);
-                token = token.replaceAll("\\s+", "");
+                if(removeWhiteSpace)
+                    token = token.replaceAll("\\s+", "");
                 preservedTokens.add(token);
 
-                String preserver = "url(___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___)";
+                String preserver = preservedToken + "(___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___)";
                 sb.append(preserver);
 
                 appendIndex = endIndex + 1;
@@ -92,20 +100,6 @@ public class CssCompressor {
 
         sb.append(css.substring(appendIndex));
 
-        return sb.toString();
-    }
-    
-    private String preserveOldIESpecificMatrixDefinition(String css, ArrayList preservedTokens) {
-        StringBuffer sb = new StringBuffer();
-        Pattern p = Pattern.compile("\\s*filter:\\s*progid:DXImageTransform.Microsoft.Matrix\\(([^\\)]+)\\);");
-        Matcher m = p.matcher(css);
-        while (m.find()) {
-            String token = m.group(1);
-            preservedTokens.add(token);
-            String preserver = "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___";
-            m.appendReplacement(sb, "filter:progid:DXImageTransform.Microsoft.Matrix(" + preserver + ");");
-        }
-        m.appendTail(sb);
         return sb.toString();
     }
 
@@ -126,7 +120,6 @@ public class CssCompressor {
         int totallen = css.length();
         String placeholder;
 
-        css = this.extractDataUrls(css, preservedTokens);
 
         StringBuffer sb = new StringBuffer(css);
 
@@ -143,6 +136,12 @@ public class CssCompressor {
             startIndex += 2;
         }
         css = sb.toString();
+
+
+        css = this.preserveToken(css, "url", "(?i)url\\(\\s*([\"']?)data\\:", true, preservedTokens);
+        css = this.preserveToken(css, "calc",  "(?i)calc\\(\\s*([\"']?)", false, preservedTokens);
+        css = this.preserveToken(css, "progid:DXImageTransform.Microsoft.Matrix",  "(?i)progid:DXImageTransform.Microsoft.Matrix\\s*([\"']?)", false, preservedTokens);
+
 
         // preserve strings so their content doesn't get accidentally minified
         sb = new StringBuffer();
@@ -213,17 +212,21 @@ public class CssCompressor {
             css = css.replace("/*" + placeholder + "*/", "");
         }
 
-
+        // preserve \9 IE hack
+        final String backslash9 = "\\9"; 
+        while (css.indexOf(backslash9) > -1) {
+            preservedTokens.add(backslash9);
+            css = css.replace(backslash9,  "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___");
+     	}
+        
         // Normalize all whitespace strings to single spaces. Easier to work with that way.
         css = css.replaceAll("\\s+", " ");
-
-        css = this.preserveOldIESpecificMatrixDefinition(css, preservedTokens);
 
         // Remove the spaces before the things that should not have spaces before them.
         // But, be careful not to turn "p :link {...}" into "p:link{...}"
         // Swap out any pseudo-class colons with the token, and then swap back.
         sb = new StringBuffer();
-        p = Pattern.compile("(^|\\})(([^\\{:])+:)+([^\\{]*\\{)");
+        p = Pattern.compile("(^|\\})((^|([^\\{:])+):)+([^\\{]*\\{)");
         m = p.matcher(css);
         while (m.find()) {
             String s = m.group();
@@ -258,7 +261,8 @@ public class CssCompressor {
         p = Pattern.compile("(?i)^(.*)(@charset)( \"[^\"]*\";)");
         m = p.matcher(css);
         while (m.find()) {
-            m.appendReplacement(sb, m.group(2).toLowerCase() + m.group(3) + m.group(1));
+            String s = m.group(1).replaceAll("\\\\", "\\\\\\\\").replaceAll("\\$", "\\\\\\$");
+            m.appendReplacement(sb, m.group(2).toLowerCase() + m.group(3) + s);
         }
         m.appendTail(sb);
         css = sb.toString();
@@ -282,7 +286,7 @@ public class CssCompressor {
         }
         m.appendTail(sb);
         css = sb.toString();
-    
+
         // lowercase some more common pseudo-elements
         sb = new StringBuffer();
         p = Pattern.compile("(?i):(active|after|before|checked|disabled|empty|enabled|first-(?:child|of-type)|focus|hover|last-(?:child|of-type)|link|only-(?:child|of-type)|root|:selection|target|visited)");
@@ -292,7 +296,7 @@ public class CssCompressor {
         }
         m.appendTail(sb);
         css = sb.toString();
-    
+
         // lowercase some more common functions
         sb = new StringBuffer();
         p = Pattern.compile("(?i):(lang|not|nth-child|nth-last-child|nth-last-of-type|nth-of-type|(?:-(?:moz|webkit)-)?any)\\(");
@@ -302,7 +306,7 @@ public class CssCompressor {
         }
         m.appendTail(sb);
         css = sb.toString();
-    
+
         // lower case some common function that can be values
         // NOTE: rgb() isn't useful as we replace with #hex later, as well as and() is already done for us right after this
         sb = new StringBuffer();
@@ -325,12 +329,29 @@ public class CssCompressor {
         css = css.replaceAll(";+}", "}");
 
         // Replace 0(px,em,%) with 0.
-        css = css.replaceAll("(?i)(^|[^0-9])(?:0?\\.)?0(?:px|em|%|in|cm|mm|pc|pt|ex|deg|g?rad|m?s|k?hz)", "$10");
+        String oldCss;
+        p = Pattern.compile("(?i)(^|: ?)((?:[0-9a-z-.]+ )*?)?(?:0?\\.)?0(?:px|em|%|in|cm|mm|pc|pt|ex|deg|g?rad|m?s|k?hz)");
+        do {
+          oldCss = css;
+          m = p.matcher(css);
+          css = m.replaceAll("$1$20");
+        } while (!(css.equals(oldCss)));
+
+        // Replace 0(px,em,%) with 0 inside groups (e.g. -MOZ-RADIAL-GRADIENT(CENTER 45DEG, CIRCLE CLOSEST-SIDE, ORANGE 0%, RED 100%))
+        p = Pattern.compile("(?i)\\( ?((?:[0-9a-z-.]+[ ,])*)?(?:0?\\.)?0(?:px|em|%|in|cm|mm|pc|pt|ex|deg|g?rad|m?s|k?hz)");
+        do {
+          oldCss = css;
+          m = p.matcher(css);
+          css = m.replaceAll("($10");
+        } while (!(css.equals(oldCss)));
+
+        // Replace x.0(px,em,%) with x(px,em,%).
+        css = css.replaceAll("([0-9])\\.0(px|em|%|in|cm|mm|pc|pt|ex|deg|g?rad|m?s|k?hz| |;)", "$1$2");
 
         // Replace 0 0 0 0; with 0.
         css = css.replaceAll(":0 0 0 0(;|})", ":0$1");
         css = css.replaceAll(":0 0 0(;|})", ":0$1");
-        css = css.replaceAll(":0 0(;|})", ":0$1");
+        css = css.replaceAll("(?<!flex):0 0(;|})", ":0$1");
 
 
         // Replace background-position:0; with background-position:0 0;
@@ -391,7 +412,7 @@ public class CssCompressor {
 
             sb.append(css.substring(index, m.start()));
 
-            boolean isFilter = (m.group(1) != null && !"".equals(m.group(1))); 
+            boolean isFilter = (m.group(1) != null && !"".equals(m.group(1)));
 
             if (isFilter) {
                 // Restore, as is. Compression will break filters
@@ -477,9 +498,28 @@ public class CssCompressor {
         css = css.replaceAll(";;+", ";");
 
         // restore preserved comments and strings
-        for(i = preservedTokens.size() - 1; i >= 0 ; i--) {
+        for(i = 0, max = preservedTokens.size(); i < max; i++) {
             css = css.replace("___YUICSSMIN_PRESERVED_TOKEN_" + i + "___", preservedTokens.get(i).toString());
         }
+        
+        // Add spaces back in between operators for css calc function
+        // https://developer.mozilla.org/en-US/docs/Web/CSS/calc
+        // Added by Eric Arnol-Martin (earnolmartin@gmail.com)
+        sb = new StringBuffer();
+        p = Pattern.compile("calc\\([^\\)]*\\)");
+        m = p.matcher(css);
+        while (m.find()) {
+            String s = m.group();
+            
+            s = s.replaceAll("(?<=[-|%|px|em|rem|vw|\\d]+)\\+", " + ");
+            s = s.replaceAll("(?<=[-|%|px|em|rem|vw|\\d]+)\\-", " - ");
+            s = s.replaceAll("(?<=[-|%|px|em|rem|vw|\\d]+)\\*", " * ");
+            s = s.replaceAll("(?<=[-|%|px|em|rem|vw|\\d]+)\\/", " / ");
+            
+            m.appendReplacement(sb, s);
+        }
+        m.appendTail(sb);
+        css = sb.toString(); 
 
         // Trim the final string (for any leading or trailing white spaces)
         css = css.trim();
