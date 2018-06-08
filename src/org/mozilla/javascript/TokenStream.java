@@ -716,11 +716,7 @@ class TokenStream
                                 sb.delete(sb.length()-2, sb.length());
                                 String s1 = sb.toString();
                                 String s2 = s1.trim();
-                                if (s1.startsWith("!")) {
-                                    // Remove the leading '!'
-                                    this.string = s1.substring(1);
-                                    return Token.KEEPCOMMENT;
-                                } else if (s2.startsWith("@cc_on") ||
+                                if (s2.startsWith("@cc_on") ||
                                            s2.startsWith("@if")    ||
                                            s2.startsWith("@elif")  ||
                                            s2.startsWith("@else")  ||
