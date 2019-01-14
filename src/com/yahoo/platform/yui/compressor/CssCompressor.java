@@ -138,7 +138,8 @@ public class CssCompressor {
         css = sb.toString();
 
 
-        css = this.preserveToken(css, "url", "(?i)url\\(\\s*([\"']?)data\\:", true, preservedTokens);
+        css = this.preserveToken(css, "url", "(?i)url\\(\\s*([\"']?)data\\:\\s*image/svg\\+xml", false, preservedTokens);
+        css = this.preserveToken(css, "url", "(?i)url\\(\\s*([\"']?)data\\:\\s*(?!(image/svg\\+xml))", true, preservedTokens);
         css = this.preserveToken(css, "calc",  "(?i)calc\\(\\s*([\"']?)", false, preservedTokens);
         css = this.preserveToken(css, "progid:DXImageTransform.Microsoft.Matrix",  "(?i)progid:DXImageTransform.Microsoft.Matrix\\s*([\"']?)", false, preservedTokens);
 
