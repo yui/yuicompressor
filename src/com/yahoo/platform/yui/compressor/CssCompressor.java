@@ -328,13 +328,30 @@ public class CssCompressor {
         // remove unnecessary semicolons
         css = css.replaceAll(";+}", "}");
 
-        // Replace 0(px,em,%) with 0.
+        // Replace 0(px,em) with 0. (don't replace seconds are they are needed for transitions to be valid)
         String oldCss;
-        p = Pattern.compile("(?i)(^|: ?)((?:[0-9a-z-.]+ )*?)?(?:0?\\.)?0(?:px|em|%|in|cm|mm|pc|pt|ex|deg|g?rad|m?s|k?hz)");
+        p = Pattern.compile("(?i)(^|: ?)((?:[0-9a-z-.]+ )*?)?(?:0?\\.)?0(?:px|em|in|cm|mm|pc|pt|ex|deg|g?rad|k?hz)");
         do {
           oldCss = css;
           m = p.matcher(css);
           css = m.replaceAll("$1$20");
+        } while (!(css.equals(oldCss)));
+        
+        // We do the same with % but don't replace the 0% in keyframes
+        String oldCss;
+        p = Pattern.compile("(?i)(: ?)((?:[0-9a-z-.]+ )*?)?(?:0?\\.)?0(?:%)");
+        do {
+          oldCss = css;
+          m = p.matcher(css);
+          css = m.replaceAll("$1$20");
+        } while (!(css.equals(oldCss)));
+        
+        //Replace the keyframe 100% step with 'to' which is shorter
+        p = Pattern.compile("(?i)(^|,|{) ?(?:100% ?{)");
+        do {
+          oldCss = css;
+          m = p.matcher(css);
+          css = m.replaceAll("$1to{");
         } while (!(css.equals(oldCss)));
 
         // Replace 0(px,em,%) with 0 inside groups (e.g. -MOZ-RADIAL-GRADIENT(CENTER 45DEG, CIRCLE CLOSEST-SIDE, ORANGE 0%, RED 100%))
@@ -346,7 +363,7 @@ public class CssCompressor {
         } while (!(css.equals(oldCss)));
 
         // Replace x.0(px,em,%) with x(px,em,%).
-        css = css.replaceAll("([0-9])\\.0(px|em|%|in|cm|mm|pc|pt|ex|deg|g?rad|m?s|k?hz| |;)", "$1$2");
+        css = css.replaceAll("([0-9])\\.0(px|em|%|in|cm|mm|pc|pt|ex|deg|m?s|g?rad|k?hz| |;)", "$1$2");
 
         // Replace 0 0 0 0; with 0.
         css = css.replaceAll(":0 0 0 0(;|})", ":0$1");
