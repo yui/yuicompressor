@@ -15,6 +15,8 @@ import org.mozilla.javascript.EvaluatorException;
 import java.io.*;
 import java.nio.charset.Charset;
 
+import org.apache.commons.lang.SystemUtils;
+
 public class YUICompressor {
 
     public static void main(String args[]) {
@@ -156,8 +158,12 @@ public class YUICompressor {
 
                     String outputFilename = output;
                     // if a substitution pattern was passed in
-                    if (pattern.length > 1 && files.size() > 0) {
-                        outputFilename = inputFilename.replaceFirst(pattern[0], pattern[1]);
+                    if (SystemUtils.IS_OS_WINDOWS) {
+                        
+                    } else {
+                        if (pattern.length > 1 && files.size() > 0) {
+                            outputFilename = inputFilename.replaceFirst(pattern[0], pattern[1]);
+                        }
                     }
 
                     if (type.equalsIgnoreCase("js")) {
