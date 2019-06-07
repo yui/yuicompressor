@@ -34,7 +34,7 @@ public class YUICompressor {
         CmdLineParser.Option preserveUnknownHintsOpt = parser.addBooleanOption('p', "preservehints");
 
         Reader in = null;
-        Writer out = null;
+        BufferedWriter out = null;
         Writer mungemap = null;
 
         try {
@@ -199,9 +199,9 @@ public class YUICompressor {
                             in.close(); in = null;
 
                             if (outputFilename == null) {
-                                out = new OutputStreamWriter(System.out, charset);
+                                out = new BufferedWriter(new OutputStreamWriter(System.out, charset));
                             } else {
-                                out = new OutputStreamWriter(new FileOutputStream(outputFilename), charset);
+                                out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFilename, true), charset));
                                 if (mungemap != null) {
                                     mungemap.write("\n\nFile: "+outputFilename+"\n\n");
                                 }
@@ -227,9 +227,9 @@ public class YUICompressor {
                         in.close(); in = null;
 
                         if (outputFilename == null) {
-                            out = new OutputStreamWriter(System.out, charset);
+                            out = new BufferedWriter(new OutputStreamWriter(System.out, charset));
                         } else {
-                            out = new OutputStreamWriter(new FileOutputStream(outputFilename), charset);
+                            out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFilename), charset));
                         }
 
                         compressor.compress(out, linebreakpos);
