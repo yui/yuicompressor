@@ -33,8 +33,8 @@
                deprecation="off"
                debug="on"
                includeantruntime="false"
-	           target="1.5"
-               source="1.5">
+               target="1.6"
+               source="1.6">
             <classpath>
                 <pathelement location="${lib.dir}/jargs-1.0.jar"/>
                 <pathelement location="${lib.dir}/rhino-1.7R2.jar"/>
@@ -51,14 +51,20 @@
         <copy todir="${build.dir}/jar">
             <fileset dir="${build.dir}/classes" includes="**/*.class"/>
         </copy>
-        <jar destfile="${build.dir}/${jar.name}" basedir="${build.dir}/jar">
+
+        <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask"
+                classpath="${lib.dir}/jarjar-1.4.1.jar"/>
+        <jarjar jarfile="${build.dir}/${jar.name}" duplicate="fail">
+            <fileset dir="${build.dir}/jar"/>
+            <rule pattern="org.mozilla.**" result="org.mozilla_yui.@1"/>
             <manifest>
                 <attribute name="Main-Class" value="com.yahoo.platform.yui.compressor.Bootstrap"/>
             </manifest>
-        </jar>
+        </jarjar>
     </target>
 
     <target name="build.dist.package" depends="build.jar">
+      
         <mkdir dir="${build.dir}/${dist.package.name}"/>
         <mkdir dir="${build.dir}/${dist.package.name}/build"/>
         <copy file="${build.dir}/${jar.name}" todir="${build.dir}/${dist.package.name}/build"/>
