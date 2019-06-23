@@ -355,7 +355,7 @@ public class CssCompressor {
         } while (!(css.equals(oldCss)));
 
         // Replace 0(px,em,%) with 0 inside groups (e.g. -MOZ-RADIAL-GRADIENT(CENTER 45DEG, CIRCLE CLOSEST-SIDE, ORANGE 0%, RED 100%))
-        p = Pattern.compile("(?i)\\( ?((?:[0-9a-z-.]+[ ,])*)?(?:0?\\.)?0(?:px|em|%|in|cm|mm|pc|pt|ex|deg|g?rad|m?s|k?hz)");
+        p = Pattern.compile("(?i)\\( ?((?:[#0-9a-z-.]+[ ,])*)?(?:0?\\.)?0(?:px|em|%|in|cm|mm|pc|pt|ex|deg|g?rad|m?s|k?hz)");
         do {
           oldCss = css;
           m = p.matcher(css);
@@ -369,6 +369,12 @@ public class CssCompressor {
         css = css.replaceAll(":0 0 0 0(;|})", ":0$1");
         css = css.replaceAll(":0 0 0(;|})", ":0$1");
         css = css.replaceAll("(?<!flex):0 0(;|})", ":0$1");
+
+        // Replace "from" with "0%" in keyframes
+        css = css.replaceAll("([{},])from([{,])", "$10%$2");
+
+        // Replace "100%" with "to" in keyframes
+        css = css.replaceAll("([{},])100%([{,])", "$1to$2");
 
 
         // Replace background-position:0; with background-position:0 0;

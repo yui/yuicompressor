@@ -1,0 +1,86 @@
+/*
+ * /(?<!keyframes)\s+/  -> ''
+ * /\/\*.*?\*\//        -> ''
+ * ';}'                 -> '}'
+ * 'from'               -> '0%'
+ * '100%'               -> 'to'
+ */
+
+/* steps defined by strings */
+@keyframes test1-1 {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+@keyframes test1-2 {
+    to {
+        opacity: 0;
+    }
+    from {
+        opacity: 1;
+    }
+}
+
+/* steps defined by percentage */
+@keyframes test2 {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.9;
+    }
+}
+
+/* steps defined by percentage and strings */
+@keyframes test3 {
+    from {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.9;
+    }
+    to {
+        opacity: 0.5;
+    }
+}
+
+/* same value for multiple steps */
+@keyframes test4-1 {
+    50%, 0%, to {
+        opacity: 0;
+    }
+    25%, 75% {
+        opacity: 1;
+    }
+}
+@keyframes test4-2 {
+    50%, from, to {
+        opacity: 0;
+    }
+    25%, 75% {
+        opacity: 1;
+    }
+}
+
+/* percent only steps, mixed order */
+@keyframes test5 {
+    100% {
+        opacity: 0;
+    }
+    0% {
+        opacity: 1;
+    }
+}
+
+/* vendor prefixed */
+@-webkit-keyframes test6 {
+    0%, 50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
