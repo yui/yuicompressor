@@ -65,7 +65,7 @@ public class CssCompressor {
             boolean foundTerminator = false;
 
             int endIndex = m.end() - 1;
-            while(foundTerminator == false && endIndex+1 <= maxIndex) {
+            while (foundTerminator == false && endIndex+1 <= maxIndex) {
                 endIndex = css.indexOf(terminator, endIndex+1);
 
                 if (endIndex <= 0) {
@@ -83,8 +83,9 @@ public class CssCompressor {
 
             if (foundTerminator) {
                 String token = css.substring(startIndex, endIndex);
-                if(removeWhiteSpace)
+                if (removeWhiteSpace) [
                     token = token.replaceAll("\\s+", "");
+                }
                 preservedTokens.add(token);
 
                 String preserver = preservedToken + "(___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___)";
@@ -386,7 +387,7 @@ public class CssCompressor {
         css = css.replaceAll("(:|\\s)0+\\.(\\d+)", "$1.$2");
 
         // Shorten colors from rgb(51,102,153) to #336699
-        // This makes it more likely that it'll get further compressed in the next step.
+        // This makes it possible that it'll get further compressed in the next step.
         p = Pattern.compile("rgb\\s*\\(\\s*([0-9,\\s]+)\\s*\\)");
         m = p.matcher(css);
         sb = new StringBuffer();
@@ -435,7 +436,7 @@ public class CssCompressor {
                 // Restore, as is. Compression will break filters
                 sb.append(m.group(1) + "#" + m.group(2) + m.group(3) + m.group(4) + m.group(5) + m.group(6) + m.group(7));
             } else {
-                if( m.group(2).equalsIgnoreCase(m.group(3)) &&
+                if (m.group(2).equalsIgnoreCase(m.group(3)) &&
                     m.group(4).equalsIgnoreCase(m.group(5)) &&
                     m.group(6).equalsIgnoreCase(m.group(7))) {
 
@@ -510,12 +511,12 @@ public class CssCompressor {
             css = sb.toString();
         }
 
-        // Replace multiple semi-colons in a row by a single one
+        // Replace multiple semicolons in a row by a single one
         // See SF bug #1980989
         css = css.replaceAll(";;+", ";");
 
         // restore preserved comments and strings
-        for(i = 0, max = preservedTokens.size(); i < max; i++) {
+        for (i = 0, max = preservedTokens.size(); i < max; i++) {
             css = css.replace("___YUICSSMIN_PRESERVED_TOKEN_" + i + "___", preservedTokens.get(i).toString());
         }
         
