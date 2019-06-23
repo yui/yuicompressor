@@ -12,5 +12,6 @@ build/classes
 build/jar
 build/build_tmp
 build/yuicompressor*.jar
+target
 .project
 .classpath
