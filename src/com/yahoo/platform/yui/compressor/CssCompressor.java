@@ -30,6 +30,10 @@ public class CssCompressor {
         }
     }
 
+    public CssCompressor(String in) {
+        srcsb.append(in);
+    }
+
     /**
      * @param css - full css string
      * @param preservedToken - token to preserve
@@ -103,8 +107,7 @@ public class CssCompressor {
         return sb.toString();
     }
 
-    public void compress(Writer out, int linebreakpos)
-            throws IOException {
+    public String getCompressedCss(int linebreakpos) {
 
         Pattern p;
         Matcher m;
@@ -540,6 +543,14 @@ public class CssCompressor {
 
         // Trim the final string (for any leading or trailing white spaces)
         css = css.trim();
+
+        return css;
+    }
+
+    public void compress(Writer out, int linebreakpos)
+            throws IOException {
+
+        String css = getCompressedCss(linebreakpos);
 
         // Write the output...
         out.write(css);
