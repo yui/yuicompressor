@@ -328,8 +328,9 @@ public class CssCompressor {
         // remove unnecessary semicolons
         css = css.replaceAll(";+}", "}");
 
-        // Replace 0(px,em) with 0. (don't replace seconds are they are needed for transitions to be valid)
         String oldCss;
+
+        // Replace 0(px,em) with 0. (don't replace seconds are they are needed for transitions to be valid)
         p = Pattern.compile("(?i)(^|: ?)((?:[0-9a-z-.]+ )*?)?(?:0?\\.)?0(?:px|em|in|cm|mm|pc|pt|ex|deg|g?rad|k?hz)");
         do {
           oldCss = css;
@@ -338,7 +339,6 @@ public class CssCompressor {
         } while (!(css.equals(oldCss)));
         
         // We do the same with % but don't replace the 0% in keyframes
-        String oldCss;
         p = Pattern.compile("(?i)(: ?)((?:[0-9a-z-.]+ )*?)?(?:0?\\.)?0(?:%)");
         do {
           oldCss = css;
