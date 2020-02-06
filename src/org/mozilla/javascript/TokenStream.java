@@ -142,7 +142,6 @@ class TokenStream
             Id_double        = Token.RESERVED,
             Id_enum          = Token.RESERVED,
             Id_extends       = Token.RESERVED,
-            Id_final         = Token.RESERVED,
             Id_finally       = Token.FINALLY,
             Id_float         = Token.RESERVED,
             Id_goto          = Token.RESERVED,
@@ -152,7 +151,6 @@ class TokenStream
             Id_int           = Token.RESERVED,
             Id_interface     = Token.RESERVED,
             Id_long          = Token.RESERVED,
-            Id_native        = Token.RESERVED,
             Id_package       = Token.RESERVED,
             Id_private       = Token.RESERVED,
             Id_protected     = Token.RESERVED,
@@ -215,7 +213,6 @@ class TokenStream
                 case 'l': X="false";id=Id_false; break L;
                 case 'n': c=s.charAt(0);
                     if (c=='c') { X="const";id=Id_const; }
-                    else if (c=='f') { X="final";id=Id_final; }
                     break L;
                 case 'o': c=s.charAt(0);
                     if (c=='f') { X="float";id=Id_float; }
@@ -226,12 +223,10 @@ class TokenStream
                 case 't': X="catch";id=Id_catch; break L;
                 } break L;
             case 6: switch (s.charAt(1)) {
-                case 'a': X="native";id=Id_native; break L;
                 case 'e': c=s.charAt(0);
                     if (c=='d') { X="delete";id=Id_delete; }
                     else if (c=='r') { X="return";id=Id_return; }
                     break L;
-                case 'h': X="throws";id=Id_throws; break L;
                 case 'm': X="import";id=Id_import; break L;
                 case 'o': X="double";id=Id_double; break L;
                 case 't': X="static";id=Id_static; break L;
