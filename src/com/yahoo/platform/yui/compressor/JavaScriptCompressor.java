@@ -213,7 +213,6 @@ public class JavaScriptCompressor {
         reserved.add("enum");
         reserved.add("export");
         reserved.add("extends");
-        reserved.add("final");
         reserved.add("float");
         reserved.add("goto");
         reserved.add("implements");
@@ -221,7 +220,6 @@ public class JavaScriptCompressor {
         reserved.add("int");
         reserved.add("interface");
         reserved.add("long");
-        reserved.add("native");
         reserved.add("package");
         reserved.add("private");
         reserved.add("protected");
