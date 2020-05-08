@@ -127,7 +127,7 @@ Notes
 
 * Supports wildcards for specifying multiple input files.
 
-* The YUI Compressor requires Java version >= 1.5.
+* The YUI Compressor requires Java version >= 1.6.
 
 * It is possible to prevent a local variable, nested function or function
 argument from being obfuscated by using "hints". A hint is a string that
