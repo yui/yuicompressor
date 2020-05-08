@@ -213,12 +213,12 @@ public class CssCompressor {
         }
 
         // preserve \9 IE hack
-        final String backslash9 = "\\9"; 
+        final String backslash9 = "\\9";
         while (css.indexOf(backslash9) > -1) {
             preservedTokens.add(backslash9);
             css = css.replace(backslash9,  "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___");
      	}
-        
+
         // Normalize all whitespace strings to single spaces. Easier to work with that way.
         css = css.replaceAll("\\s+", " ");
 
@@ -336,16 +336,15 @@ public class CssCompressor {
           m = p.matcher(css);
           css = m.replaceAll("$1$20");
         } while (!(css.equals(oldCss)));
-        
+
         // We do the same with % but don't replace the 0% in keyframes
-        String oldCss;
         p = Pattern.compile("(?i)(: ?)((?:[0-9a-z-.]+ )*?)?(?:0?\\.)?0(?:%)");
         do {
           oldCss = css;
           m = p.matcher(css);
           css = m.replaceAll("$1$20");
         } while (!(css.equals(oldCss)));
-        
+
         //Replace the keyframe 100% step with 'to' which is shorter
         p = Pattern.compile("(?i)(^|,|{) ?(?:100% ?{)");
         do {
@@ -518,7 +517,7 @@ public class CssCompressor {
         for(i = 0, max = preservedTokens.size(); i < max; i++) {
             css = css.replace("___YUICSSMIN_PRESERVED_TOKEN_" + i + "___", preservedTokens.get(i).toString());
         }
-        
+
         // Add spaces back in between operators for css calc function
         // https://developer.mozilla.org/en-US/docs/Web/CSS/calc
         // Added by Eric Arnol-Martin (earnolmartin@gmail.com)
@@ -527,16 +526,16 @@ public class CssCompressor {
         m = p.matcher(css);
         while (m.find()) {
             String s = m.group();
-            
+
             s = s.replaceAll("(?<=[-|%|px|em|rem|vw|\\d]+)\\+", " + ");
             s = s.replaceAll("(?<=[-|%|px|em|rem|vw|\\d]+)\\-", " - ");
             s = s.replaceAll("(?<=[-|%|px|em|rem|vw|\\d]+)\\*", " * ");
             s = s.replaceAll("(?<=[-|%|px|em|rem|vw|\\d]+)\\/", " / ");
-            
+
             m.appendReplacement(sb, s);
         }
         m.appendTail(sb);
-        css = sb.toString(); 
+        css = sb.toString();
 
         // Trim the final string (for any leading or trailing white spaces)
         css = css.trim();
