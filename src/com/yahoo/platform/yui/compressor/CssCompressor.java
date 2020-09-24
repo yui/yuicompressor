@@ -338,7 +338,6 @@ public class CssCompressor {
         } while (!(css.equals(oldCss)));
         
         // We do the same with % but don't replace the 0% in keyframes
-        String oldCss;
         p = Pattern.compile("(?i)(: ?)((?:[0-9a-z-.]+ )*?)?(?:0?\\.)?0(?:%)");
         do {
           oldCss = css;
@@ -347,7 +346,7 @@ public class CssCompressor {
         } while (!(css.equals(oldCss)));
         
         //Replace the keyframe 100% step with 'to' which is shorter
-        p = Pattern.compile("(?i)(^|,|{) ?(?:100% ?{)");
+        p = Pattern.compile("(?i)(^|,|\\{) ?(?:100% ?\\{)");
         do {
           oldCss = css;
           m = p.matcher(css);
@@ -355,7 +354,8 @@ public class CssCompressor {
         } while (!(css.equals(oldCss)));
 
         // Replace 0(px,em,%) with 0 inside groups (e.g. -MOZ-RADIAL-GRADIENT(CENTER 45DEG, CIRCLE CLOSEST-SIDE, ORANGE 0%, RED 100%))
-        p = Pattern.compile("(?i)\\( ?((?:[0-9a-z-.]+[ ,])*)?(?:0?\\.)?0(?:px|em|%|in|cm|mm|pc|pt|ex|deg|g?rad|m?s|k?hz)");
+        // Avoid replacement within hsla(), where percents are required for `s` and `l` arguments.
+        p = Pattern.compile("(?i)(?<!hsla?|rgba?)\\( ?((?:[0-9a-z-.]+[ ,])*)?(?:0?\\.)?0(?:px|em|%|in|cm|mm|pc|pt|ex|deg|g?rad|m?s|k?hz)");
         do {
           oldCss = css;
           m = p.matcher(css);
