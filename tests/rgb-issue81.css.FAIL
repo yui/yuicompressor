@@ -1,4 +1,4 @@
 .color_chip {
-    color: color: rgb(0%, 50%, 50%);
+    color: rgb(0%, 50%, 50%);
     background: rgba(195, 198, 214, 0.85);
 }
