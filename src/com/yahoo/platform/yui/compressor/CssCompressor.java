@@ -355,7 +355,7 @@ public class CssCompressor {
 
         // Replace 0(px,em,%) with 0 inside groups (e.g. -MOZ-RADIAL-GRADIENT(CENTER 45DEG, CIRCLE CLOSEST-SIDE, ORANGE 0%, RED 100%))
         // Avoid replacement within hsla(), where percents are required for `s` and `l` arguments.
-        p = Pattern.compile("(?i)(?<!hsla?)\\( ?((?:[0-9a-z-.]+[ ,])*)?(?:0?\\.)?0(?:px|em|%|in|cm|mm|pc|pt|ex|deg|g?rad|m?s|k?hz)");
+        p = Pattern.compile("(?i)(?<!hsla?|rgba?)\\( ?((?:[0-9a-z-.]+[ ,])*)?(?:0?\\.)?0(?:px|em|%|in|cm|mm|pc|pt|ex|deg|g?rad|m?s|k?hz)");
         do {
           oldCss = css;
           m = p.matcher(css);
