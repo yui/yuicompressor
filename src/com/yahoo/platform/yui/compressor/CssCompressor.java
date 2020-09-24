@@ -346,7 +346,7 @@ public class CssCompressor {
         } while (!(css.equals(oldCss)));
         
         //Replace the keyframe 100% step with 'to' which is shorter
-        p = Pattern.compile("(?i)(^|,|{) ?(?:100% ?{)");
+        p = Pattern.compile("(?i)(^|,|\\{) ?(?:100% ?\\{)");
         do {
           oldCss = css;
           m = p.matcher(css);
