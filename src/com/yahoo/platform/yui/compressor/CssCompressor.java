@@ -338,7 +338,6 @@ public class CssCompressor {
         } while (!(css.equals(oldCss)));
         
         // We do the same with % but don't replace the 0% in keyframes
-        String oldCss;
         p = Pattern.compile("(?i)(: ?)((?:[0-9a-z-.]+ )*?)?(?:0?\\.)?0(?:%)");
         do {
           oldCss = css;
